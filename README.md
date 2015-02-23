@@ -1,5 +1,5 @@
 Bricks-MMC
-=======
+========
 
 This is an environment for students in introductory programming classes to write small programs and have them graded automatically.
 
