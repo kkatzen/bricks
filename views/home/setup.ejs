@@ -1,0 +1,31 @@
+<style>
+   #setuppanel {
+        width: 300px;
+   }
+   .voffset {
+        margin-top: 120px;
+    }
+</style>
+<script>
+<%
+User.find({admin: true}).exec(function(err, users) {
+    if(users.length > 0) {    
+        res.redirect("/");
+    }
+});
+%>
+</script>
+<div class="container-fluid">
+    <div id="setuppanel" class="center-block voffset">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Would you like to be made an administrator?
+            </div>
+            <div class="panel-body">
+                <p class="alert alert-info">There are currently no admins. If you would not like to become admin, logout and have the correct individual login.<p>
+                <a href="/user/setAdmin/<%=req.user.id%>" class="btn btn-default">Become Admin</a>
+                <a href="/login/logout" class="btn btn-default">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>

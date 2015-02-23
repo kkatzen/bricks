@@ -1,0 +1,370 @@
+<script>
+    <%
+    User.find({admin: true}).exec(function(err, users) {
+        if(err) {
+            console.log("error: " + err);
+        } else {
+            if(users.length == 0) {
+                res.redirect("/user/setup");
+            }
+        }
+    });
+    %>
+    function deleteFolder(id){
+		allFolders[id].remove();
+    };
+    function deleteProblem(id){
+        var classname = "#li-" + id;
+        $(classname).remove();
+    };
+    function addProblem(problem){
+		var item = $("<li></li>").attr("id","li-" + problem.id).html(problem.name);
+		var close = $("<a></a>").attr("class","delete").css("margin-left","5px").click(function() {
+            $.post("/problem/delete", {id: problem.id}, function(problem){
+            });
+            deleteProblem(problem.id);
+		});
+        //add problem under containing folder
+        //$("#l-" + problem.folder).append("<li id='li-" + problem.id + "'>" + problem.name + "</li>");
+        $("#l-" + problem.folder).append(item).append(close);
+        //add delete button/method to problem
+		/*
+		$("#li-" + problem.id).append("<a class='delete' style='margin-left: 5px;'><span class='glyphicon glyphicon-remove'></span></a>").click(function(){
+            $.post("/problem/delete", {id: problem.id}, function(problem){
+                alert("successfully deleted");
+            });
+            deleteProblem(problem.id);
+        });
+		*/
+    };
+</script>
+<script src="/js/admin.js"></script>
+<style>
+#navigationPanel {
+	margin-top: 20px;
+}
+form > button {
+	margin-top: 10px;
+}
+.navbar-default {
+    margin-top: 20px;
+}
+#folderBar > div {
+	margin-right: 10px;
+}
+.alert {
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+</style>
+<div class="container-fluid">
+<% if (req.isAuthenticated() && req.user.admin) {%>
+    <!--Navigation starts-->
+	<div id="navigationPanel" class="panel panel-default col-md-2">
+		<div class="panel-body">
+			<ul class="nav nav-pills nav-stacked">
+				<li class="active"><a href="#questions" data-toggle="pill">Questions and Folders</a></li>
+				<li><a href="#students" data-toggle="pill">View Submissions</a></li>
+                <li><a href="#admin" data-toggle="pill">Manage Admin</a></li>
+			</ul>
+			<ul>
+				<li><p>Something</p></li>
+				<li><p>Something else</p></li>
+			</ul>
+		</div>
+	</div>
+    <!--Navigation ends-->
+    <!--Content starts-->
+	<div class="tab-content col-md-10">
+        <!--Header starts-->
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Admin Page</a>
+                </div>
+                <div>
+                    <div class="navbar-right">
+                        <p class="navbar-text"><%= req.user.displayName %></p>
+                        <form class="navbar-form navbar-right">
+                            <a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
+                        </form>
+                </div>
+       </nav>
+       <!--Header ends-->
+           <div class="panel panel-default">
+             <div id="folderBar" class="panel-body">
+                 <!-- folder dropdowns inserted here -->
+             </div>
+           </div>
+       <!--questions section starts-->
+		<div class="tab-pane active" id="questions">
+            <!--<div class="panel panel-default">
+                <ul class="nav nav-pills">
+                    <li><a href="#modifyFolders" data-toggle="pill">Modify Folders</a></li>
+                    <li><a href="#questionCreate" data-toggle="pill">Create a Question</a></li>
+                    <li><a href="#questionEdit" data-toggle="pill">Edit a Question</a></li>
+                </ul>
+            </div>-->
+
+        <!--Edit Folders sub-section starts-->
+        <div class="col-md-12">
+            <div class="row">
+                 <div class="col-md-6">
+                     <div class="panel panel-default">
+                         <div class="panel-heading">
+                             Manage folders
+                             <button id="folderDisplay" class="btn btn-default">Hide</button>
+                         </div>
+                         <ul id="folders" class="list-group folderContent">
+                            <!-- folder names inserted here -->
+                         </ul>
+                         <div class="panel-body folderContent">
+                             <div class="input-group">
+                                 <input type="text" id="newFolder" class="form-control" placeholder="Add folder..."></input>
+                                 <span class="input-group-btn">
+                                     <button type="submit" id="newFolderBtn" class="btn btn-default"><span class="glyphicon glyphicon-plus" style="color:green;"></span></button>
+                                 </span>
+                             </div>
+                             <div id="newFolderError"></div>
+                         </div>
+                     </div>
+                 </div>
+                     <div class="col-md-6">
+                         <div class="panel panel-default">
+                             <div class="panel-heading">
+                                 Manage questions
+                                 <button id="questionDisplay" class="btn btn-default">Hide</button>
+                             </div>
+                             <div class="panel-body questionContent">
+                                 <form class="form-inline">
+                                    <div class="form-group">
+                                        <label>Select a folder:</label>
+                                        <select id="problemsfolderDropdown" class="form-control">
+                                        </select>
+                                        <button id="showProblems" class="btn btn-default form-control">Show Problems</button>
+                                    </div>
+                                </form>
+                            </div>
+                             <ul id="problems" class="list-group questionContent">
+                                <!-- problem names inserted here -->
+                                <li class="list-group-item">
+                                    Select a folder to see the problems it contains
+                                </li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+                 <!--Edit folders sub-section ends-->
+
+<!--Edit a question sub-section starts-->
+<div class="col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Edit a question
+    </div>
+    <div class="panel-body">
+      <p id="editPlaceholder">Select a question from the above menus to edit it</p>
+      <form id="edit" class="form hidden">
+        <div class="row">
+          <div class="form-group">
+            <div class="col-md-3">
+              <label class="control-label" for="editType">Type</label>
+              <select id="editType" name="editType" class="form-control">
+                <option value="twit">twit</option>
+                <option value="diy">diy</option>
+                <option value="wall">wall</option>
+                <option value="exam">exam</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="control-label" for="editPhase">Phase</label>
+              <select id="editPhase" name="editPhase" class="form-control">
+                <option value="0">Past</option>
+                <option value="1">Present</option>
+                <option value="2">Future</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="control-label">Function Points</label>
+              <input id="editCorrectPoints" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="control-label">Style Points</label>
+              <input id="editStylePoints" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="control-label" for="editProblemLanguage">Language</label>
+              <select name="editLanguage" id="editLanguageDropdown" class="form-control">
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <div class="col-md-6">
+              <label class="control-label" for="editProblemName">Name</label>
+              <input id="editProblemName" name="editName" type="text" class="form-control"></input>
+            </div>
+            <div class="col-md-6">
+              <label name="editFolder" class="control-label" for="folder">Folder</label>
+              <select id="editfolderDropdown" class="form-control">  </select>
+            </div>
+          </div>
+        </div>
+
+
+        <label class="control-label" for="editDescription">Description</label>
+        <textarea name="editDescription" id="editDescription" class="form-control"></textarea>
+        <label class="control-label" for="editOnSubmit">Function to run on submission</label>
+        <textarea name="editOnSubmit" id="editOnSubmit" class="form-control" 
+             style="font-family:Consolas, monospace">
+        </textarea>
+        <button class="btn btn-default form-control" id="editProblem">Update Problem</button>
+        <div id="editProblemError"></div>
+      </form>
+    </div>
+  </div>
+</div>
+<!--Update a question sub-section ends-->
+
+<!--Add a question sub-section starts-->
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Add a new question
+      </div>
+      <div class="panel-body">
+        <form id="addProblemForm" class="form">
+          <div class="row">
+            <div class="form-group">
+              <div class="col-md-3">
+                <label class="control-label" for="type">Type</label>
+                <select  id="type" class="form-control">
+                  <option value="twit">twit</option>
+                  <option value="diy">diy</option>
+                  <option value="wall">wall</option>
+                  <option value="exam">exam</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="control-label" for="phase">Phase</label>
+                <select  id="phase" class="form-control">
+                  <option value="2">Future</option>
+                  <option value="1">Present</option>
+                  <option value="0">Past</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="control-label">Function Points</label>
+                <input id="correctPoints" value=2 class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label class="control-label">Style Points</label>
+                <input id="stylePoints" value=2 class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label class="control-label" for="language">Language</label>
+                <select id="languageDropdown" class="form-control">
+                  <option value="javascript">JavaScript</option>
+                  <option value="java">Java</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <div class="col-md-6">
+                <label class="control-label" for="name">Name</label>
+                <input  id="problemName" type="text" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label class="control-label" for="folder">Folder</label>
+                <select id="folderDropdown" class="form-control"> </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <div class="col-md-12">
+                <label class="control-label" for="description">Description</label>
+                <textarea id="description" class="form-control"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <div class="col-md-12">
+                <label class="control-label" for="onSubmit">Function to run on submission</label>
+                <textarea id="onSubmit" class="form-control" 
+                   style="font-family:Consolas, monospace">
+                </textarea>
+              </div>
+            </div>
+          </div>
+	  <button class="btn btn-default form-control" id="addProblem">Add Problem</button>
+          <div id="newProblemError"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+<!--Add a question sub-section ends-->
+
+</div>
+<!--Questions section ends-->
+
+<!--Admin section starts-->
+		<div class="tab-pane" id="admin">
+            <p>View admins and give administrative privileges here</p>
+             <div class="panel panel-default">
+                 <div class="panel-heading">
+                         Manage admins
+                 </div>
+                 <ul id="admins" class="list-group">
+                    <!-- admin names inserted here -->
+                 </ul>
+                 <div class="panel-body">
+                     <div class="input-group">
+                         <input type="text" id="newAdmin" class="form-control" placeholder="Type username..."></input>
+                         <span class="input-group-btn">
+                             <button type="submit" id="newAdminBtn" class="btn btn-default"><span class="glyphicon glyphicon-plus" style="color:green;"></span></button>
+                         </span>
+                     </div>
+                     <div id="newAdminError"></div>
+                 </div>
+             </div>
+        </div>
+        <div class="tab-pane" id="students">
+            <p>View student progress here</p>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Student Progress  <span id="function" class="label label-info" >0%</span><span id="style" class="label label-success">0%</span>
+                    <button class="btn btn-primary btn-sm pull-right" id="refreshData">Refresh</button>
+                </div>
+                <div id="studentResultsTable">
+                    <div class="panel-body">
+                        Select a problem to view student progress
+                    </div>
+                </div>
+            </div>
+        </div>
+	 </div>
+     <!--Admin section ends-->
+     <%} else if (!req.isAuthenticated()) {%>
+         <% res.redirect("/login?d=admin"); %>
+    <%} else {%>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Admin Page</a>
+                </div>
+                <form class="navbar-form navbar-right">
+                    <a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
+                </form>
+            </div>
+       </nav>
+       <p>You must be an admin to view this page</p>
+    <%}%>
+</div>

@@ -1,0 +1,225 @@
+<link rel="stylesheet" href="lib/codemirror.css">
+<link rel="stylesheet" href="theme/mbo.css">
+<link rel="stylesheet" href="addon/display/fullscreen.css">
+<style>
+    html, body, .container-fluid, .col-md-9, #codemirror, .CodeMirror {
+        height: 95%;
+    }
+    .CodeMirror-scroll {
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+</style>
+<script src="lib/codemirror.js"></script>
+<script src="../mode/javascript/javascript.js"></script>
+<script src="../addon/selection/active-line.js"></script>
+<script src="../addon/display/fullscreen.js"></script>
+
+<script src="/js/acorn.js"></script>
+<script src="/js/pnut.js"></script>
+<script src="/js/index.js"></script>
+
+<script>
+<% if (req.isAuthenticated()) { %>
+	var loggedIn = true;
+<% } else { %>
+	var loggedIn = false;
+<% } %>
+<%
+User.find({admin: true}).exec(function(err, users) {
+    if(err) {
+        console.log("error: " + err);
+    } else {
+        if(users.length == 0) {   
+            res.redirect("/user/setup");
+        }
+    }
+});
+%>
+</script>
+<!--NavBar for login-->
+<nav style="margin-bottom: 0" class="navbar navbar-inverse" role="navigation">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">Bricks</a>
+		</div>
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<% if (req.isAuthenticated()) { %>
+			<div class="navbar-right">
+                <p class="navbar-text">Score: <span id="grade">0/0</span></p>
+				<p class="navbar-text"><%= req.user.displayName %></p>
+				<form class="navbar-form navbar-right">
+					<a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
+				</form>
+			</div>
+			<% } else { %>
+			<form class="navbar-form navbar-right" action="https://onyen.unc.edu/cgi-bin/unc_id/authenticator.pl" name="form1" method="POST">
+				<!-- 'title' is special; it will be used on the authenticator page. -->
+				<input type="hidden"
+				name="title"
+				value="COMP 110 Onyen Authentication">
+
+				<!-- Do we want to get the PID for this person? -->
+				<input type="hidden"
+				name="getpid"
+				value="displayName">
+
+				<input id="target" type="hidden"
+				name="targetpass"
+				value="http://localhost:1337/login/authenticate">
+
+				<input type="hidden"
+				name="locationfailtimeout"
+				value="https://onyen.unc.edu/cgi-bin/unc_id/authenticator.pl">
+
+				<input type="hidden"
+				name="targetfail"
+				value="https://onyen.unc.edu/cgi-bin/unc_id/authenticator.pl">
+
+				<input type="hidden"
+				name="textpass"
+				value="You are now logged in!">
+
+				<input type="submit"
+				class="btn btn-primary"
+				name="submit"
+				value="Log in">
+			</form>
+			<% } %> 
+
+		</div><!-- /.navbar-collapse -->
+	</div><!-- /.container-fluid -->
+</nav>
+<!--NavBar for choosing a problem-->
+<nav style="margin-top: 0"class="navbar navbar-default" role="navigation">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+		</div>
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul id="folders" class="nav navbar-nav">
+			</ul>
+		</div><!-- /.navbar-collapse -->
+	</div><!-- /.container-fluid -->
+</nav>
+<!--Content-->
+<div class="container-fluid">
+  <!--Question Info -->
+  <div class="col-md-3">
+    <div class="row">
+      <div>
+        <div class='panel panel-default'>
+	  <div class='panel-heading'> 
+	    <h3 id="desc-title" class='panel-title'>Instructions</h3>
+	  </div>
+	  <div id="desc-body" class='panel-body'> 
+	    Select a problem to run and submit.
+	  </div>
+	</div>
+      </div>
+    </div>
+    <div class="row">
+      <div id="errors" class="panel panel-default ">
+				<div class="panel-heading">
+					<h3 class="panel-title">Messages
+		<button id="test" type="button" class="btn btn-default pull-right">Test Locally</button> 
+                                        </h3>
+				</div>
+				<div id="errMessage" class="panel-body">
+					No error reports
+				</div>
+			</div>
+		</div>
+		<div class="row">
+		  <div>
+		    <div id="submissions" class='panel panel-default hidden'>
+		      <div class='panel-heading'> 
+			<h3 class='panel-title'>Submissions
+		<button data-toggle="modal" data-target="#myModal" class="btn btn-default pull-right" id="initSubmit" disabled="disabled">Submit for Score</button>
+                        </h3>
+		      </div>
+		      <table class="table" >
+			   <thead>
+			   <tr><td>Submission Time</td>
+                               <td>Func Style</td>
+                           </tr>
+		 	   </thead>
+		  	   <tbody id="subs"> </tbody>
+		      </table>
+	 	    </div>
+		  </div>
+		</div>
+	</div>
+	<!--CODE-->
+	<div class="col-md-9">
+		<!--CodeMirror Start-->
+        <% if (req.isAuthenticated()) { %>
+            <textarea id="codemirror"><%=req.user.latestCode%></textarea>
+        <%} else {%>
+            <textarea id="codemirror"></textarea>
+        <%}%>
+		<!--CodeMirror End-->
+<!--
+		<button id="test" type="button" class="btn btn-default ">Test</button>
+		<button data-toggle="modal" data-target="#myModal" class="btn btn-default " id="initSubmit" disabled="disabled">Submit</button>
+-->
+	<!-- Modal -->
+        <% if (req.isAuthenticated()) { %>
+
+	 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	           <div class="modal-header">
+		      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		      <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+		   </div>
+		   <div class="modal-body">
+		      Are you sure you want to submit your assignment?<br />
+		      Please make sure you have tested your code.
+		   </div>
+	  	   <div class="modal-footer">
+		      <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+		      <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary">Submit</button>
+		   </div>
+		 </div>
+ 	    </div>
+	  </div>    
+
+        <%} else {%>
+
+         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	       <div class="modal-content">
+	          <div class="modal-header">
+	             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	             <h4 class="modal-title" id="myModalLabel">Please Login</h4>
+                  </div>
+                  <div class="modal-body">
+	  	     You must login before you can submit a program for scoring.  <br/>
+		     Please make sure you have tested your code locally.
+		  </div>
+		  <div class="modal-footer">
+		     <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+		  </div>
+               </div>
+            </div> 
+         </div>
+
+        <%}%>
+    </div>
+</div>

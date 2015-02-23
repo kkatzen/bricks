@@ -1,0 +1,55 @@
+<style>
+   #loginpanel {
+        width: 125px;
+   }
+   .voffset {
+        margin-top: 120px;
+    }
+</style>
+<script>
+window.onload = function () {
+	$("#target").val("http://" + window.location.host + "/login/authenticate?d=<%= req.param("d")||"" %>");
+};
+</script>
+<div class="container-fluid">
+    <div id="loginpanel" class="center-block voffset">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Click to Log In
+        </div>
+        <div class="panel-body">
+            <form action="https://onyen.unc.edu/cgi-bin/unc_id/authenticator.pl" name="form1" method="POST">
+                <!-- 'title' is special; it will be used on the authenticator page. -->
+                <input type="hidden"
+                     name="title"
+                     value="COMP 110 Onyen Authentication">
+
+                <!-- Do we want to get the PID for this person? -->
+                <input type="hidden"
+                     name="getpid"
+                     value="displayName">
+
+                <input id="target" type="hidden"
+                     name="targetpass"
+                     value="http://localhost:1337/login/authenticate">
+
+                <input type="hidden"
+                     name="locationfailtimeout"
+                     value="https://onyen.unc.edu/cgi-bin/unc_id/authenticator.pl">
+
+                <input type="hidden"
+                     name="targetfail"
+                     value="https://onyen.unc.edu/cgi-bin/unc_id/authenticator.pl">
+
+                <input type="hidden"
+                     name="textpass"
+                     value="You are now logged in!">
+
+                <input type="submit"
+                    class="btn btn-primary center-block"
+                     name="submit"
+                     value="Log in">
+            </form>
+        </div>
+    </div>
+</div>
