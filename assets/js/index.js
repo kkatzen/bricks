@@ -223,9 +223,10 @@ window.onload = function () {
 		} else {
 			var problem = curProblem.id;
 			var code = editor.getValue();
-			var AST = acorn.parse(code);
+			var AST = acorn.parse(code);    // return an abstract syntax tree structure
 			// var types = pnut.listTopLevelTypes(AST);
-			var ssOb = pnut.collectStructureStyleFacts(AST);
+			var ssOb = pnut.collectStructureStyleFacts(AST);    // return a analysis of style grading by checking AST
+
 			$.post("/submission/create", {problem: problem, code: code, style: JSON.stringify(ssOb)}, function (submission) {
 				addSubmission(submission);
 				foldersReload();

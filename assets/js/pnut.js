@@ -16,6 +16,7 @@
 //   -- or write adapter functions
 //
 //  David Stotts, 5/16/2014
+//  Yuxin Mo, 2/12/2015 
 //
 //------------------------------------------------------------------------
 
@@ -31,19 +32,24 @@ var pnut = (function () {
 //------------------------------------------------------------------------
 
 function collectStructureStyleFacts (ast) {
-  var dObj = {};
+  var dObj      = {};
 
-  dObj.nTFD = numTopFuncDecls(ast);
-  dObj.nTFC = numTopFuncCalls(ast);
-  dObj.nBGD = numBadGlobalDecls(ast);
-  dObj.nBGU = numBadGlobalUses(ast);
-  dObj.nTFL = numForLoops(ast);
-  dObj.nTWL = numWhileLoops(ast);
+  dObj.nTFD     = numTopFuncDecls(ast);
+  dObj.nTFC     = numTopFuncCalls(ast);
+  dObj.nBGD     = numBadGlobalDecls(ast);
+  dObj.nBGU     = numBadGlobalUses(ast);
+  dObj.nTFL     = numForLoops(ast);
+  dObj.nTWL     = numWhileLoops(ast);
+  dObj.uBGV     = usesBadGlobalVars(ast);
+  dObj.nAFL     = numForLoopsInAllFuncDecls(ast);
+  dObj.nAWL     = numWhileLoopsInAllFuncDecls(ast);
 
-  dObj.uBGV = usesBadGlobalVars(ast);
-  dObj.isAFD1C = isAllFuncDeclsPlusOneCall(ast);
-  dObj.nAFL =  numForLoopsInAllFuncDecls(ast);
-  dObj.nAWL =  numWhileLoopsInAllFuncDecls(ast);
+  dObj.isAFD1C  = isAllFuncDeclsPlusOneCall(ast);
+  dObj.isPBR    = isFunctionCallPassByReference(ast);
+  dObj.nVGOD    = numValidGlobalObjectDeclared(ast);
+  dObj.nVODF    = numValidObjectDeclaredInAllFunctions(ast);
+  dObj.nDOU     = numDeclaredObjectsUsed(ast);
+  dObj.isRC     = isRecuriveFunction(ast);
 
   return dObj;
 }
@@ -67,7 +73,19 @@ function collectStructureStyleFacts (ast) {
 //   numTopFuncCalls (ast)            ==>  integer >= 0
 //   isFuncCall (obj)                 ==>  boolean
 //   listTopLevelTypes (ast)          ==>  [ string ]
-//   isAllFuncDeclsPlusOneCall (ast)  ==>  boolean
+//
+// NEW FUNCIONTS (update at Feb 21, 2015):
+//   listFunctions(ast)                 ==>  [ string ]
+//   isAValidProgram(ast)               ==>  boolean
+//   isAValidFunction(func)             ==>  boolean
+//   isAllFuncDeclsPlusOneCall(ast)     ==>  boolean
+//   isFunctionCallPassByReference(ast) ==>  boolean
+//   numValidObjectDeclared(ast)        ==>  integer >= 0
+//   numDeclaredObjectUsed(ast)         ==>  integer >= 0
+//   isRecuriveFunction(ast)            ==>  boolean
+//   numValidObjectDeclaredInAllFunctions(ast)
+//                                      ==>  integer >= 0
+//   
 //
 //------------------------------------------------------------------------
 
@@ -271,61 +289,332 @@ function numTopFuncCalls (ast) {
 
 function listTopLevelTypes (ast) {
   // what are the main top level statements in the program
-  var nst = ast.body.length;
-  var list = [];
+  var nst = ast.body.length;  // the num of nodes in ast root
+  var list = [];              
   for (var i=0; i<nst; i++) { list[i] = ast.body[i].type ; }
   return list; // array of strings
 }
 
 
-function isAllFuncDeclsPlusOneCall (ast) {
-  if (numTopFuncCalls(ast) != 1) return false;
-  
-  var numFuncDecls = 0;
-  var stList = listTopLevelTypes(ast); // array of strings
+//------------------------------------------------------------------------
+// return a list of all functions delcared in a program 
+//------------------------------------------------------------------------
+function listFunctions(ast) {
+  var list = [];
+  var len = ast.body.length;
+  var funcName;
 
-  for (var s=0; s<stList.length; s++) {
-     switch (stList[s]) {
-        case "FunctionDeclaration":
-           // cool this is ok, so count and just keep going
-           numFuncDecls += 1;
-           break;
-        case "VariableDeclaration":
-           // is this var decl really a func decl?
-           if (ast.body[s].declarations[0].init.type == "FunctionExpression") { 
-             numFuncDecls += 1; 
-           } else { 
-             return false; 
-           }
-           break;
-        case "ExpressionStatement":
-           // is this expression a single func call?
-	   if (!isFuncCall(ast.body[s])) return false;
-           break;
-        default: return false;
-     } // end switch
-  } // end for loop
-  return ( numFuncDecls > 0 ) ;
+  for(var m=0; m<len; m++) {
+    if(ast.body[m].type == "FunctionDeclaration") {
+      funcName = ast.body[m].id.name;
+      for(var s=0; s<list.lenght; s++) {
+        if(funcName != list[s]) { list.push(funcName); }
+      }
+    }
+  }
+
+  return list;
 }
+
+//------------------------------------------------------------------------
+// Check for if all declared functions get called exactly once 
+//------------------------------------------------------------------------
+
+function isAllFuncDeclsPlusOneCall (ast) {
+  if(isAValidProgram(ast)) {
+    var numFuncDecls    = 0;                      // num of functiona get declared
+    var funcName        = []; 
+    var funcNameCallNum = [];                     // match the index of funcName
+    var expName         = [];
+    var funcCallOnce    = true;
+    var name;
+
+    for(var s=0; s<ast.body.length; s++) {
+      switch (ast.body[s].type) {
+        case "FunctionDeclaration":
+          // cool this is ok, so count and just keep going
+          name = ast.body[s].id.name;
+          if(numFuncDecls == 0) { 
+            funcName.push(name); 
+            numFuncDecls++;
+            funcNameCallNum.push(0);
+          } else {
+            for(var i=0; i<numFuncDecls; i++) {
+              if(name == funcName[i]) {
+                alert("Warn: You are redefining an existing function " + funcName[i]);
+              } else {
+                funcName.push(name); 
+                funcNameCallNum.push(0);          
+              }
+            }
+            numFuncDecls++;
+          }
+          break;
+        case "VariableDeclaration":
+             // check if a var declaration also call a function 
+            if(ast.body[s].declarations[0].init.type != "FunctionExpression") {
+              return false;
+            } 
+            break;
+        case "ExpressionStatement":
+            if(numFuncDecls > 0) {
+              // IF statement works only for one function declaration
+              for(var i=0; i<numFuncDecls; i++) {
+                if(ast.body[s].expression.callee.name == funcName[i]) {
+                  funcNameCallNum[i]++;
+                }
+              }
+            }  
+            break;
+        default:
+       } // end switch
+    } // end for loop
+
+    // check for single call to each declared function
+    for(var i=0; i<numFuncDecls; i++) {
+      if(funcNameCallNum[i]==0 || funcNameCallNum>1) {
+        funcCallOnce = false;
+      }
+    }
+
+    return funcCallOnce;  
+  } else {
+    return false;
+  }
+}
+
+//------------------------------------------------------------------------
+// check if a program is non-empty
+//------------------------------------------------------------------------
+
+function isAValidProgram(ast) {
+  return ast.body.length>0;
+}
+
+//------------------------------------------------------------------------
+// check if a function is non-empty
+//------------------------------------------------------------------------
+
+function isAValidFunction(func) {
+  return func.body.body.length>0;
+}
+
+
+
+//------------------------------------------------------------------------
+// check if a function is pass-by-reference
+//------------------------------------------------------------------------
+
+function isFunctionCallPassByReference(ast) {
+  if(!isAValidProgram(ast)) { return false; }
+
+  var func;
+  for(var i=0; i<ast.body.length; i++) {
+    func = ast.body[i];
+    if(func.type == "ExpressionStatement" &&
+        func.expression.arguments.name!=null) {
+      return true; 
+    }
+  }
+
+  return false;
+}
+
+
+//------------------------------------------------------------------------
+// calculate the number of valid global objects declaration
+//------------------------------------------------------------------------
+
+function numValidGlobalObjectDeclared(ast) {
+  if(!isAValidProgram(ast)) { return 0; }
+
+  var objs = [];
+  var func;
+  var funcName;
+
+  for(var m=0; m<ast.body.length; m++) {
+    func = ast.body[m];
+    if(func.type == "VariableDeclaration") {
+      funcName = func.declarations[0].id.name;
+      objs.push(funcName);
+    }
+  } 
+  console.log("global obj declared: " + objs.length);
+  return objs.length;
+}
+
+//------------------------------------------------------------------------
+// calculate the number of valid objects declaration in all functions
+//------------------------------------------------------------------------
+
+function numValidObjectDeclaredInAllFunctions(ast) {
+  if(!isAValidProgram(ast)) { return 0; }
+
+  var objs = [];
+  var func;
+
+  for(var s=0; s<ast.body.length; s++) {
+    func = ast.body[s];
+    if(func.type == "FunctionDeclaration") {
+      for(var m=0; m<func.body.body.length; m++) {
+        var funcblock = func.body.body[m];
+        if(funcblock.type == "VariableDeclaration") {
+          objs.push(funcblock.declarations[0].id.name);
+        }
+      }
+    }
+  }
+  console.log("function obj declared: " + objs.length);
+  return objs.length;
+}
+
+
+//------------------------------------------------------------------------
+// calculate the number of declared objects in use
+//------------------------------------------------------------------------
+
+function numDeclaredObjectsUsed(ast) {
+  if(!isAValidProgram(ast)) { return 0; }
+
+  // calculate for the num of all global objects
+  var gbObjs          = new Set;
+  var funcObjs        = [];
+  var numTopLevelNode = ast.body.length;
+  var func;
+
+  for(var i=0; i<numTopLevelNode; i++) {
+    func = ast.body[i];
+    switch(func.type) {
+      case "VariableDeclaration":  // calculate for the num of global objects declared in functions
+        gbObjs.add(func.declarations[0].id.name);
+        break;
+      case "FunctionDeclaration":   // calculate for the num of all objects declared in functions
+        for(var m=0; m<func.body.body.length; m++) {
+          var funcblock = func.body.body[m];
+          if(funcblock.type == "VariableDeclaration") {
+            funcObjs.push(funcblock.declarations[0].id.name);
+          }
+        }        
+        break;
+      default:
+    }
+  } 
+
+  var glbObjNum   = gbObjs.length;
+  var funcObjNum  = funcObjs.length;
+  var gUsedNum    = 0;
+  var fUsedNum    = 0;
+
+  // how to calculate how an global object in use
+  //    1. obj is passed to a function
+  //
+  // how to calculate how an function's object in use
+  //    1. obj is passed to another function
+  //    2. obj is an Out parameter
+  //    ?. obj is updated in a loop?
+  for(var m=0; m<numTopLevelNode; m++) {
+    func = ast.body[m];
+    if(func.type == "FunctionDeclaration") {
+      if(gbObjs.has(func.params.name)) { gUsedNum++; }
+      else {
+        for(var n=0; n<func.body.body.length; n++) {
+          var funcblock = func.body.body[n];
+          switch(funcblock.type) {
+            case "ExpressionStatement":
+              var args = funcblock.expression.arguments[0];
+              if(args!=null && args.type=="Identifier") {
+                for(var i=0; i<funcObjNum; i++) {
+                  if(args.name == funcObjs[i]) { fUsedNum++; }
+                }
+              }
+              break;
+            case "ReturnStatement":
+              var arg = funcblock.argument;
+              if(arg != null) { fUsedNum+=subnode(arg, funcObjs, funcObjNum); }
+              break;
+          }
+        }
+      }  
+    }
+  }
+  console.log("objs in use: " + (gUsedNum+fUsedNum));
+  return (gUsedNum + fUsedNum);
+}
+
+function subnode(nd, funcList, funcnNum) { 
+  if(nd.type == "CallExpression") { return 0; }
+  else if(nd.type == "Literal") { return 0; }
+  else if(nd.type == "Identifier") { 
+    var count = 0;
+    for(var i=0; i<funcnNum; i++) { count = (nd.name==funcList[i]) ? count+1: count; }
+    return count;
+  }
+
+  return subnode(nd.left)+subnode(nd.right);
+}
+
+
+//------------------------------------------------------------------------
+// check if a function is recursive by its return statement
+//------------------------------------------------------------------------
+
+function isRecuriveFunction(ast) { 
+  if(!isAValidProgram(ast)) { return false; }
+
+  var numTopLevelNode = ast.body.length;
+  var funcList = listFunctions(ast);
+  var numFuncNode;
+  var func;
+
+  for(var m=0; m<numTopLevelNode; m++) {
+    func = ast.body[m];
+    if(func.type == "FunctionDeclaration") {
+      numFuncNode = func.body.body.length;
+      for(var n=0; n<numFuncNode; n++) {
+        var block = func.body.body[n];
+        if(block.type == "ReturnStatement" && recursionDetector(block.argument, func.id.name)) {
+          console.log("Recursion: " + recursionDetector(block.argument, func.id.name));
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function recursionDetector(nd, funcName) {
+  if(nd.type=="Identifier") { return false; }
+  else if(nd.type=="Literal") { return false; }
+  else if(nd.type=="CallExpression") { return nd.callee.name==funcName; }
+
+  return recursionDetector(nd.left, funcName)||recursionDetector(nd.right, funcName);
+}
+
 
 // all functions have been declared local to this anonymous function
 // now put them all into an object as methods and send that object back
 
 return {
-  collectStructureStyleFacts: collectStructureStyleFacts
-  ,numBadGlobalDecls: numBadGlobalDecls 
-  ,numBadGlobalUses: numBadGlobalUses
-  ,usesBadGlobalVars: usesBadGlobalVars
-  ,numForLoops: numForLoops 
-  ,numWhileLoops: numWhileLoops 
-  ,numForNestLevels: numForNestLevels 
-  ,numWhileNestLevels: numWhileNestLevels 
-  ,numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls
-  ,numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls
-  ,numTopFuncDecls: numTopFuncDecls 
-  ,numTopFuncCalls: numTopFuncCalls 
-  ,listTopLevelTypes: listTopLevelTypes 
-  ,isAllFuncDeclsPlusOneCall: isAllFuncDeclsPlusOneCall 
+  collectStructureStyleFacts: collectStructureStyleFacts,
+  numBadGlobalDecls: numBadGlobalDecls, 
+  numBadGlobalUses: numBadGlobalUses,
+  usesBadGlobalVars: usesBadGlobalVars,
+  numForLoops: numForLoops, 
+  numWhileLoops: numWhileLoops, 
+  numForNestLevels: numForNestLevels, 
+  numWhileNestLevels: numWhileNestLevels, 
+  numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls,
+  numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls,
+  numTopFuncDecls: numTopFuncDecls, 
+  numTopFuncCalls: numTopFuncCalls, 
+  listTopLevelTypes: listTopLevelTypes, 
+
+  isAllFuncDeclsPlusOneCall: isAllFuncDeclsPlusOneCall,
+  isFunctionCallPassByReference: isFunctionCallPassByReference, 
+  numValidGlobalObjectDeclared: numValidGlobalObjectDeclared,
+  numValidObjectDeclaredInAllFunctions: numValidObjectDeclaredInAllFunctions,
+  numDeclaredObjectsUsed: numDeclaredObjectsUsed,
+  isRecuriveFunction: isRecuriveFunction
 }
 
 })  // end anonymous function declaration 
