@@ -376,7 +376,7 @@ function isAllFuncDeclsPlusOneCall (ast) {
         funcCallOnce = false;
       }
     }
-
+    console.log("is all functions declared and called once: " + funcCallOnce);
     return funcCallOnce;  
   } else {
     return false;
