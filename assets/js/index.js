@@ -201,26 +201,28 @@ window.onload = function () {
 		}
 	});
 	var setErrorMsg = function (msg) {
-		$("#errors").removeClass("hidden");
-		$("#errMessage").empty();
-		$("#errMessage").append(msg);
+		//$("#errors").removeClass("hidden");
+		$("#console").empty();
+		$("#console").append(msg);
 	};
 	$("#test").click(function () {
 		var code = editor.getValue();
-		$("#errors").removeClass("hidden");
-		$("#errMessage").empty();
+		//$("#errors").removeClass("hidden");
+		$("#console").empty();
 		try {
 			eval(code);
-			$("#errMessage").append("No error reports");
+			$("#console").append("No error reports");
 		} catch (e) {
 			//alert(e);
-			$("#errMessage").append(e);
+			$("#console").append(e);
 		}
 	});
 	$("#submit").click(function () {
 		if (curProblem == null) {
 			alert("You must select a problem before submitting");
 		} else {
+			$("#console").empty();
+			$("#console").append("See submission feedback above.");
 			var problem = curProblem.id;
 			var code = editor.getValue();
 			var AST = acorn.parse(code);
@@ -234,3 +236,4 @@ window.onload = function () {
 		}
 	});
 };
+
