@@ -40,10 +40,46 @@ var pnut = (function () {
     dObj.nBGU     = numBadGlobalUses(ast);
     dObj.uBGV     = usesBadGlobalVars(ast);
 
+    /* 1. Style Grading for Declaration and Use of Variable   */
+    dObj.nDV      = numDecVars(ast);
+    dObj.lDV      = listDecVars(ast);
+    dObj.nUDV     = numUndecVars(ast);
+    dObj.lUDV     = listUndecVars(ast);
+    dObj.lVU      = listVarsUsed(ast);
+
+    /* 2. Style Grading for Declaration and Use of Array      */
+    dObj.nDA      = numDecArrs(ast);
+    dObj.lDA      = listDecArrs(ast);
+    dObj.nUDA     = numUndecArrs(ast);
+    dObj.lUDA     = listUndecArrs(ast);
+    dObj.nAU      = numArrsUsed(ast);
+    dObj.lAU      = listArrsUsed(ast);
+
+    /* 3. Style Grading for Declaration and Use of Object     */
+    dObj.nDO      = numDecObjs(ast);
+    dObj.lDO      = listDecObjs(ast);
+    dObj.nUDO     = numUndecObjs(ast);
+    dObj.lUDO     = listUndecObjs(ast);
+    dObj.nOU      = numObjsUsed(ast);
+    dObj.lOU      = listObjsUsed(ast);
+    dObj.isAFRO   = isAnyFuncReturnObj(ast);
+
+    /* 4. Style Grading for Use of While Loop                 */
+    dObj.nGLWL    = numGloLevWhileLoops(ast);
+    dObj.nLLWL    = numLocLevWhileLoops(ast);
+    dObj.nWLinAP  = numWhileLoopsInAProgram(ast);
+
+    /* 5. Style Grading for Use of For Loop                   */
+    dObj.nGLFL    = numGloLevForLoops(ast);
+    dObj.nLLFL    = numLocLevForLoops(ast);
+    dObj.nFLinAP  = numForLoopsInAProgram(ast);
+
+    /* 6. Style Grading for Declaration and Use of Function   */
+
 
     // Improved style grading features
-    dObj.nGFL     = numGlobalForLoops(ast);
-    dObj.nGWL     = numGlobalWhileLoops(ast);
+    dObj.nGFL     = numGlobalForLoops(ast);//x
+    dObj.nGWL     = numGlobalWhileLoops(ast);//x
     dObj.nFLIF    = numForLoopsInAllFuncDecls(ast);
     dObj.nWLIF    = numWhileLoopsInAllFuncDecls(ast);
     dObj.nNFL     = numNestedForLoops(ast);
@@ -61,46 +97,6 @@ var pnut = (function () {
 
 
 //------------------------------------------------------------------------
-//
-// API functions
-//
-//   numBadGlobalDecls (ast)          ==>  integer >= 0
-//   numBadGlobalUses (ast)           ==>  integer >= 0
-//   usesBadGlobalVars (ast)          ==>  boolean
-//   numWhileLoops (ast)              ==>  integer >= 0
-//   numForLoopsInAllFuncDecls(ast)   ==>  integer >= 0
-//   numWhileLoopsInAllFuncDecls(ast) ==>  integer >= 0
-//   numWhileNestLevels (ast)         ==>  integer >= 0
-//   numTopFuncDecls (ast)            ==>  integer >= 0
-//   numTopFuncCalls (ast)            ==>  integer >= 0
-//   isFuncCall (obj)                 ==>  boolean
-//   listTopLevelTypes (ast)          ==>  [ string ]
-//
-// NEW FUNCIONTS (update at Feb 21, 2015):
-//   numGlobalForLoops(ast)             ==>  integer >= 0
-//   numForLoopsInAllFuncDecls(ast)     ==>  integer >= 0
-//   numNestedForLoops(ast)             ==>  integer >= 0
-//
-//   numGlobalWhileLoops(ast)           ==>  integer >= 0
-//   numWhileLoopsInAllFuncDecls(ast)   ==>  integer >= 0
-//   numNestedWhileLoops(ast)           ==>  integer >= 0
-//
-//   listFunctions(ast)                 ==>  [ string ]
-//   isAValidProgram(ast)               ==>  boolean
-//   isAValidFunction(func)             ==>  boolean
-//   isAllFuncDeclsPlusOneCall(ast)     ==>  boolean
-//   isFunctionCallPassByReference(ast) ==>  boolean
-//   numValidObjectDeclared(ast)        ==>  integer >= 0
-//   numDeclaredObjectUsed(ast)         ==>  integer >= 0
-//   isRecuriveFunction(ast)            ==>  boolean
-//   numValidObjectDeclaredInAllFunctions(ast)
-//                                      ==>  integer >= 0
-//   
-//
-//------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------
 //   style grading parser:
 //    
 //------------------------------------------------------------------------
@@ -112,11 +108,12 @@ var pnut = (function () {
 
 /**********************************************************/
 /* 1. Style Grading for Declaration and Use of Variable   */
-/*    a. numDecVars(ast)                                  */
-/*    b. listDecVars(ast)                                 */
-/*    c. numUndecVars(ast)                                */
-/*    d. listUndecVars(ast)                               */
-/*    e. listVarsUsed(ast)                                */
+/*    a. numDecVars(ast)      ==> integer >= 0            */
+/*    b. listDecVars(ast)     ==> [ string ]              */
+/*    c. numUndecVars(ast)    ==> integer >= 0            */
+/*    d. listUndecVars(ast)   ==> [ string ]              */
+/*    e. listVarsUsed(ast)    ==> [ string ]              */
+/*    f. isAnyFuncVars(ast)   ==> boolean ? true:false    */
 /**********************************************************/
 
 //------------------------------------------------------------------------
@@ -284,6 +281,10 @@ var pnut = (function () {
     return usedVarArr;
   } 
 
+//------------------------------------------------------------------------
+// private function:
+// list all operator variables (right-hand side variables)
+//------------------------------------------------------------------------ 
   function listOperatorVars(nd) {
     var arr = [];
     switch(nd.type) {
@@ -302,16 +303,24 @@ var pnut = (function () {
     return arr;
   }
 
+//------------------------------------------------------------------------
+// 1-f. exam if any function gets assigned to a variable in a program
+//------------------------------------------------------------------------
+  function isAnyFuncVars(ast) {
+    
+  }
+
+
 
 
 /**********************************************************/
 /* 2. Style Grading for Declaration and Use of Array      */
-/*    a. numDecArrs(ast)                                  */
-/*    b. listDecArrs(ast)                                 */
-/*    c. numUndecArrs(ast)                                */
-/*    d. listUndecArrs(ast)                               */
-/*    e. numArrsUsed(ast)                                 */
-/*    f. listArrsUsed(ast)                                */
+/*    a. numDecArrs(ast)      ==> integer >= 0            */
+/*    b. listDecArrs(ast)     ==> [ string ]              */
+/*    c. numUndecArrs(ast)    ==> integer >= 0            */
+/*    d. listUndecArrs(ast)   ==> [ string ]              */
+/*    e. numArrsUsed(ast)     ==> integer >= 0            */
+/*    f. listArrsUsed(ast)    ==> [ string ]              */
 /**********************************************************/
 
 //------------------------------------------------------------------------
@@ -516,13 +525,13 @@ var pnut = (function () {
 
 /**********************************************************/
 /* 3. Style Grading for Declaration and Use of Object     */
-/*    a. numDecObjs(ast)                                  */
-/*    b. listDecObjs(ast)                                 */
-/*    c. numUndecObjs(ast)                                */
-/*    d. listUndecObjs(ast)                               */
-/*    e. numObjsUsed(ast)                                 */
-/*    f. listObjsUsed(ast)                                */
-/*    g. isAnyFuncReturnObj(ast)                          */
+/*    a. numDecObjs(ast)         ==> integer >= 0         */
+/*    b. listDecObjs(ast)        ==> [ string ]           */
+/*    c. numUndecObjs(ast)       ==> integer >= 0         */
+/*    d. listUndecObjs(ast)      ==> [ string ]           */
+/*    e. numObjsUsed(ast)        ==> integer >= 0         */
+/*    f. listObjsUsed(ast)       ==> [ string ]           */
+/*    g. isAnyFuncReturnObj(ast) ==> boolean ? true:false */
 /**********************************************************/
 
 //------------------------------------------------------------------------
@@ -687,6 +696,10 @@ var pnut = (function () {
     return false;
   } 
 
+//------------------------------------------------------------------------
+// private function:
+// list all declared objects in a function   
+//------------------------------------------------------------------------  
   function listObjsInAFunc(nd) {
     var list = new Set();
     var snd, decs;
@@ -713,9 +726,9 @@ var pnut = (function () {
 
 /**********************************************************/
 /* 4. Style Grading for Use of While Loop                 */
-/*    a. numGloLevWhileLoops(ast)                         */
-/*    b. numLocLevWhileLoops(ast)                         */
-/*    c. numWhileLoopsInAProgram(ast)                     */
+/*    a. numGloLevWhileLoops(ast)      ==> integer >= 0   */
+/*    b. numLocLevWhileLoops(ast)      ==> integer >= 0   */
+/*    c. numWhileLoopsInAProgram(ast)  ==> integer >= 0   */
 /**********************************************************/
 
 //------------------------------------------------------------------------
@@ -755,6 +768,7 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
+// private function:
 // calculate total number of while loops in a calling scope
 //------------------------------------------------------------------------  
   function numWhileLoops(nd) {
@@ -769,6 +783,7 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
+// private function:
 // calculate total number of nested while loops in a calling scope
 //------------------------------------------------------------------------  
   function numNestedWhileLoops(nd) {
@@ -783,24 +798,26 @@ var pnut = (function () {
 
 
 
+
+
 /**********************************************************/
 /* 5. Style Grading for Use of For Loop                   */
-/*    a. numGlobalForLoops(ast)                           */
-/*    b. numForLoopsInAllFunctions(ast)                   */
-/*    c. numForLoopsInAProgram(ast)                       */
+/*    a. numGloLevForLoops(ast)       ==> integer >= 0    */
+/*    b. numLocLevForLoops(ast)       ==> integer >= 0    */
+/*    c. numForLoopsInAProgram(ast)   ==> integer >= 0    */
 /**********************************************************/
 
 //------------------------------------------------------------------------
 // 5-a. calculate total number of for loops in global level
 //------------------------------------------------------------------------  
-  function numGlobalForLoops(ast) {
+  function numGloLevForLoops(ast) {
     return numForLoops(ast);
   }
 
 //------------------------------------------------------------------------
 // 5-b. calculate total number of for loops in functions (local level)
 //------------------------------------------------------------------------  
-  function numForLoopsInAllFunctions(ast) {
+  function numLocLevForLoops(ast) {
     var count = 0;
     var nst = ast.body.length;
     var nd;
@@ -821,6 +838,7 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
+// private function:
 // calculate total number of for loops in a calling scope
 //------------------------------------------------------------------------  
   function numForLoops(nd) {
@@ -836,6 +854,7 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
+// private function:
 // calculate total number of nested for loops in a calling scope
 //------------------------------------------------------------------------  
   function numNestedForLoops(nd) {
@@ -851,36 +870,63 @@ var pnut = (function () {
 
 
 
-/* 6. */
+/**********************************************************/
+/* 6. Style Grading for Declaration and Use of Function   */
+/*    a. numDecFuncs(ast)               ==> integer >= 0  */
+/*    b. numForLoopsInAllFunctions(ast) ==> integer >= 0  */
+/*    c. numForLoopsInAProgram(ast)     ==> integer >= 0  */
+/**********************************************************/
+
 //------------------------------------------------------------------------
-// calculate declared function in global level:
-//  1. function a() {}
-//  2. var a = function() {}
+// 6-a. calculate the number of declared functions in global level:
+//      ex:
+//        function a() {}
+//        var a = function() {}
 //------------------------------------------------------------------------
-  function numGlobalFuncDecls(ast) {
-    var count = 0;
+  function numDecFuncs(ast) {
+    return listDecFunc(ast).length;
+  }
+
+//------------------------------------------------------------------------
+// 6-b. list all declared functions in global level:
+//      ex:
+//        function a() {}
+//        var a = function() {}
+//------------------------------------------------------------------------
+  function listDecFuncs(ast) {
+    var list = [];
     var nd;
     for(var m=0; m<ast.body.length; m++) {
       nd = ast.body[m];
       switch(nd.type) {
         case "FunctionDeclaration":
-          count++;
+          list.push("Function " + nd.id.name + " ()");
           break;
         case "VariableDeclaration":
           var decs = nd.declarations;
           for(var m=0; m<decs.length; m++) {
-            count = (decs[m].init.type=="FunctionExpression") ? count+1:count;
+            if(decs[m].init.type=="FunctionExpression") {
+              list.push("Function "+ decs[m].id.name + " ()");
+            }
           }
           break;
       }
     }
-    return count;
+    return list;  
   }
 
-
-
-
-  function isAFuncCallToGloFunc(ast) {
+//------------------------------------------------------------------------
+// 6-c. exam call expressions that all call declared functions in which 
+//      functions are declared on the top of call expressions.
+//      ex:
+//        CORRECT: function myMain() { return 5; }
+//                 myMain();
+//        WRONG:   1. function myMain() { return 5; }
+//                    foo();
+//                 2. foo()
+//                    function foo() { return 5; }
+//------------------------------------------------------------------------
+  function areCallExpsAllValid(ast) {
     var check = false;
     for(var m=0; m<ast.body.length; m++) {
       var nd = ast.body[m];
@@ -889,9 +935,6 @@ var pnut = (function () {
     return check;
   }
 
-  function isLocLelFuncCall(ast) {
-
-  }
 
   function isAFuncCall (nd) { 
     switch (nd.type) {
@@ -909,69 +952,42 @@ var pnut = (function () {
     return false; 
   }
 
+//------------------------------------------------------------------------
+// 6-d. list invalid call expressions in which a call expression calls 
+//      an undeclared function
+//      ex:
+//        CORRECT: function myMain() { return 5; }
+//                 myMain();
+//        WRONG:   1. function myMain() { return 5; }
+//                    foo();
+//                 2. foo()
+//                    function foo() { return 5; }
+//------------------------------------------------------------------------
+  function listInvalidCallExps(ast) {
 
-  function numTopFuncCalls (ast) {
-    var count = 0;
-    var nst = ast.body.length;
-    var st;
-    for (var i=0; i<nst; i++) {
-      st = ast.body[i];
-      if (isFuncCall(st)) count += 1;
-    }
-    /*
-    for (var i=0; i<nst; i++) {
-      st = ast.body[i];
-      if (st.type == "ExpressionStatement") {
-        // syntax: myMain();
-        if (st.expression.type == "CallExpression") { count += 1; }
-        // syntax: z = myMain(); 
-        if (st.expression.type == "AssignmentStatement") { 
-  	if (st.expression.right == "CallExpression") { count += 1; }
-        }
-      } 
-    } // end for loop
-    */
-    return count;
+  }
+
+//------------------------------------------------------------------------
+// 6-e. exam all declared functions get called in a program
+//      * the number that a function gets called is regardless
+//      ex: function bar() { return 5; }
+//          function foo() { return 5; }
+//          bar(); bar();
+//          foo(); foo();
+//------------------------------------------------------------------------
+  function areDecFuncsCalled(ast) {
+
   }
 
 
 //------------------------------------------------------------------------
-//   top level structure check
-//   is it nothing but func decls and one func call?
+// 6-f. exam all declared functions get called exactly once in a program
+//      ex: function bar() { return 5; }
+//          function foo() { return 5; }
+//          bar();
+//          foo();
 //------------------------------------------------------------------------
-  function listTopLevelTypes (ast) {
-    // what are the main top level statements in the program
-    var nst = ast.body.length;  // the num of nodes in ast root
-    var list = [];              
-    for (var i=0; i<nst; i++) { list[i] = ast.body[i].type ; }
-    return list; // array of strings
-  }
-
-
-//------------------------------------------------------------------------
-// return a list of all functions delcared in a program 
-//------------------------------------------------------------------------
-  function listFunctions(ast) {
-    var list = [];
-    var len = ast.body.length;
-    var funcName;
-
-    for(var m=0; m<len; m++) {
-      if(ast.body[m].type == "FunctionDeclaration") {
-        funcName = ast.body[m].id.name;
-        for(var s=0; s<list.lenght; s++) {
-          if(funcName != list[s]) { list.push(funcName); }
-        }
-      }
-    }
-
-    return list;
-  }
-
-//------------------------------------------------------------------------
-// Check for if all declared functions get called exactly once 
-//------------------------------------------------------------------------
-  function isAllFuncDeclsPlusOneCall (ast) {
+  function areDecFuncsCalledOnce (ast) {
     if(isAValidProgram(ast)) {
       var numFuncDecls    = 0;                      // num of functiona get declared
       var funcName        = []; 
@@ -1048,163 +1064,199 @@ var pnut = (function () {
   }
 
 
-
-//------------------------------------------------------------------------
-// check if a function is pass-by-reference
-//------------------------------------------------------------------------
-  function isFunctionCallPassByReference(ast) {
-    if(!isAValidProgram(ast)) { return false; }
-
-    var func;
-    for(var i=0; i<ast.body.length; i++) {
-      func = ast.body[i];
-      if(func.type=="ExpressionStatement"   &&
-          func.expression.arguments!=null   &&
-          func.expression.arguments.name!=null) {
-        return true; 
-      }
-    }
-
-    return false;
-  }
-
-
-//------------------------------------------------------------------------
-// calculate the number of valid global objects declaration
-//------------------------------------------------------------------------
-  function numGlobalVariableDeclared(ast) {
-    if(!isAValidProgram(ast)) { return 0; }
-
-    var objs = [];
-    var func;
-    var funcName;
-
-    for(var m=0; m<ast.body.length; m++) {
-      func = ast.body[m];
-      if(func.type == "VariableDeclaration") {
-        funcName = func.declarations[0].id.name;
-        objs.push(funcName);
-      }
-    } 
-    console.log("global obj declared: " + objs.length);
-    return objs.length;
-  }
+// //------------------------------------------------------------------------
+// // 6-g. exam if any function is a pass-by-reference function or not
+// //      ex: CORRECT: function bar(x) { return 5; }
+// //          WRONG:   funciton bar()  { return 5; }
+// //------------------------------------------------------------------------
+//   function isAnyFuncPassedByReference(ast) {
+//     if(!isAValidProgram(ast)) { return false; }
+//
+//     var func;
+//     for(var i=0; i<ast.body.length; i++) {
+//       func = ast.body[i];
+//       if(func.type=="ExpressionStatement"   &&
+//           func.expression.arguments!=null   &&
+//           func.expression.arguments.name!=null) {
+//         return true; 
+//       }
+//     }
+//
+//     return false;
+//   }
 
 
-//------------------------------------------------------------------------
-// calculate the number of valid objects declaration in all functions
-//------------------------------------------------------------------------
-  function numValidObjectDeclaredInAllFunctions(ast) {
-    if(!isAValidProgram(ast)) { return 0; }
-
-    var objs = [];
-    var func;
-
-    for(var s=0; s<ast.body.length; s++) {
-      func = ast.body[s];
-      if(func.type == "FunctionDeclaration") {
-        for(var m=0; m<func.body.body.length; m++) {
-          var funcblock = func.body.body[m];
-          if(funcblock.type == "VariableDeclaration") {
-            objs.push(funcblock.declarations[0].id.name);
-          }
-        }
-      }
-    }
-    console.log("function obj declared: " + objs.length);
-    return objs.length;
-  }
+// //------------------------------------------------------------------------
+// // calculate the number of valid global objects declaration
+// //------------------------------------------------------------------------
+//   function numGlobalVariableDeclared(ast) {
+//     if(!isAValidProgram(ast)) { return 0; }
+// 
+//     var objs = [];
+//     var func;
+//     var funcName;
+// 
+//     for(var m=0; m<ast.body.length; m++) {
+//       func = ast.body[m];
+//       if(func.type == "VariableDeclaration") {
+//         funcName = func.declarations[0].id.name;
+//         objs.push(funcName);
+//       }
+//     } 
+//     console.log("global obj declared: " + objs.length);
+//     return objs.length;
+//   }
 
 
-//------------------------------------------------------------------------
-// calculate the number of declared objects in use
-//------------------------------------------------------------------------
-  function numDeclaredObjectsUsed(ast) {
-    if(!isAValidProgram(ast)) { return 0; }
-
-    // calculate for the num of all global objects
-    var gbObjs          = new Set();
-    var funcObjs        = [];
-    var numTopLevelNode = ast.body.length;
-    var func;
-
-    for(var i=0; i<numTopLevelNode; i++) {
-      func = ast.body[i];
-      switch(func.type) {
-        case "VariableDeclaration":   // calculate for the num of global objects declared in functions
-          gbObjs.add(func.declarations[0].id.name);
-          break;
-        case "FunctionDeclaration":   // calculate for the num of all objects declared in functions
-          for(var m=0; m<func.body.body.length; m++) {
-            var funcblock = func.body.body[m];
-            if(funcblock.type == "VariableDeclaration") {
-              funcObjs.push(funcblock.declarations[0].id.name);
-            }
-          }        
-          break;
-      }
-    } 
-
-    var glbObjNum   = gbObjs.length;
-    var funcObjNum  = funcObjs.length;
-    var gUsedNum    = 0;
-    var fUsedNum    = 0;
-
-    // how to calculate how an global object in use
-    //    1. obj is passed to a function
-    //
-    // how to calculate how an function's object in use
-    //    1. obj is passed to another function
-    //    2. obj is an Out parameter
-    //    ?. obj is updated in a loop?
-    for(var m=0; m<numTopLevelNode; m++) {
-      func = ast.body[m];
-      if(func.type == "FunctionDeclaration") {
-        if(gbObjs.has(func.params.name)) { gUsedNum++; }
-        else {
-          for(var n=0; n<func.body.body.length; n++) {
-            var funcblock = func.body.body[n];
-            switch(funcblock.type) {
-              case "ExpressionStatement":
-                var args = funcblock.expression.arguments[0];
-                if(args!=null && args.type=="Identifier") {
-                  for(var i=0; i<funcObjNum; i++) {
-                    if(args.name == funcObjs[i]) { fUsedNum++; }
-                  }
-                }
-                break;
-              case "ReturnStatement":
-                var arg = funcblock.argument;
-                if(arg != null) { fUsedNum+=subnode(arg, funcObjs, funcObjNum); }
-                break;
-            }
-          }
-        }  
-      }
-    }
-    console.log("objs in use: " + (gUsedNum+fUsedNum));
-    return (gUsedNum + fUsedNum);
-  }
-
-  function subnode(nd, funcList, funcnNum) { 
-    if(nd.type == "CallExpression") { return 0; }
-    else if(nd.type == "Literal") { return 0; }
-    else if(nd.type == "Identifier") { 
-      var count = 0;
-      for(var i=0; i<funcnNum; i++) { count = (nd.name==funcList[i]) ? count+1: count; }
-      return count;
-    }
-
-    return subnode(nd.left)+subnode(nd.right);
-  }
+// //------------------------------------------------------------------------
+// // calculate the number of valid objects declaration in all functions
+// //------------------------------------------------------------------------
+//   function numValidObjectDeclaredInAllFunctions(ast) {
+//     if(!isAValidProgram(ast)) { return 0; }
+// 
+//     var objs = [];
+//     var func;
+// 
+//     for(var s=0; s<ast.body.length; s++) {
+//       func = ast.body[s];
+//       if(func.type == "FunctionDeclaration") {
+//         for(var m=0; m<func.body.body.length; m++) {
+//           var funcblock = func.body.body[m];
+//           if(funcblock.type == "VariableDeclaration") {
+//             objs.push(funcblock.declarations[0].id.name);
+//           }
+//         }
+//       }
+//     }
+//     console.log("function obj declared: " + objs.length);
+//     return objs.length;
+//   }
 
 
-//------------------------------------------------------------------------
-// check if a function is recursive by its return statement
-//------------------------------------------------------------------------
+// //------------------------------------------------------------------------
+// // calculate the number of declared objects in use
+// //------------------------------------------------------------------------
+//   function numDeclaredObjectsUsed(ast) {
+//     if(!isAValidProgram(ast)) { return 0; }
+// 
+//     // calculate for the num of all global objects
+//     var gbObjs          = new Set();
+//     var funcObjs        = [];
+//     var numTopLevelNode = ast.body.length;
+//     var func;
+// 
+//     for(var i=0; i<numTopLevelNode; i++) {
+//       func = ast.body[i];
+//       switch(func.type) {
+//         case "VariableDeclaration":   // calculate for the num of global objects declared in functions
+//           gbObjs.add(func.declarations[0].id.name);
+//           break;
+//         case "FunctionDeclaration":   // calculate for the num of all objects declared in functions
+//           for(var m=0; m<func.body.body.length; m++) {
+//             var funcblock = func.body.body[m];
+//             if(funcblock.type == "VariableDeclaration") {
+//               funcObjs.push(funcblock.declarations[0].id.name);
+//             }
+//           }        
+//           break;
+//       }
+//     } 
+// 
+//     var glbObjNum   = gbObjs.length;
+//     var funcObjNum  = funcObjs.length;
+//     var gUsedNum    = 0;
+//     var fUsedNum    = 0;
+// 
+//     // how to calculate how an global object in use
+//     //    1. obj is passed to a function
+//     //
+//     // how to calculate how an function's object in use
+//     //    1. obj is passed to another function
+//     //    2. obj is an Out parameter
+//     //    ?. obj is updated in a loop?
+//     for(var m=0; m<numTopLevelNode; m++) {
+//       func = ast.body[m];
+//       if(func.type == "FunctionDeclaration") {
+//         if(gbObjs.has(func.params.name)) { gUsedNum++; }
+//         else {
+//           for(var n=0; n<func.body.body.length; n++) {
+//             var funcblock = func.body.body[n];
+//             switch(funcblock.type) {
+//               case "ExpressionStatement":
+//                 var args = funcblock.expression.arguments[0];
+//                 if(args!=null && args.type=="Identifier") {
+//                   for(var i=0; i<funcObjNum; i++) {
+//                     if(args.name == funcObjs[i]) { fUsedNum++; }
+//                   }
+//                 }
+//                 break;
+//               case "ReturnStatement":
+//                 var arg = funcblock.argument;
+//                 if(arg != null) { fUsedNum+=subnode(arg, funcObjs, funcObjNum); }
+//                 break;
+//             }
+//           }
+//         }  
+//       }
+//     }
+//     console.log("objs in use: " + (gUsedNum+fUsedNum));
+//     return (gUsedNum + fUsedNum);
+//   }
+// 
+//   function subnode(nd, funcList, funcnNum) { 
+//     if(nd.type == "CallExpression") { return 0; }
+//     else if(nd.type == "Literal") { return 0; }
+//     else if(nd.type == "Identifier") { 
+//       var count = 0;
+//       for(var i=0; i<funcnNum; i++) { count = (nd.name==funcList[i]) ? count+1: count; }
+//       return count;
+//     }
+// 
+//     return subnode(nd.left)+subnode(nd.right);
+//   }
+
+
+
+/************************************************************/
+/* 7. Style Grading for Variable Assignment                 */
+/*    a. isRecuriveFunction(ast) ==> boolean ? true: false  */
+/************************************************************/
+
+
+
+
+
+/************************************************************/
+/* 9. Style Grading for Recursive Function                  */
+/*    a. isRecuriveFunction(ast)  ==> boolean ? true:false  */
+/************************************************************/
+
+//------------------------------------------------------------------------------
+// 9-a. exam if a function is recursive or not by checking its return statement
+//      ex: CORRECT: function myMain() {
+//                      var x = foo(3);
+//                      alert(x);
+//                   }
+//
+//                   function foo(x) {
+//                      if x=1 return 1;
+//                      return x*foo(x-1);
+//                   }
+//                   myMain();
+//
+//           WRONG:  function myMain() {
+//                      var x = foo(3);
+//                      alert(x);
+//                   }
+//
+//                   function foo(x) {
+//                      var prod=1;
+//                      for (var i=x; i>1; i--) { prod *= i; }
+//                      return prod;
+//                   }
+//                   myMain();
+//------------------------------------------------------------------------------
   function isRecuriveFunction(ast) { 
-    if(!isAValidProgram(ast)) { return false; }
-
     var numTopLevelNode = ast.body.length;
     var funcList = listFunctions(ast);
     var numFuncNode;
@@ -1226,6 +1278,11 @@ var pnut = (function () {
     return false;
   }
 
+
+//------------------------------------------------------------------------------
+// private function:
+// check a funciton's returnstatement if it is a call of the function or not
+//------------------------------------------------------------------------------
   function recursionDetector(nd, funcName) {
     if(nd.type=="Identifier") { return false; }
     else if(nd.type=="Literal") { return false; }
@@ -1235,15 +1292,17 @@ var pnut = (function () {
   }
 
 
+
 //------------------------------------------------------------------------
-// HashMap:
-//  1. setItem(key, value) ==> map a new key to a value in the map
-//  2. getItem(key)        ==> retrieve a value of a key
-//  3. hasItem(key)        ==> check if a key is in the dic or not
-//  4. removeItem(key)     ==> remove a key with its associative value
-//  5. keys()              ==> a list of all keys in the map
-//  6. values()            ==> a list of all values in the map
-//  7. clear()             ==> clear the map
+// private function:
+//  HashMap:
+//    1. setItem(key, value) ==> map a new key to a value in the map
+//    2. getItem(key)        ==> retrieve a value of a key
+//    3. hasItem(key)        ==> check if a key is in the dic or not
+//    4. removeItem(key)     ==> remove a key with its associative value
+//    5. keys()              ==> a list of all keys in the map
+//    6. values()            ==> a list of all values in the map
+//    7. clear()             ==> clear the map
 //------------------------------------------------------------------------
   function HashMap(obj) {
       this.length = 0;
