@@ -46,6 +46,8 @@ var pnut = (function () {
     dObj.nUDV     = numUndecVars(ast);
     dObj.lUDV     = listUndecVars(ast);
     dObj.lVU      = listVarsUsed(ast);
+    dObj.isFV     = isAnyFuncVars(ast);
+    dObj.lFV      = listFuncVars(ast);
 
     /* 2. Style Grading for Declaration and Use of Array      */
     dObj.nDA      = numDecArrs(ast);
@@ -75,6 +77,8 @@ var pnut = (function () {
     dObj.nFLinAP  = numForLoopsInAProgram(ast);
 
     /* 6. Style Grading for Declaration and Use of Function   */
+
+
 
 
     // Improved style grading features
@@ -114,6 +118,7 @@ var pnut = (function () {
 /*    d. listUndecVars(ast)   ==> [ string ]              */
 /*    e. listVarsUsed(ast)    ==> [ string ]              */
 /*    f. isAnyFuncVars(ast)   ==> boolean ? true:false    */
+/*    g. listFuncVars(ast)    ==> [ string]               */
 /**********************************************************/
 
 //------------------------------------------------------------------------
@@ -304,10 +309,64 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
-// 1-f. exam if any function gets assigned to a variable in a program
+// 1-f. exam if any function gets assigned to a variable in global level
+//      ex: function bar() { }
+//          var f2 = bar;
 //------------------------------------------------------------------------
-  function isAnyFuncVars(ast) {
-    
+  function isAnyFuncVar(ast) {
+    return listFuncVars(ast).length>0;
+  }
+
+//------------------------------------------------------------------------
+// 1-g. list global variables in which directly points to a function
+//      ex: function bar() { }
+//          var f2 = bar;
+//------------------------------------------------------------------------
+  function listFuncVars(ast) {
+    var node;
+    var func = new Set();
+    var used = new Set();
+    var arr  = [];
+
+
+    for(m in ast.body) {
+      node = ast.body[m];
+
+      if(node.type=="FunctionDeclaration" && node.id.type=="Identifier") {
+        func.add(node.id.name);
+      }
+    }
+
+    for(m in ast.body) {
+      node = ast.body[m];
+
+      switch(node.type) {
+        case "VariableDeclaration":
+          var subnode = node.declarations;
+          for(n in subnode) {
+            if(subnode[n].init!=null && subnode[n].init.type=="Identifier") {
+              if(typeof(funcs.has(subnode[n].init.name)) != undefined &&
+                typeof(used.has(subnode[n].init.name)) != undefined )) {
+                used.add(subnode[n].id.name);
+                arr.push(subnode[n].id.name);
+              }
+            } 
+          }
+          break;
+        case "ExpressionStatement":
+          var exp = node.expression;
+          if(exp.type=="AssignmentExpression" && 
+            exp.left.type=="Identifier" && exp.right.type=="Identifier") {
+            if(typeof(funcs.has(exp.right.name)) != undefined &&
+              typeof(used.has(exp.left.name)) != undefined )) {
+              used.add(exp.left.name);
+              arr.push(exp.left.name);
+            }                    
+          }
+          break;
+      }
+    }
+    return arr;
   }
 
 
@@ -612,7 +671,6 @@ var pnut = (function () {
     return arr;   
   } 
 
-
 //------------------------------------------------------------------------
 // 3-c. calculate total number of undeclared objects 
 //      that get used in a program
@@ -623,7 +681,6 @@ var pnut = (function () {
   function numUndecObjs(ast) {
     return 0;
   } 
-
 
 //------------------------------------------------------------------------
 // 3-d. list all undeclared objects that get used in a program
@@ -636,7 +693,6 @@ var pnut = (function () {
     return [];
   } 
 
-
 //------------------------------------------------------------------------
 // 3-e. calculate total number of objects that are used in a program
 //      ex:
@@ -646,7 +702,6 @@ var pnut = (function () {
   function numObjsUsed(ast) {
     return 0;
   } 
-
 
 //------------------------------------------------------------------------
 // 3-f. list all objecs that are used in a program
@@ -819,9 +874,8 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function numLocLevForLoops(ast) {
     var count = 0;
-    var nst = ast.body.length;
     var nd;
-    for (var m=0; m<nst; m++) {
+    for (var m in ast.body) {
       nd = ast.body[m];
       count = (nd.type=="FunctionDeclaration") ? count+numForLoops(nd.body):count;
     }
@@ -844,7 +898,7 @@ var pnut = (function () {
   function numForLoops(nd) {
     var count = 0;
     var snd;
-    for(var m=0; m<nd.body.length; m++) {
+    for(var m in nd.body) {
       snd = nd.body[m];
       count = (snd.type=="ForStatement") ? numForLoops(snd.body)+1:count;
     } 
@@ -860,7 +914,7 @@ var pnut = (function () {
   function numNestedForLoops(nd) {
     var count = 0;
     var snd;
-    for(var m=0; m<nd.body.length; m++) {
+    for(var m in nd.body) {
       snd = nd.body[m];
       count = (snd.type=="ForStatement" && numForLoops(snd.body)>0) ? count+1:count;
     }
@@ -870,12 +924,16 @@ var pnut = (function () {
 
 
 
-/**********************************************************/
-/* 6. Style Grading for Declaration and Use of Function   */
-/*    a. numDecFuncs(ast)               ==> integer >= 0  */
-/*    b. numForLoopsInAllFunctions(ast) ==> integer >= 0  */
-/*    c. numForLoopsInAProgram(ast)     ==> integer >= 0  */
-/**********************************************************/
+/******************************************************************/
+/* 6. Style Grading for Declaration and Use of Function           */
+/*    a. numDecFuncs(ast)               ==> integer >= 0          */
+/*    b. numForLoopsInAllFunctions(ast) ==> integer >= 0          */
+/*    c. numForLoopsInAProgram(ast)     ==> integer >= 0          */
+/*    d. listInvalidFuncCallExps(ast)   ==> [ string ]            */
+/*    e. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
+/*    f. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
+/*    g. isAFuncPassedByReference(ast)  ==> boolean ? true:false  */
+/******************************************************************/
 
 //------------------------------------------------------------------------
 // 6-a. calculate the number of declared functions in global level:
@@ -888,32 +946,52 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
-// 6-b. list all declared functions in global level:
+// 6-b. list all declared functions in global level with occuring number:
 //      ex:
 //        function a() {}
+//        function b(x) {}
+//        function b(x, y) {}
 //        var a = function() {}
 //------------------------------------------------------------------------
   function listDecFuncs(ast) {
-    var list = [];
-    var nd;
-    for(var m=0; m<ast.body.length; m++) {
+    return DictDecFuncs(ast).keys; 
+  }
+
+//------------------------------------------------------------------------
+// private method:
+// create a dictionary to map funcionts with their occurrence order.
+//------------------------------------------------------------------------
+  function DictDecFuncs(ast) {
+    var dict  = new HashMap();
+    var index = 0;
+    var nd, name;
+    for(var m in ast.body) {
       nd = ast.body[m];
       switch(nd.type) {
         case "FunctionDeclaration":
-          list.push("Function " + nd.id.name + " ()");
+          if(nd.params.length<2) {
+            name = "Function " + nd.id.name + " ("+ nd.params.length+" param)";
+          } else {
+            name = "Function " + nd.id.name + " ("+ nd.params.length+" params)";
+          }
+          dict.setItem(name, index);
+          index += 1;
           break;
         case "VariableDeclaration":
           var decs = nd.declarations;
-          for(var m=0; m<decs.length; m++) {
-            if(decs[m].init.type=="FunctionExpression") {
-              list.push("Function "+ decs[m].id.name + " ()");
+          for(var n in decs) {
+            if(decs[n].init.type=="FunctionExpression") {
+              name = "Function Variable "+ decs[n].id.name;
+              dict.setItem(name, index);
+              index += 1;
             }
           }
           break;
       }
     }
-    return list;  
+    return dict;  
   }
+
 
 //------------------------------------------------------------------------
 // 6-c. exam call expressions that all call declared functions in which 
@@ -928,32 +1006,34 @@ var pnut = (function () {
 //------------------------------------------------------------------------
   function areCallExpsAllValid(ast) {
     var check = false;
-    for(var m=0; m<ast.body.length; m++) {
-      var nd = ast.body[m];
+    var nd;
+    for(var m in ast.body) {
+      nd = ast.body[m];
       check  = isFuncCall(nd);
     }
     return check;
   }
 
 
-  function isAFuncCall (nd) { 
+  function isAFuncCall(nd) { 
     switch (nd.type) {
       case "ExpressionStatement":
-        if (nd.expression.type=="CallExpression") return true;
-        if (nd.expression.type=="AssignmentExpression") {
-  	     if (nd.expression.right.type=="CallExpression") return true;
+        exp = nd.expression;
+        if (exp.type=="CallExpression") { return true; }
+        if (exp.type=="AssignmentExpression" && 
+          exp.right.type=="CallExpression") {
+  	      return true;
         }
         break;
       case "VariableDeclaration":
         if (nd.declarations[0].init.type=="CallExpression") return true;
         break;
-      default: return false;
     }
     return false; 
   }
 
 //------------------------------------------------------------------------
-// 6-d. list invalid call expressions in which a call expression calls 
+// 6-d. list invalid function call expressions in which a call expression calls 
 //      an undeclared function
 //      ex:
 //        CORRECT: function myMain() { return 5; }
@@ -963,8 +1043,34 @@ var pnut = (function () {
 //                 2. foo()
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
-  function listInvalidCallExps(ast) {
+  function listInvalidFuncCallExps(ast) {
+    var dict = DictDecFuncs(ast);
+    var list = [];
+    var node;
+    for(m in ast.body) {
+      node = ast.body[m];
 
+      if(node.type=="ExpressionStatement"       && 
+        node.expression.type=="CallExpression"  &&
+        node.expression.callee.type=="Identifier") {
+        var name = node.expression.callee.name;
+        var argnum = node.expression.arguments;
+        var func1;
+        var func2 = "Function Variable "+ name;
+
+        if(argnum<2) {
+          func1 = "Function " + name + " (" + argnum+ " param)";
+        } else {
+          func1 = "Function " + name + " (" + argnum+ " params)";
+        }
+
+
+        if(!dict.hasItem(func1) && !dict.hasItem(func2)) {
+          list.push(func1);
+        }
+      }
+    }
+    return list;
   }
 
 //------------------------------------------------------------------------
@@ -988,7 +1094,6 @@ var pnut = (function () {
 //          foo();
 //------------------------------------------------------------------------
   function areDecFuncsCalledOnce (ast) {
-    if(isAValidProgram(ast)) {
       var numFuncDecls    = 0;                      // num of functiona get declared
       var funcName        = []; 
       var funcNameCallNum = [];                     // match the index of funcName
@@ -1043,47 +1148,29 @@ var pnut = (function () {
         }
       }
       console.log("is all functions declared and called once: " + funcCallOnce);
-      return funcCallOnce;  
-    } else {
-      return false;
+      return funcCallOnce;
+  }
+
+
+
+//------------------------------------------------------------------------
+// 6-g. exam if any function is a pass-by-reference function or not
+//      ex: CORRECT: function bar(x) { return x; }
+//          WRONG:   funciton bar()  { return 5; }
+//------------------------------------------------------------------------
+  function isAFuncPassedByReference(ast) {
+    var func;
+    for(var i in ast.body) {
+      func = ast.body[i];
+      if(func.type=="ExpressionStatement"   &&
+          func.expression.arguments!=null   &&
+          func.expression.arguments.name!=null) {
+        return true; 
+      }
     }
+
+    return false;
   }
-
-//------------------------------------------------------------------------
-// check if a program is non-empty
-//------------------------------------------------------------------------
-  function isAValidProgram(ast) {
-    return ast.body.length>0;
-  }
-
-//------------------------------------------------------------------------
-// check if a function is non-empty
-//------------------------------------------------------------------------
-  function isAValidFunction(func) {
-    return func.body.body.length>0;
-  }
-
-
-// //------------------------------------------------------------------------
-// // 6-g. exam if any function is a pass-by-reference function or not
-// //      ex: CORRECT: function bar(x) { return 5; }
-// //          WRONG:   funciton bar()  { return 5; }
-// //------------------------------------------------------------------------
-//   function isAnyFuncPassedByReference(ast) {
-//     if(!isAValidProgram(ast)) { return false; }
-//
-//     var func;
-//     for(var i=0; i<ast.body.length; i++) {
-//       func = ast.body[i];
-//       if(func.type=="ExpressionStatement"   &&
-//           func.expression.arguments!=null   &&
-//           func.expression.arguments.name!=null) {
-//         return true; 
-//       }
-//     }
-//
-//     return false;
-//   }
 
 
 // //------------------------------------------------------------------------
@@ -1217,22 +1304,14 @@ var pnut = (function () {
 
 
 
-/************************************************************/
-/* 7. Style Grading for Variable Assignment                 */
-/*    a. isRecuriveFunction(ast) ==> boolean ? true: false  */
-/************************************************************/
-
-
-
-
 
 /************************************************************/
-/* 9. Style Grading for Recursive Function                  */
+/* 7. Style Grading for Recursive Function                  */
 /*    a. isRecuriveFunction(ast)  ==> boolean ? true:false  */
 /************************************************************/
 
 //------------------------------------------------------------------------------
-// 9-a. exam if a function is recursive or not by checking its return statement
+// 7-a. exam if a function is recursive or not by checking its return statement
 //      ex: CORRECT: function myMain() {
 //                      var x = foo(3);
 //                      alert(x);
@@ -1317,11 +1396,9 @@ var pnut = (function () {
 
       this.setItem = function(key, value) {
         var previous = undefined;
-        if (this.hasItem(key)) {
-          previous = this.items[key];
-        } else {
-          this.length++;
-        }
+        if (this.hasItem(key)) { previous = this.items[key];
+        } else { this.length++; }
+
         this.items[key] = value;
         return previous;
       }
@@ -1356,9 +1433,7 @@ var pnut = (function () {
       this.values = function() {
         var values = [];
         for (var k in this.items) {
-          if (this.hasItem(k)) {
-            values.push(this.items[k]);
-          }
+          if (this.hasItem(k)) { values.push(this.items[k]); }
         }
         return values;
       }
@@ -1377,6 +1452,44 @@ var pnut = (function () {
 // now put them all into an object as methods and send that object back
 
   return {
+
+    /* 1. Style Grading for Declaration and Use of Variable   */
+    numDecVars    : numDecVars,
+    listDecVars   : listDecVars,
+    numUndecVars  : numUndecVars,
+    listUndecVars : listUndecVars,
+    listVarsUsed  : listVarsUsed,
+    isAnyFuncVars : isAnyFuncVars,
+    listFuncVars  : listFuncVars,
+
+    /* 2. Style Grading for Declaration and Use of Array      */
+    numDecArrs    : numDecArrs,
+    listDecArrs   : listDecArrs,
+    numUndecArrs  : numUndecArrs,
+    listUndecArrs : listUndecArrs,
+    numArrsUsed   : numArrsUsed,
+    listArrsUsed  : listArrsUsed,
+
+    /* 3. Style Grading for Declaration and Use of Object     */
+    numDecObjs          : numDecObjs,
+    listDecObjs         : listDecObjs,
+    numUndecObjs        : numUndecObjs,
+    listUndecObjs       : listUndecObjs,
+    numObjsUsed         : numObjsUsed,
+    listObjsUsed        : listObjsUsed,
+    isAnyFuncReturnObj  : isAnyFuncReturnObj,
+
+    /* 4. Style Grading for Use of While Loop                 */
+    numGloLevWhileLoops       : numGloLevWhileLoops,
+    numLocLevWhileLoops       : numLocLevWhileLoops,
+    numWhileLoopsInAProgram   : numWhileLoopsInAProgram,
+
+    /* 5. Style Grading for Use of For Loop                   */
+    numGloLevForLoops       : numGloLevForLoops,
+    numLocLevForLoops       : numLocLevForLoops,
+    numForLoopsInAProgram   : numForLoopsInAProgram,
+
+
     collectStructureStyleFacts: collectStructureStyleFacts,
     numBadGlobalDecls: numBadGlobalDecls, 
     numBadGlobalUses: numBadGlobalUses,
