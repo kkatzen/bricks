@@ -6,6 +6,8 @@ var folderStudScore = 0;
 var totScore = 0;
 var studScore = 0;
 
+
+/*
 fProto = {
    addProblem : function (problem) {
       var maxScore = 0;
@@ -51,6 +53,51 @@ fProto = {
 		$("ul",this.domNode).append(link);
 	}
 }
+*/
+
+function addProblemToAccordian(problem){
+	console.log("addProblemToAccordian()");
+	var maxScore = 0;
+	var probMax = Number(problem.value.correct) + Number(problem.value.style);
+	totScore += probMax;
+	var link = $("<li></li>").append(
+		$("<a></a>")
+			.attr("href","#")
+			.append(problem.name)
+	);
+	if(problem.phase == 0) {
+	    link.css("background-color","lightgray");
+	}
+	link.click(function () { addProbInfo(problem); });
+
+	if (loggedIn) {
+		var results = { correct: false, style: false };
+		$.post("/submission/read/" + problem.id, {}, function (submissions) {
+		if (!submissions.length == 0) {
+			submissions.forEach( function (submission) {
+				var curSubScore = Number(submission.value.correct)+Number(submission.value.style);
+				if(curSubScore > maxScore) {
+					maxScore = curSubScore;
+				}
+				results.correct = 
+					results.correct || (submission.value.correct == problem.value.correct);
+				results.style = results.style || (submission.value.style == problem.value.style);
+				if (results.correct && results.style) { return true; } 
+			});
+			studScore += maxScore;
+			if (maxScore < probMax) {
+				$("a", link).append(inProgress("8px"));
+			} else {
+				$("a", link).append(correct("8px"));
+			}
+			var probGrade = $("<span class='badge'>" + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
+			$("a", link).append(probGrade);
+		}
+		$("#grade").empty().append(studScore + "/" + totScore);
+		});
+	}
+	return link;
+}
 
 function correct (pad) {
    return $("<span></span>")
@@ -77,6 +124,7 @@ function inProgress (pad) {
 }
 
 function addFolder (folder) {
+	/*
 	var dropdown = $("<li></li>").addClass("dropdown");
 	var toggle = $("<a></a>")
 		.attr("href","#")
@@ -89,12 +137,22 @@ function addFolder (folder) {
 		.attr("id","f-" + folder.id);
 	dropdown.append(toggle).append(menu);
 	$("#folders").append(dropdown);
-	var fObj = { domNode : dropdown, data : folder };
-	fObj.__proto__ = fProto;
-	allFolders[folder.id] = fObj;
+	*/
+	var accordianFolderName = "accoridanFolder" + folder.id;
+	var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
+	var accordian = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + "</h4></div></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
+	$("#folderAccordion").append(accordian);
+	var accordianFolderBody = '';
+	$("#" + accordianFolderName).append(accordianFolderBody);
+			    
+	//var fObj = { domNode : dropdown, data : folder };
+	//fObj.__proto__ = fProto;
+	//allFolders[folder.id] = fObj;
 	$.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
 		problems.forEach( function (problem) {
-			fObj.addProblem(problem);
+			//fObj.addProblem(problem);
+			var link = addProblemToAccordian(problem);
+			$("#" + accordianFolderName).append(link);
 		});
 	});
 }
@@ -271,6 +329,17 @@ window.onload = function () {
 				setErrorMsg(submission.message);
 			});
 		}
+	});
+
+	$('#accShow').on('click', function() {
+	    if($(this).text() == 'Hide All') {
+	        $(this).text('Show All');
+	        $('.folderCollapse').collapse('hide');
+	    } else {
+	        $(this).text('Hide All');
+	        $('.folderCollapse').collapse('show');
+	    }
+	    return false;
 	});
 };
 
