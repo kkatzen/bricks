@@ -34,12 +34,6 @@ var pnut = (function () {
   function collectStructureStyleFacts (ast) {
     var dObj      = {};
 
-    dObj.nTFD     = numTopFuncDecls(ast);
-    dObj.nTFC     = numTopFuncCalls(ast);
-    dObj.nBGD     = numBadGlobalDecls(ast);
-    dObj.nBGU     = numBadGlobalUses(ast);
-    dObj.uBGV     = usesBadGlobalVars(ast);
-
     /* 1. Style Grading for Declaration and Use of Variable   */
     dObj.nDV      = numDecVars(ast);
     dObj.lDV      = listDecVars(ast);
@@ -1487,35 +1481,8 @@ var pnut = (function () {
     /* 5. Style Grading for Use of For Loop                   */
     numGloLevForLoops       : numGloLevForLoops,
     numLocLevForLoops       : numLocLevForLoops,
-    numForLoopsInAProgram   : numForLoopsInAProgram,
+    numForLoopsInAProgram   : numForLoopsInAProgram
 
-
-    collectStructureStyleFacts: collectStructureStyleFacts,
-    numBadGlobalDecls: numBadGlobalDecls, 
-    numBadGlobalUses: numBadGlobalUses,
-    usesBadGlobalVars: usesBadGlobalVars,
-    numWhileLoops: numWhileLoops, 
-    numWhileNestLevels: numWhileNestLevels, 
-    numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls,
-    numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls,
-    numTopFuncDecls: numTopFuncDecls, 
-    numTopFuncCalls: numTopFuncCalls, 
-    listTopLevelTypes: listTopLevelTypes, 
-
-
-    // modified features return
-    numGlobalForLoops: numGlobalForLoops,
-    numGlobalWhileLoops: numGlobalWhileLoops,
-    numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls,
-    numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls,
-    numNestedForLoops: numNestedForLoops,
-    numNestedWhileLoops: numNestedWhileLoops,
-    isAllFuncDeclsPlusOneCall: isAllFuncDeclsPlusOneCall,
-    isFunctionCallPassByReference: isFunctionCallPassByReference, 
-    numGlobalVariableDeclared: numGlobalVariableDeclared,
-    numValidObjectDeclaredInAllFunctions: numValidObjectDeclaredInAllFunctions,
-    numDeclaredObjectsUsed: numDeclaredObjectsUsed,
-    isRecuriveFunction: isRecuriveFunction
   }
 
 })  // end anonymous function declaration 
