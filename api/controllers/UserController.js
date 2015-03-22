@@ -17,11 +17,27 @@ module.exports = {
         });
     },
     read: function (req, res) {
-        User.find()
-        .sort({"displayName": 1})
-        .exec(function(err, users) {
-            res.send(users);
-        });
+        var id = req.param("id") || null;
+        if(id){
+            console.log("has id");
+                User.findOne({id:id}).exec(function (err, user) {
+                if (err) {
+                    res.send(500, {error: "DB error finding user"});
+                    return;
+                } else {
+                    res.send(user);
+                }
+            });
+        }else {
+            console.log("has no id");
+            User.find()
+            .sort({"displayName": 1})
+            .exec(function(err, users) {
+                res.send(users);
+            });
+        }
+
+       
     },
     readAdmin: function (req, res) {
         User.find({admin: true})

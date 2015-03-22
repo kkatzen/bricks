@@ -41,7 +41,8 @@
 <script src="/js/admin.js"></script>
 <style>
 #navigationPanel {
-	margin-top: 20px;
+	margin-top: 20px;s
+  padding: 0px;
 }
 form > button {
 	margin-top: 10px;
@@ -57,45 +58,50 @@ form > button {
     margin-bottom: 0;
 }
 </style>
-<div class="container-fluid">
+<nav style="margin-bottom: 0" class="navbar navbar-inverse" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../">Bricks</a>
+      <a class="navbar-brand" href="#questions" data-toggle="pill">Questions</a>
+      <a class="navbar-brand" href="#students" data-toggle="pill">Students</a>
+      <a class="navbar-brand" href="#admin" data-toggle="pill">Manage</a>
+      <a class="navbar-brand" href="#">Progress*</a>
+    </div>
+  </div><!-- /.container-fluid -->
+</nav>
+<div class="container-fluid ">
 <% if (req.isAuthenticated() && req.user.admin) {%>
     <!--Navigation starts-->
-	<div id="navigationPanel" class="panel panel-default col-md-2">
-		<div class="panel-body">
-			<ul class="nav nav-pills nav-stacked">
-				<li class="active"><a href="#questions" data-toggle="pill">Questions and Folders</a></li>
-				<li><a href="#students" data-toggle="pill">View Submissions</a></li>
-                <li><a href="#admin" data-toggle="pill">Manage Admin</a></li>
-			</ul>
-			<ul>
-				<li><p>Something</p></li>
-				<li><p>Something else</p></li>
-			</ul>
-		</div>
-	</div>
-    <!--Navigation ends-->
-    <!--Content starts-->
-	<div class="tab-content col-md-10">
-        <!--Header starts-->
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="#">Admin Page</a>
-                </div>
-                <div>
-                    <div class="navbar-right">
-                        <p class="navbar-text"><%= req.user.displayName %></p>
-                        <form class="navbar-form navbar-right">
-                            <a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
-                        </form>
-                </div>
-       </nav>
-       <!--Header ends-->
-           <div class="panel panel-default">
-             <div id="folderBar" class="panel-body">
-                 <!-- folder dropdowns inserted here -->
-             </div>
-           </div>
+	<div id="navigationPanel" class="panel panel-default col-md-2  ">
+    <div id="folderBar" >
+         <!-- folder dropdowns inserted here -->
+    </div>
+  </div>
+  <!--Navigation ends-->
+  <!--Content starts-->
+	<div class="tab-content  col-md-10 ">
+    <!--Header starts-->
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+          <div class="navbar-header">
+              <a class="navbar-brand" href="#">Admin Page</a>
+          </div>
+          <div>
+          <div class="navbar-right">
+              <p class="navbar-text"><%= req.user.displayName %></p>
+              <form class="navbar-form navbar-right">
+                  <a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
+              </form>
+          </div>
+    </nav>
+    <!--Header ends-->
        <!--questions section starts-->
 		<div class="tab-pane active" id="questions">
             <!--<div class="panel panel-default">
@@ -315,6 +321,27 @@ form > button {
 </div>
 <!--Questions section ends-->
 
+
+
+<!--Individual section starts-->
+  <div class="tab-pane" id="individual">
+    <h1 id="individualName"></h1>
+
+    <!--Progress Bar sub-section starts-->
+    <div id="individualProgessBar" class="col-md-12" style="background:green;">
+    test
+    </div>     
+    <!--Progress Bar sub-section ends-->
+
+    <!--View Problems sub-section starts-->
+    <div id="individualSubmissionList" style="background:red;">
+    </div>     
+    <!--View Problems sub-section ends-->
+
+  </div>
+<!--individual section ends-->
+
+
 <!--Admin section starts-->
 		<div class="tab-pane" id="admin">
             <p>View admins and give administrative privileges here</p>
@@ -343,9 +370,14 @@ form > button {
                     Student Progress  <span id="function" class="label label-info" >0%</span><span id="style" class="label label-success">0%</span>
                     <button class="btn btn-primary btn-sm pull-right" id="refreshData">Refresh</button>
                 </div>
-                <div id="studentResultsTable">
+                <!--<div id="studentResultsTable">
                     <div class="panel-body">
                         Select a problem to view student progress
+                    </div>
+                </div>-->
+                <div id="studentTable">
+                    <div class="panel-body">
+                        Loading students...
                     </div>
                 </div>
             </div>

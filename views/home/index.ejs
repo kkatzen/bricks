@@ -9,6 +9,23 @@
         overflow-y: auto;
         overflow-x: auto;
     }
+    .console {
+    	background-color: white;
+    	color: #202020;
+    	border: 1px solid gray;
+    	padding: 2px;
+    }
+    .textConsole {
+    	width: 100%;
+    	background-color: gray;
+    }
+    #pointbreakdown {
+    	border: 2px solid gray;
+    	float:right; 
+    	width:233px; 
+    	margin-left:5px;
+    	padding:5px;
+    }
 </style>
 <script src="lib/codemirror.js"></script>
 <script src="../mode/javascript/javascript.js"></script>
@@ -98,75 +115,71 @@ User.find({admin: true}).exec(function(err, users) {
 		</div><!-- /.navbar-collapse -->
 	</div><!-- /.container-fluid -->
 </nav>
-<!--NavBar for choosing a problem-->
-<nav style="margin-top: 0"class="navbar navbar-default" role="navigation">
-	<div class="container-fluid">
-		<!-- Brand and toggle get grouped for better mobile display -->
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-		</div>
-		<!-- Collect the nav links, forms, and other content for toggling -->
-		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul id="folders" class="nav navbar-nav">
-			</ul>
-		</div><!-- /.navbar-collapse -->
-	</div><!-- /.container-fluid -->
-</nav>
 <!--Content-->
 <div class="container-fluid">
-  <!--Question Info -->
-  <div class="col-md-3">
-    <div class="row">
-      <div>
-        <div class='panel panel-default'>
-	  <div class='panel-heading'> 
-	    <h3 id="desc-title" class='panel-title'>Instructions</h3>
-	  </div>
-	  <div id="desc-body" class='panel-body'> 
-	    Select a problem to run and submit.
-	  </div>
-	</div>
-      </div>
-    </div>
-    <div class="row">
-      <div id="errors" class="panel panel-default ">
-				<div class="panel-heading">
-					<h3 class="panel-title">Messages
-		<button id="test" type="button" class="btn btn-default pull-right">Test Locally</button> 
-                                        </h3>
-				</div>
-				<div id="errMessage" class="panel-body">
-					No error reports
-				</div>
-			</div>
-		</div>
-		<div class="row">
-		  <div>
-		    <div id="submissions" class='panel panel-default hidden'>
-		      <div class='panel-heading'> 
-			<h3 class='panel-title'>Submissions
-		<button data-toggle="modal" data-target="#myModal" class="btn btn-default pull-right" id="initSubmit" disabled="disabled">Submit for Score</button>
-                        </h3>
-		      </div>
-		      <table class="table" >
-			   <thead>
-			   <tr><td>Submission Time</td>
-                               <td>Func Style</td>
-                           </tr>
-		 	   </thead>
-		  	   <tbody id="subs"> </tbody>
-		      </table>
-	 	    </div>
-		  </div>
-		</div>
+	<!--Question Info -->
+  	<div class="col-md-3">
+    	<div class="row">
+      		<div>
+      			<!--Folder Nav-->
+        		<ul id="folders" class="nav navbar-nav">
+				</ul>
+      		</div>
+    	</div>
 	</div>
 	<!--CODE-->
 	<div class="col-md-9">
+		 <!-- <div class="row">
+      		<div id="errors" class="panel panel-default ">
+				<div class="panel-heading">
+					<h3 class="panel-title">Messages
+                    </h3>
+				</div>
+				 <div id="errMessage" class="panel-body">
+					No error reports
+				</div> 
+			</div>
+		</div> -->
+		<!--
+		<div class="row">
+      		<div>
+        		<div class='panel panel-default'>
+	  				<div class='panel-heading'> 
+	    				<h3 id="desc-title" class='panel-title'>Instructions</h3>
+	    				<button id="test" type="button" class="btn btn-default pull-right">Test Locally</button> 
+	  				</div>
+	  				<div id="desc-body" class='panel-body'> 
+	   					Select a problem to run and submit.
+	  				</div>
+				</div>
+      		</div>
+    	</div>
+    	-->
+		<div class="row">
+			<div>
+		    	<div id="instructions" class='panel panel-default'>
+		      		<div class='panel-heading'> 
+						<h3 class='panel-title'>Instructions
+							<button data-toggle="modal" data-target="#myModal" class="btn btn-default pull-right" id="initSubmit" disabled="disabled">Submit for Score</button>
+							<button id="test" type="button" class="btn btn-default pull-right">Test Locally</button> 
+                        </h3>
+		      		</div>
+	  				<div class='panel-body'> 
+	  					<div id="pointbreakdown" class="hidden">
+			  				Point Breakdown:<br/>
+			  				Style- <span id="highestPtStyle">0</span>/<span id="availablePtStyle"></span><span id="styleCheck"></span>
+			  				<br />
+			  				Func- <span id="highestPtCorrect">0</span>/<span id="availablePtCorrect"></span><span id="correctCheck"></span>
+			  				<br />
+		  				</div>
+		  				<div id="desc-body" >
+	   						Select a problem to run and submit.
+	   					</div>
+	  				</div>
+	 	    	</div>
+		 	</div>
+		</div>
+
 		<!--CodeMirror Start-->
         <% if (req.isAuthenticated()) { %>
             <textarea id="codemirror"><%=req.user.latestCode%></textarea>
@@ -174,51 +187,77 @@ User.find({admin: true}).exec(function(err, users) {
             <textarea id="codemirror"></textarea>
         <%}%>
 		<!--CodeMirror End-->
-<!--
+
+		<div id="consoleHeader" class="console">
+		Test Results Console
+        </div>
+		<textarea id="console" class="textConsole" readonly>
+    	</textarea>
+
+    	<div id="submissions" class='panel panel-default hidden'>
+      		<div class='panel-heading'> 
+				<h3 class='panel-title'>Submissions
+                </h3>
+      		</div>
+			<table class="table" >
+			<thead>
+			<tr><td>Submission Time</td>
+			<td>Func Style</td>
+			</tr>
+			</thead>
+			<tbody id="subs"> </tbody>
+			</table>
+	    </div>
+
+
+    	
+    	
+		<!--
 		<button id="test" type="button" class="btn btn-default ">Test</button>
 		<button data-toggle="modal" data-target="#myModal" class="btn btn-default " id="initSubmit" disabled="disabled">Submit</button>
--->
-	<!-- Modal -->
+		-->
+
+		<!-- Modal -->
         <% if (req.isAuthenticated()) { %>
 
-	 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	    <div class="modal-dialog">
-	        <div class="modal-content">
-	           <div class="modal-header">
-		      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		      <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
-		   </div>
-		   <div class="modal-body">
-		      Are you sure you want to submit your assignment?<br />
-		      Please make sure you have tested your code.
-		   </div>
-	  	   <div class="modal-footer">
-		      <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
-		      <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary">Submit</button>
-		   </div>
-		 </div>
- 	    </div>
-	  </div>    
+					 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+					    <div class="modal-dialog">
+					        <div class="modal-content">
+					           <div class="modal-header">
+						      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						      <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+						   </div>
+						   <div class="modal-body">
+						      Are you sure you want to submit your assignment?<br />
+						      Please make sure you have tested your code.
+						   </div>
+					  	   <div class="modal-footer">
+						      <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+						      <button id="submit" type="button" data-dismiss="modal" class="btn btn-primary">Submit</button>
+						   </div>
+						 </div>
+				 	    </div>
+					  </div>    
 
         <%} else {%>
 
-         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	    <div class="modal-dialog">
-	       <div class="modal-content">
-	          <div class="modal-header">
-	             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	             <h4 class="modal-title" id="myModalLabel">Please Login</h4>
-                  </div>
-                  <div class="modal-body">
-	  	     You must login before you can submit a program for scoring.  <br/>
-		     Please make sure you have tested your code locally.
-		  </div>
-		  <div class="modal-footer">
-		     <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
-		  </div>
-               </div>
-            </div> 
-         </div>
+			         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				    <div class="modal-dialog">
+				       <div class="modal-content">
+				          <div class="modal-header">
+				             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				             <h4 class="modal-title" id="myModalLabel">Please Login</h4>
+			                  </div>
+			                  <div class="modal-body">
+				  	     You must login before you can submit a program for scoring.  <br/>
+					     Please make sure you have tested your code locally.
+					  </div>
+					  <div class="modal-footer">
+					     <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+					  </div>
+			               </div>
+			            </div> 
+			         </div>
 
         <%}%>
     </div>

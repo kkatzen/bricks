@@ -1,3 +1,19 @@
+///Krista sidebar for problem navigations that i copied from the index
+fProto = {
+   addProblem : function (problem) {
+      var link = $("<li></li>").append(
+            $("<a></a>")
+                .attr("href","#")
+                .append(problem.name)
+        );
+        if(problem.phase == 0) {
+            link.css("background-color","lightgray");
+        }
+        link.click(function () { FILLERKRISTA(problem); });
+        $("ul",this.domNode).append(link);
+    }
+}
+
 //Color submission status boxes
 function correct(){
    return $("<span class='glyphicon glyphicon-ok'></span>").css("color", "green").css("margin-right", "5px");
@@ -37,12 +53,138 @@ function getStudentResults(problem) {
     $.post("/user/read/", {}, function(users){
         total = users.length;
         users.forEach(function (user) {
+            console.log("a user");
+            var a = $("<td></td>")
+                .html("<a href='#individual' data-toggle='pill'>" + user.displayName + "</a>")
+                .click(function (event) {
+                    event.preventDefault();
+                    $.post("/user/read/" + user.id, {}, function (user) {
+
+                    //$.post("/user/read/", {id: user.id}, function (user) {
+                        if (!user) {
+                            alert("No user with that id found");
+                            return;
+                        }
+                        curStudent = user;
+                        console.log("help ive been clicked");
+                        getIndividual(user);
+                    });
+                });            
             var student = $("<tr></tr>");
-            student.append("<td>" + user.displayName + "</td>");
+            student.append(a);
             problemCorrect(user, problem, student, users.length);
         });
     });
 }
+
+
+function getStudents() {
+    console.log("getStudents();");
+    $("#studentTable").empty();
+    var tbl = $("<table class='table'><thead><tr><th>Name</th></tr></thead><tbody id='studentsTableBody'></tbody></table>");
+    $("#studentTable").append(tbl);
+    $.post("/user/read/", {}, function(users){
+        total = users.length;
+        users.forEach(function (user) {
+            console.log("a user");
+            var a = $("<td></td>")
+                .html("<a href='#individual' data-toggle='pill'>" + user.displayName + "</a>")
+                .click(function (event) {
+                    event.preventDefault();
+                    $.post("/user/read/" + user.id, {}, function (user) {
+
+                    //$.post("/user/read/", {id: user.id}, function (user) {
+                        if (!user) {
+                            alert("No user with that id found");
+                            return;
+                        }
+                        curStudent = user;
+                        console.log("help ive been clicked");
+                        getIndividual(user);
+                    });
+                });            
+            var student = $("<tr></tr>");
+            student.append(a);
+            $("#studentsTableBody").append(student);
+
+        });
+    });
+}
+
+
+function getIndividual(user) {
+    console.log("getIndividual");
+    if(user == null) {
+        console.log("user null");
+        return;
+    }else{
+        console.log("user not null");
+    }
+    $("#individualName").html(user.displayName);
+    createIndividualProgressBar(user);
+    loadIndividualProblems(user);
+    $("#individualSubmissionList").empty();
+    $("#individualSubmissionList").append("<ul></ul>");
+
+}
+function createIndividualProgressBar(user){
+    $("#individualProgessBar").empty().append("placefiller");
+/*
+    $.post("/submission/read/", {student: user.username}, function(submissions){
+        //student.append("<td>" + submissions.length + "</td>");
+        pointsEarned = 0;
+        pointsAttempted = 0;
+        pointsUnattempted = 0;
+        if(submissions.length == 0){
+            console.log("no submission");
+        } else {
+            var attempted = true;
+            submissions.forEach(function(submission) {
+                    pointsEarned += parseInt(submission.value.correct);
+                    pointsEarned += parseInt(submission.value.style);
+            });
+            console.log("some submission");
+            $("#individualProgessBar").append("pointsEarned = " + pointsEarned);
+        }
+        /*if(results.tried) {
+            if(results.correct) {
+                numfunct++;
+                rsection.append(correct());
+            } else {
+                rsection.append(wrong());
+            } if(results.style) {
+                numstyle++;
+                rsection.append(correct());
+            } else {
+                rsection.append(wrong());
+            }
+        }
+        student.append(rsection);
+        $("#studentResults").append(student);
+        //update quickview progress labels
+        $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
+        $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
+        
+    });*/
+
+}
+
+function loadIndividualProblems(user){
+    console.log("loadIndividualProblems called");
+    $.post("/folder/read", null, function (folders) {
+        numFolders = folders.length;
+        folders.forEach(function (folder) {
+            var button = $("<button></button>")
+            .attr("type","button")
+            .attr("class","btn btn-default dropdown-toggle")
+            .attr("data-toggle","dropdown")
+            .html(folder.name + " <span class='caret'></span>");
+           $("#individualSubmissionList").append("<li>" + folder.name + "</li>");
+        });
+    });
+
+}
+
 
 //check score of student for problem
 function problemCorrect(user, problem, student, totalStudents){
@@ -332,6 +474,29 @@ function addFolder(folder) {
     if(curFolder) {
         $("#problemsfolderDropdown").val(curFolder);
     }
+
+////krista
+
+    var dropdown = $("<li></li>").addClass("dropdown");
+    var toggle = $("<a></a>")
+        .attr("href","#")
+        .attr("data-toggle","dropdown")
+        .addClass("dropdown-toggle")
+        .append(folder.name)
+        .append( $("<b></b>").addClass("caret") );
+    var menu = $("<ul></ul>")
+        .addClass("dropdown-menu")
+        .attr("id","f-" + folder.id);
+    dropdown.append(toggle).append(menu);
+    var fObj = { domNode : dropdown, data : folder };
+    fObj.__proto__ = fProto;
+    allFolders[folder.id] = fObj;
+    $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
+        problems.forEach( function (problem) {
+            fObj.addProblem(problem);
+        });
+    });
+
 }
 
 function loadFolders() {
@@ -364,6 +529,7 @@ function loadUsers() {
 
 window.onload = function () {
     curProblem = null;
+    curStudent = null;
     curFolder = null;
     numProblems = 0;
     numFolders = 0;
@@ -371,6 +537,7 @@ window.onload = function () {
     numstyle = 0; //num solutions with correct style
 	loadFolders();
     loadUsers();
+    getStudents();
     setInterval(
         function() {
             getStudentResults(curProblem);

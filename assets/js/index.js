@@ -103,14 +103,51 @@ function addFolder (folder) {
 function addProbInfo (problem) {
 	$("#initSubmit").removeAttr("disabled");
 	$("#submissions").removeClass("hidden");
+	$("#pointbreakdown").removeClass("hidden");
 	$("#desc-title").empty().append(problem.name);
 	$("#desc-body").empty().append(problem.text);
 	curProblem = problem;
+	$("#availablePtStyle").empty().append(problem.value.style);
+	$("#availablePtCorrect").empty().append(problem.value.correct);
+	var highestStyle = 0;
+	var highestCorrect = 0;
 	$.post("/submission/read/" + problem.id, {}, function (submissions) {
         $("#subs").empty();
+
 		submissions.forEach( function (submission) {
 			addSubmission(submission);
+			console.log(submission.value.style);
+			console.log(submission.value.correct);			
+			if(submission.value.style > highestStyle){
+				highestStyle = submission.value.style;
+			}
+			if(submission.value.correct > highestCorrect){
+				highestCorrect = submission.value.correct;
+			}
+			console.log("highestCorrect" + highestCorrect);
+			console.log("highestStyle" + highestStyle);			
+
 		});
+		$("#highestPtCorrect").empty().append(highestCorrect);
+		$("#highestPtStyle").empty().append(highestStyle);
+		$("#correctCheck").empty();
+		$("#styleCheck").empty();
+
+		//append checks xs if they have attempted
+		if(submissions.length > 0){
+			if(problem.value.correct == highestCorrect){
+				$("#correctCheck").append(correct("8px"));
+			}else {
+	        	$("#correctCheck").append(wrong("8px"));
+			}	
+			if(problem.value.style == highestStyle){
+				$("#styleCheck").append(correct("8px"));
+			}else {
+	        	$("#styleCheck").append(wrong("8px"));
+			}
+		}
+				
+		
 	});
 }
 
@@ -154,7 +191,7 @@ function foldersReload() {
 		});
 	});
     if(curProblem) {
-        addProbInfo(problem);
+        addProbInfo(curProblem);
     }
 }
 
@@ -201,26 +238,27 @@ window.onload = function () {
 		}
 	});
 	var setErrorMsg = function (msg) {
-		$("#errors").removeClass("hidden");
-		$("#errMessage").empty();
-		$("#errMessage").append(msg);
+		//$("#errors").removeClass("hidden");
+		$("#console").empty();
+		$("#console").append(msg);
 	};
 	$("#test").click(function () {
 		var code = editor.getValue();
-		$("#errors").removeClass("hidden");
-		$("#errMessage").empty();
+		//$("#errors").removeClass("hidden");
+		$("#console").empty();
 		try {
 			eval(code);
-			$("#errMessage").append("No error reports");
+			$("#console").append("No error reports");
 		} catch (e) {
 			//alert(e);
-			$("#errMessage").append(e);
+			$("#console").append(e);
 		}
 	});
 	$("#submit").click(function () {
 		if (curProblem == null) {
 			alert("You must select a problem before submitting");
 		} else {
+			$("#console").empty();
 			var problem = curProblem.id;
 			var code = editor.getValue();
 			var AST = acorn.parse(code);    // return an abstract syntax tree structure
@@ -235,3 +273,4 @@ window.onload = function () {
 		}
 	});
 };
+
