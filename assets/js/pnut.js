@@ -671,6 +671,7 @@ var pnut = (function () {
     return arr;   
   } 
 
+
 //------------------------------------------------------------------------
 // 3-c. calculate total number of undeclared objects 
 //      that get used in a program
@@ -681,6 +682,7 @@ var pnut = (function () {
   function numUndecObjs(ast) {
     return 0;
   } 
+
 
 //------------------------------------------------------------------------
 // 3-d. list all undeclared objects that get used in a program
@@ -693,6 +695,7 @@ var pnut = (function () {
     return [];
   } 
 
+
 //------------------------------------------------------------------------
 // 3-e. calculate total number of objects that are used in a program
 //      ex:
@@ -702,6 +705,7 @@ var pnut = (function () {
   function numObjsUsed(ast) {
     return 0;
   } 
+
 
 //------------------------------------------------------------------------
 // 3-f. list all objecs that are used in a program
@@ -874,8 +878,9 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function numLocLevForLoops(ast) {
     var count = 0;
+    var nst = ast.body.length;
     var nd;
-    for (var m in ast.body) {
+    for (var m=0; m<nst; m++) {
       nd = ast.body[m];
       count = (nd.type=="FunctionDeclaration") ? count+numForLoops(nd.body):count;
     }
@@ -898,7 +903,7 @@ var pnut = (function () {
   function numForLoops(nd) {
     var count = 0;
     var snd;
-    for(var m in nd.body) {
+    for(var m=0; m<nd.body.length; m++) {
       snd = nd.body[m];
       count = (snd.type=="ForStatement") ? numForLoops(snd.body)+1:count;
     } 
@@ -914,7 +919,7 @@ var pnut = (function () {
   function numNestedForLoops(nd) {
     var count = 0;
     var snd;
-    for(var m in nd.body) {
+    for(var m=0; m<nd.body.length; m++) {
       snd = nd.body[m];
       count = (snd.type=="ForStatement" && numForLoops(snd.body)>0) ? count+1:count;
     }
@@ -929,7 +934,7 @@ var pnut = (function () {
 /*    a. numDecFuncs(ast)               ==> integer >= 0          */
 /*    b. numForLoopsInAllFunctions(ast) ==> integer >= 0          */
 /*    c. numForLoopsInAProgram(ast)     ==> integer >= 0          */
-/*    d. listInvalidFuncCallExps(ast)   ==> [ string ]            */
+/*    d. listInvalidCallExps(ast)       ==> [ string ]            */
 /*    e. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
 /*    f. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
 /*    g. isAFuncPassedByReference(ast)  ==> boolean ? true:false  */
@@ -946,52 +951,32 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
-// 6-b. list all declared functions in global level with occuring number:
+// 6-b. list all declared functions in global level:
 //      ex:
 //        function a() {}
-//        function b(x) {}
-//        function b(x, y) {}
 //        var a = function() {}
 //------------------------------------------------------------------------
   function listDecFuncs(ast) {
-    return DictDecFuncs(ast).keys; 
-  }
-
-//------------------------------------------------------------------------
-// private method:
-// create a dictionary to map funcionts with their occurrence order.
-//------------------------------------------------------------------------
-  function DictDecFuncs(ast) {
-    var dict  = new HashMap();
-    var index = 0;
-    var nd, name;
-    for(var m in ast.body) {
+    var list = [];
+    var nd;
+    for(var m=0; m<ast.body.length; m++) {
       nd = ast.body[m];
       switch(nd.type) {
         case "FunctionDeclaration":
-          if(nd.params.length<2) {
-            name = "Function " + nd.id.name + " ("+ nd.params.length+" param)";
-          } else {
-            name = "Function " + nd.id.name + " ("+ nd.params.length+" params)";
-          }
-          dict.setItem(name, index);
-          index += 1;
+          list.push("Function " + nd.id.name + " ()");
           break;
         case "VariableDeclaration":
           var decs = nd.declarations;
-          for(var n in decs) {
-            if(decs[n].init.type=="FunctionExpression") {
-              name = "Function Variable "+ decs[n].id.name;
-              dict.setItem(name, index);
-              index += 1;
+          for(var m=0; m<decs.length; m++) {
+            if(decs[m].init.type=="FunctionExpression") {
+              list.push("Function "+ decs[m].id.name + " ()");
             }
           }
           break;
       }
     }
-    return dict;  
+    return list;  
   }
-
 
 //------------------------------------------------------------------------
 // 6-c. exam call expressions that all call declared functions in which 
@@ -1006,9 +991,8 @@ var pnut = (function () {
 //------------------------------------------------------------------------
   function areCallExpsAllValid(ast) {
     var check = false;
-    var nd;
-    for(var m in ast.body) {
-      nd = ast.body[m];
+    for(var m=0; m<ast.body.length; m++) {
+      var nd = ast.body[m];
       check  = isFuncCall(nd);
     }
     return check;
@@ -1028,12 +1012,13 @@ var pnut = (function () {
       case "VariableDeclaration":
         if (nd.declarations[0].init.type=="CallExpression") return true;
         break;
+      default: return false;
     }
     return false; 
   }
 
 //------------------------------------------------------------------------
-// 6-d. list invalid function call expressions in which a call expression calls 
+// 6-d. list invalid call expressions in which a call expression calls 
 //      an undeclared function
 //      ex:
 //        CORRECT: function myMain() { return 5; }
@@ -1043,34 +1028,8 @@ var pnut = (function () {
 //                 2. foo()
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
-  function listInvalidFuncCallExps(ast) {
-    var dict = DictDecFuncs(ast);
-    var list = [];
-    var node;
-    for(m in ast.body) {
-      node = ast.body[m];
+  function listInvalidCallExps(ast) {
 
-      if(node.type=="ExpressionStatement"       && 
-        node.expression.type=="CallExpression"  &&
-        node.expression.callee.type=="Identifier") {
-        var name = node.expression.callee.name;
-        var argnum = node.expression.arguments;
-        var func1;
-        var func2 = "Function Variable "+ name;
-
-        if(argnum<2) {
-          func1 = "Function " + name + " (" + argnum+ " param)";
-        } else {
-          func1 = "Function " + name + " (" + argnum+ " params)";
-        }
-
-
-        if(!dict.hasItem(func1) && !dict.hasItem(func2)) {
-          list.push(func1);
-        }
-      }
-    }
-    return list;
   }
 
 //------------------------------------------------------------------------
