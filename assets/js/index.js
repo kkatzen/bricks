@@ -55,7 +55,10 @@ fProto = {
 }
 */
 
-function addProblemToAccordian(problem){
+function addProblemToAccordian(problem,folderName){
+	var earnedPointsDiv = "#earned-" +folderName;
+	var availPointsDiv = "#avail-" +folderName;
+	var checkDiv = "#check-" +folderName;
 	console.log("addProblemToAccordian()");
 	var maxScore = 0;
 	var probMax = Number(problem.value.correct) + Number(problem.value.style);
@@ -92,6 +95,22 @@ function addProblemToAccordian(problem){
 			}
 			var probGrade = $("<span class='badge'>" + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
 			$("a", link).append(probGrade);
+
+			var currentEarned = $(earnedPointsDiv).text();
+			var availablePoints = $(availPointsDiv).text();
+			console.log("currentEarnedPre" +currentEarned);
+			console.log("maxScore" +maxScore);
+			currentEarned = Number(currentEarned);
+			currentEarned = currentEarned + maxScore;
+			console.log("currentEarnedPost" +currentEarned);
+			$(earnedPointsDiv).empty().append(currentEarned);
+			console.log("check a" + availablePoints + " e" + currentEarned);
+
+			if(availablePoints == currentEarned){
+				console.log("check is yes");
+				$(checkDiv).append(correct("8px"));
+			}
+
 		}
 		$("#grade").empty().append(studScore + "/" + totScore);
 		});
@@ -140,21 +159,26 @@ function addFolder (folder) {
 	*/
 	var accordianFolderName = "accoridanFolder" + folder.id;
 	var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
-	var accordian = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + "</h4></div></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
+	var accordian = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
 	$("#folderAccordion").append(accordian);
 	var accordianFolderBody = '';
 	$("#" + accordianFolderName).append(accordianFolderBody);
-			    
+	var folderScore = 0;
+	$("#avail-" + accordianFolderName).empty().append(folderScore);
 	//var fObj = { domNode : dropdown, data : folder };
 	//fObj.__proto__ = fProto;
 	//allFolders[folder.id] = fObj;
+	$("#" + accordianFolderName).empty();
 	$.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
 		problems.forEach( function (problem) {
 			//fObj.addProblem(problem);
-			var link = addProblemToAccordian(problem);
+			var link = addProblemToAccordian(problem, accordianFolderName);
+			folderScore += parseInt(problem.value.style) + parseInt(problem.value.correct);
 			$("#" + accordianFolderName).append(link);
 		});
+		$("#avail-" + accordianFolderName).empty().append(folderScore);
 	});
+
 }
 
 
@@ -240,7 +264,7 @@ function addSubmission(submission) {
 }
 
 function foldersReload() {
-    $("#folders").empty();
+    $("#folderAccordion").empty();
 	$.post("/folder/read", {}, function (folders) {
         studScore = 0;
         totScore = 0;
@@ -270,6 +294,7 @@ window.onload = function () {
         },
         120000 /* 120000ms = 2 min*/
     );
+    $("#folderAccordion").empty();
 	$.post("/folder/read", {}, function (folders) {
 		folders.forEach( function (folder) {
 			addFolder(folder);
