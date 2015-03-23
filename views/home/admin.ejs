@@ -38,10 +38,18 @@
 		*/
     };
 </script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
 <script src="/js/admin.js"></script>
 <style>
+  #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+  #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; }
+  #sortable li span { position: absolute; margin-left: -1.3em; }
+
 #navigationPanel {
-	margin-top: 20px;s
+	margin-top: 20px;
   padding: 0px;
 }
 form > button {
@@ -74,36 +82,28 @@ form > button {
       <a class="navbar-brand" href="#admin" data-toggle="pill">Manage</a>
       <a class="navbar-brand" href="#">Progress*</a>
     </div>
+    <div class="navbar-right">
+              <p class="navbar-text"><%= req.user.displayName %></p>
+              <form class="navbar-form navbar-right">
+                  <a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
+              </form>
+          </div>
   </div><!-- /.container-fluid -->
 </nav>
 <div class="container-fluid ">
 <% if (req.isAuthenticated() && req.user.admin) {%>
     <!--Navigation starts-->
 	<div id="navigationPanel" class="panel panel-default col-md-2  ">
-    <div id="folderBar" >
+    <button id="sortFolders">Sort Folders</button>
+    <ul id="folderBar" >
          <!-- folder dropdowns inserted here -->
-    </div>
+    </ul>
   </div>
   <!--Navigation ends-->
   <!--Content starts-->
 	<div class="tab-content  col-md-10 ">
-    <!--Header starts-->
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-          <div class="navbar-header">
-              <a class="navbar-brand" href="#">Admin Page</a>
-          </div>
-          <div>
-          <div class="navbar-right">
-              <p class="navbar-text"><%= req.user.displayName %></p>
-              <form class="navbar-form navbar-right">
-                  <a href="/login/logout" id="logout" class="btn btn-default">Logout</a>
-              </form>
-          </div>
-    </nav>
-    <!--Header ends-->
        <!--questions section starts-->
-		<div class="tab-pane active" id="questions">
+		      <div class="tab-pane active" id="questions">
             <!--<div class="panel panel-default">
                 <ul class="nav nav-pills">
                     <li><a href="#modifyFolders" data-toggle="pill">Modify Folders</a></li>
@@ -400,3 +400,4 @@ form > button {
        <p>You must be an admin to view this page</p>
     <%}%>
 </div>
+

@@ -365,6 +365,6 @@ window.onload = function () {
 	        $('.folderCollapse').collapse('show');
 	    }
 	    return false;
-	});
+	});	
 };
 
