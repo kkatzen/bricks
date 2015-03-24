@@ -34,12 +34,6 @@ var pnut = (function () {
   function collectStructureStyleFacts (ast) {
     var dObj      = {};
 
-    dObj.nTFD     = numTopFuncDecls(ast);
-    dObj.nTFC     = numTopFuncCalls(ast);
-    dObj.nBGD     = numBadGlobalDecls(ast);
-    dObj.nBGU     = numBadGlobalUses(ast);
-    dObj.uBGV     = usesBadGlobalVars(ast);
-
     /* 1. Style Grading for Declaration and Use of Variable   */
     dObj.nDV      = numDecVars(ast);
     dObj.lDV      = listDecVars(ast);
@@ -77,27 +71,19 @@ var pnut = (function () {
     dObj.nFLinAP  = numForLoopsInAProgram(ast);
 
     /* 6. Style Grading for Declaration and Use of Function   */
+    dObj.nDF      = numDecFuncs(ast);
+    dObj.lDF      = listDecFuncs(ast);
+    dObj.areCEAV  = areCallExpsAllValid(ast);
+    dObj.lIFCE    = listInvalidFuncCallExps(ast);
+    dObj.areDFC   = areDecFuncsCalled(ast);
+    dObj.areDFCO  = areDecFuncsCalledOnce(ast);
+    dObj.isADFPBR = isADecFuncPassedByRef(ast);
 
-
-
-
-    // Improved style grading features
-    dObj.nGFL     = numGlobalForLoops(ast);//x
-    dObj.nGWL     = numGlobalWhileLoops(ast);//x
-    dObj.nFLIF    = numForLoopsInAllFuncDecls(ast);
-    dObj.nWLIF    = numWhileLoopsInAllFuncDecls(ast);
-    dObj.nNFL     = numNestedForLoops(ast);
-    dObj.nNWL     = numNestedWhileLoops(ast);
-    dObj.isAFD1C  = isAllFuncDeclsPlusOneCall(ast);
-    dObj.isPBR    = isFunctionCallPassByReference(ast);
-    dObj.nGVD     = numGlobalVariableDeclared(ast);
-    dObj.nVODF    = numValidObjectDeclaredInAllFunctions(ast);
-    dObj.nDOU     = numDeclaredObjectsUsed(ast);
-    dObj.isRC     = isRecuriveFunction(ast);
+    /* 7. Style Grading for Recursive Function                  */
+    dObj.isRF      = isRecuriveFunction(ast);
 
     return dObj;
   }
-
 
 
 //------------------------------------------------------------------------
@@ -107,7 +93,6 @@ var pnut = (function () {
   function styleGrading(ast) {
 
   }
-
 
 
 /**********************************************************/
@@ -671,7 +656,6 @@ var pnut = (function () {
     return arr;   
   } 
 
-
 //------------------------------------------------------------------------
 // 3-c. calculate total number of undeclared objects 
 //      that get used in a program
@@ -682,7 +666,6 @@ var pnut = (function () {
   function numUndecObjs(ast) {
     return 0;
   } 
-
 
 //------------------------------------------------------------------------
 // 3-d. list all undeclared objects that get used in a program
@@ -695,7 +678,6 @@ var pnut = (function () {
     return [];
   } 
 
-
 //------------------------------------------------------------------------
 // 3-e. calculate total number of objects that are used in a program
 //      ex:
@@ -705,7 +687,6 @@ var pnut = (function () {
   function numObjsUsed(ast) {
     return 0;
   } 
-
 
 //------------------------------------------------------------------------
 // 3-f. list all objecs that are used in a program
@@ -804,7 +785,7 @@ var pnut = (function () {
   function numLocLevWhileLoops(ast) {
     var count = 0;
     var nd;
-    for (var m=0; m<ast.body.length; m++) {
+    for(m in ast.body) {
       nd = ast.body[m];
       count = (nd.type=="WhileStatement") ? count+numWhileLoops(nd.body):count;
     }
@@ -833,7 +814,7 @@ var pnut = (function () {
   function numWhileLoops(nd) {
     var count = 0;
     var snd;
-    for(var m=0; m<nd.body.length; m++) {
+    for(m in nd.body) {
       snd = nd.body[m];
       count = (snd.type=="WhileStatement") ? numWhileLoops(snd.body)+1:count;
     } 
@@ -848,7 +829,7 @@ var pnut = (function () {
   function numNestedWhileLoops(nd) {
     var count = 0;
     var snd;
-    for(var m=0; m<nd.body.length; m++) {
+    for(m in nd.body) {
       snd = nd.body[m];
       count = (snd.type=="WhileStatement" && numWhileLoops(snd.body)>0) ? count+1:count;
     }
@@ -878,9 +859,8 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function numLocLevForLoops(ast) {
     var count = 0;
-    var nst = ast.body.length;
     var nd;
-    for (var m=0; m<nst; m++) {
+    for(m in ast.body) {
       nd = ast.body[m];
       count = (nd.type=="FunctionDeclaration") ? count+numForLoops(nd.body):count;
     }
@@ -903,7 +883,7 @@ var pnut = (function () {
   function numForLoops(nd) {
     var count = 0;
     var snd;
-    for(var m=0; m<nd.body.length; m++) {
+    for(m in nd.body) {
       snd = nd.body[m];
       count = (snd.type=="ForStatement") ? numForLoops(snd.body)+1:count;
     } 
@@ -919,7 +899,7 @@ var pnut = (function () {
   function numNestedForLoops(nd) {
     var count = 0;
     var snd;
-    for(var m=0; m<nd.body.length; m++) {
+    for(m in nd.body) {
       snd = nd.body[m];
       count = (snd.type=="ForStatement" && numForLoops(snd.body)>0) ? count+1:count;
     }
@@ -932,12 +912,12 @@ var pnut = (function () {
 /******************************************************************/
 /* 6. Style Grading for Declaration and Use of Function           */
 /*    a. numDecFuncs(ast)               ==> integer >= 0          */
-/*    b. numForLoopsInAllFunctions(ast) ==> integer >= 0          */
-/*    c. numForLoopsInAProgram(ast)     ==> integer >= 0          */
-/*    d. listInvalidCallExps(ast)       ==> [ string ]            */
+/*    b. listDecFuncs(ast)              ==> [ string ]            */
+/*    c. areCallExpsAllValid(ast)       ==> integer >= 0          */
+/*    d. listInvalidFuncCallExps(ast)   ==> [ string ]            */
 /*    e. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
 /*    f. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
-/*    g. isAFuncPassedByReference(ast)  ==> boolean ? true:false  */
+/*    g. isADecFuncPassedByRef(ast)     ==> boolean ? true:false  */
 /******************************************************************/
 
 //------------------------------------------------------------------------
@@ -951,31 +931,15 @@ var pnut = (function () {
   }
 
 //------------------------------------------------------------------------
-// 6-b. list all declared functions in global level:
+// 6-b. list all declared functions in global level with occuring number:
 //      ex:
 //        function a() {}
+//        function b(x) {}
+//        function b(x, y) {}
 //        var a = function() {}
 //------------------------------------------------------------------------
   function listDecFuncs(ast) {
-    var list = [];
-    var nd;
-    for(var m=0; m<ast.body.length; m++) {
-      nd = ast.body[m];
-      switch(nd.type) {
-        case "FunctionDeclaration":
-          list.push("Function " + nd.id.name + " ()");
-          break;
-        case "VariableDeclaration":
-          var decs = nd.declarations;
-          for(var m=0; m<decs.length; m++) {
-            if(decs[m].init.type=="FunctionExpression") {
-              list.push("Function "+ decs[m].id.name + " ()");
-            }
-          }
-          break;
-      }
-    }
-    return list;  
+    return DictDecFuncs(ast).keys; 
   }
 
 //------------------------------------------------------------------------
@@ -986,50 +950,40 @@ var pnut = (function () {
 //                 myMain();
 //        WRONG:   1. function myMain() { return 5; }
 //                    foo();
-//                 2. foo()
+//                 2. foo();
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
   function areCallExpsAllValid(ast) {
-    var check = false;
-    for(var m=0; m<ast.body.length; m++) {
-      var nd = ast.body[m];
-      check  = isFuncCall(nd);
-    }
-    return check;
-  }
-
-
-  function isAFuncCall(nd) { 
-    switch (nd.type) {
-      case "ExpressionStatement":
-        exp = nd.expression;
-        if (exp.type=="CallExpression") { return true; }
-        if (exp.type=="AssignmentExpression" && 
-          exp.right.type=="CallExpression") {
-  	      return true;
-        }
-        break;
-      case "VariableDeclaration":
-        if (nd.declarations[0].init.type=="CallExpression") return true;
-        break;
-      default: return false;
-    }
-    return false; 
+    return listInvalidFuncCallExps(ast).length>0;
   }
 
 //------------------------------------------------------------------------
-// 6-d. list invalid call expressions in which a call expression calls 
+// 6-d. list invalid function call expressions in which a call expression calls 
 //      an undeclared function
 //      ex:
 //        CORRECT: function myMain() { return 5; }
 //                 myMain();
 //        WRONG:   1. function myMain() { return 5; }
 //                    foo();
-//                 2. foo()
+//                 2. foo();
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
-  function listInvalidCallExps(ast) {
+  function listInvalidFuncCallExps(ast) {
+    var decs  = DictDecFuncs(ast);
+    var calls = DictFuncCalls(ast);
+    var exps  = decs.keys;
+    var list  = [];
 
+    for(m in exps) {
+      if(decs.getItem(exps[m])==undefined) {
+        list.push(exps[m]);
+      } 
+      else if(decs.getItem(exps[m])>calls.getItem(exps[m])){
+        list.push(exps[m]);
+      }
+    }
+
+    return list;
   }
 
 //------------------------------------------------------------------------
@@ -1041,7 +995,16 @@ var pnut = (function () {
 //          foo(); foo();
 //------------------------------------------------------------------------
   function areDecFuncsCalled(ast) {
+    var dict = dictFuncsAndCallNum(ast);
+    var nums = dict.values; // num of each function gets called
 
+    for(m in nums) {
+      if(nums[m]==0) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 
@@ -1052,64 +1015,18 @@ var pnut = (function () {
 //          bar();
 //          foo();
 //------------------------------------------------------------------------
-  function areDecFuncsCalledOnce (ast) {
-      var numFuncDecls    = 0;                      // num of functiona get declared
-      var funcName        = []; 
-      var funcNameCallNum = [];                     // match the index of funcName
-      var expName         = [];
-      var funcCallOnce    = true;
-      var name;
+  function areDecFuncsCalledOnce(ast) {
+    var dict = dictFuncsAndCallNum(ast);
+    var nums = dict.values; // num of each function gets called
 
-      for(var s=0; s<ast.body.length; s++) {
-        switch (ast.body[s].type) {
-          case "FunctionDeclaration":
-            // cool this is ok, so count and just keep going
-            name = ast.body[s].id.name;
-            if(numFuncDecls == 0) { 
-              funcName.push(name); 
-              funcNameCallNum.push(0);
-            } else {
-              for(var i=0; i<numFuncDecls; i++) {
-                if(name == funcName[i]) {
-                  alert("Warn: You are redefining an existing function " + funcName[i]);
-                } else {
-                  funcName.push(name); 
-                  funcNameCallNum.push(0);          
-                }
-              }
-            }
-
-            numFuncDecls++;
-            break;
-          case "VariableDeclaration":
-             // check if a var declaration also call a function 
-            if(ast.body[s].declarations[0].init.type != "FunctionExpression") {
-              return false;
-            } 
-            break;
-          case "ExpressionStatement":
-            if(numFuncDecls > 0) {
-              // IF statement works only for one function declaration
-              for(var i=0; i<numFuncDecls; i++) {
-                if(ast.body[s].expression.callee.name == funcName[i]) {
-                  funcNameCallNum[i]++;
-                }            
-              }
-            }  
-            break;
-        } 
-      } 
-
-      // check for single call to each declared function
-      for(var i=0; i<numFuncDecls; i++) {
-        if(funcNameCallNum[i]==0 || funcNameCallNum>1) {
-          funcCallOnce = false;
-        }
+    for(m in nums) {
+      if(nums[m]!=1) {
+        return false;
       }
-      console.log("is all functions declared and called once: " + funcCallOnce);
-      return funcCallOnce;
-  }
+    }
 
+    return true;
+  }
 
 
 //------------------------------------------------------------------------
@@ -1117,20 +1034,138 @@ var pnut = (function () {
 //      ex: CORRECT: function bar(x) { return x; }
 //          WRONG:   funciton bar()  { return 5; }
 //------------------------------------------------------------------------
-  function isAFuncPassedByReference(ast) {
-    var func;
-    for(var i in ast.body) {
-      func = ast.body[i];
-      if(func.type=="ExpressionStatement"   &&
-          func.expression.arguments!=null   &&
-          func.expression.arguments.name!=null) {
-        return true; 
+  function isADecFuncPassedByRef(ast) {
+    var nd;
+
+    for(m in ast.body) {
+      nd = ast.body[m];
+      if(nd.type=="FunctionDeclaration" &&
+        nd.params.length>0) {
+        return true;
       }
     }
 
     return false;
   }
 
+//------------------------------------------------------------------------
+// private function:
+// create a dictionary to map funcionts with their occurrence order.
+//------------------------------------------------------------------------
+  function DictDecFuncs(ast) {
+    var dict  = new HashMap();
+    var nd, name;
+    for(m in ast.body) {
+      nd = ast.body[m];
+      switch(nd.type) {
+        case "FunctionDeclaration":
+          if(nd.params.length<2) {
+            name = "Function " + nd.id.name + " ("+ nd.params.length+" param)";
+          } else {
+            name = "Function " + nd.id.name + " ("+ nd.params.length+" params)";
+          }
+
+          if(calls.getItem(name)==undefined) {
+            calls.setItem(name, nd.start);
+          }
+          break;
+        case "VariableDeclaration":
+          var decs = nd.declarations;
+          for(n in decs) {
+            if(decs[n].init!=null && decs[n].init.type="FunctionExpression") {
+              if(decs[n].init.params.length<2) {
+                name = "Function " + decs[n].id.name + " ("+ decs[n].init.params.length +" param)";
+              } else {
+                name = "Function " + decs[n].id.name + " ("+ decs[n].init.params.length +" params)";
+              }
+
+              if(calls.getItem(name)==undefined) {
+                calls.setItem(name, nd.start);
+              }
+            }
+          }
+          break;
+      }
+    }
+    return dict;  
+  }
+
+//------------------------------------------------------------------------
+// private function:
+// create a dictionary to map function calls with their occurrence order.
+//------------------------------------------------------------------------
+  function DictFuncCalls(ast) {
+    var calls = new HashMap();
+    var node, dec, name, exp;
+
+    for(m in ast.body) {
+      node = ast.body[m];
+
+      switch(node.type) {
+        case "ExpressionStatement":
+          for(n in node.declarations) {
+            dec = node.declarations[n];
+            if(dec.init!=null && dec.init.type="CallExpression") {
+              if(dec.init.arguments.length<2) {
+                name = "Function " + dec.init.callee.name + 
+                       " ("+ dec.init.arguments.length+" param)";
+              } else {
+                name = "Function " + dec.init.callee.name + 
+                       " ("+ dec.init.arguments.length+" params)";
+              }
+
+              if(calls.getItem(name)==undefined) {
+                calls.setItem(name, nd.start);
+              }
+            }
+          }
+          break;
+        case "VariableDeclaration":
+          exp = node.expression;
+          if(exp.type=="CallExpression") {
+            if(exp.arguments.length<2) {
+              name = "Function " + exp.callee.name + 
+                     " ("+ exp.arguments.length+" param)";
+            } else {
+              name = "Function " + exp.callee.name + 
+                     " ("+ exp.arguments.length+" params)";
+            }
+
+            if(calls.getItem(name)==undefined) {
+              calls.setItem(name, nd.start);
+            }
+          }
+          break;
+      }
+    }
+    return calls;
+  }
+
+//------------------------------------------------------------------------
+// private function:
+// create a dictionary to map declared functions with the number 
+// how many times they get called in a program.
+//------------------------------------------------------------------------
+  function dictDecFuncsAndCallNum (ast) {
+    var funcs = DictDecFuncs(ast);
+    var calls = DictFuncCalls(ast);
+    var dict  = new HashMap();
+    var exp;
+
+    for(m in funcs.keys) {
+      dict.setItem(funcs.keys[m], 0);
+    }
+
+    for(m in calls.keys) {
+      exp = calls.keys[m];
+
+      if(dict.getItem(exp)!=undefined) {
+        dict.setItem(exp, dict.getItem(exp)+1);
+      }
+    }
+
+    return dict;
+  }
 
 // //------------------------------------------------------------------------
 // // calculate the number of valid global objects declaration
@@ -1316,7 +1351,6 @@ var pnut = (function () {
     return false;
   }
 
-
 //------------------------------------------------------------------------------
 // private function:
 // check a funciton's returnstatement if it is a call of the function or not
@@ -1413,30 +1447,30 @@ var pnut = (function () {
   return {
 
     /* 1. Style Grading for Declaration and Use of Variable   */
-    numDecVars    : numDecVars,
-    listDecVars   : listDecVars,
-    numUndecVars  : numUndecVars,
-    listUndecVars : listUndecVars,
-    listVarsUsed  : listVarsUsed,
-    isAnyFuncVars : isAnyFuncVars,
-    listFuncVars  : listFuncVars,
+    numDecVars                : numDecVars,
+    listDecVars               : listDecVars,
+    numUndecVars              : numUndecVars,
+    listUndecVars             : listUndecVars,
+    listVarsUsed              : listVarsUsed,
+    isAnyFuncVars             : isAnyFuncVars,
+    listFuncVars              : listFuncVars,
 
     /* 2. Style Grading for Declaration and Use of Array      */
-    numDecArrs    : numDecArrs,
-    listDecArrs   : listDecArrs,
-    numUndecArrs  : numUndecArrs,
-    listUndecArrs : listUndecArrs,
-    numArrsUsed   : numArrsUsed,
-    listArrsUsed  : listArrsUsed,
+    numDecArrs                : numDecArrs,
+    listDecArrs               : listDecArrs,
+    numUndecArrs              : numUndecArrs,
+    listUndecArrs             : listUndecArrs,
+    numArrsUsed               : numArrsUsed,
+    listArrsUsed              : listArrsUsed,
 
     /* 3. Style Grading for Declaration and Use of Object     */
-    numDecObjs          : numDecObjs,
-    listDecObjs         : listDecObjs,
-    numUndecObjs        : numUndecObjs,
-    listUndecObjs       : listUndecObjs,
-    numObjsUsed         : numObjsUsed,
-    listObjsUsed        : listObjsUsed,
-    isAnyFuncReturnObj  : isAnyFuncReturnObj,
+    numDecObjs                : numDecObjs,
+    listDecObjs               : listDecObjs,
+    numUndecObjs              : numUndecObjs,
+    listUndecObjs             : listUndecObjs,
+    numObjsUsed               : numObjsUsed,
+    listObjsUsed              : listObjsUsed,
+    isAnyFuncReturnObj        : isAnyFuncReturnObj,
 
     /* 4. Style Grading for Use of While Loop                 */
     numGloLevWhileLoops       : numGloLevWhileLoops,
@@ -1444,37 +1478,22 @@ var pnut = (function () {
     numWhileLoopsInAProgram   : numWhileLoopsInAProgram,
 
     /* 5. Style Grading for Use of For Loop                   */
-    numGloLevForLoops       : numGloLevForLoops,
-    numLocLevForLoops       : numLocLevForLoops,
-    numForLoopsInAProgram   : numForLoopsInAProgram,
+    numGloLevForLoops         : numGloLevForLoops,
+    numLocLevForLoops         : numLocLevForLoops,
+    numForLoopsInAProgram     : numForLoopsInAProgram,
 
+    /* 6. Style Grading for Declaration and Use of Function   */
+    numDecFuncs               : numDecFuncs,
+    listDecFuncs              : listDecFuncs,
+    areCallExpsAllValid       : areCallExpsAllValid,
+    listInvalidFuncCallExps   : listInvalidFuncCallExps,
+    areDecFuncsCalled         : areDecFuncsCalled,
+    areDecFuncsCalledOnce     : areDecFuncsCalledOnce,
+    isADecFuncPassedByRef     : isADecFuncPassedByRef,
 
-    collectStructureStyleFacts: collectStructureStyleFacts,
-    numBadGlobalDecls: numBadGlobalDecls, 
-    numBadGlobalUses: numBadGlobalUses,
-    usesBadGlobalVars: usesBadGlobalVars,
-    numWhileLoops: numWhileLoops, 
-    numWhileNestLevels: numWhileNestLevels, 
-    numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls,
-    numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls,
-    numTopFuncDecls: numTopFuncDecls, 
-    numTopFuncCalls: numTopFuncCalls, 
-    listTopLevelTypes: listTopLevelTypes, 
+    /* 7. Style Grading for Recursive Function                  */
+    isRecuriveFunction        : isRecuriveFunction
 
-
-    // modified features return
-    numGlobalForLoops: numGlobalForLoops,
-    numGlobalWhileLoops: numGlobalWhileLoops,
-    numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls,
-    numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls,
-    numNestedForLoops: numNestedForLoops,
-    numNestedWhileLoops: numNestedWhileLoops,
-    isAllFuncDeclsPlusOneCall: isAllFuncDeclsPlusOneCall,
-    isFunctionCallPassByReference: isFunctionCallPassByReference, 
-    numGlobalVariableDeclared: numGlobalVariableDeclared,
-    numValidObjectDeclaredInAllFunctions: numValidObjectDeclaredInAllFunctions,
-    numDeclaredObjectsUsed: numDeclaredObjectsUsed,
-    isRecuriveFunction: isRecuriveFunction
   }
 
 })  // end anonymous function declaration 
