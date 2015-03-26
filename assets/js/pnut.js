@@ -31,6 +31,7 @@ var pnut = (function () {
 //   - data object will be sent to the server for analysis/grading
 //------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 function collectStructureStyleFacts (ast) {
   var dObj      = {};
@@ -76,6 +77,21 @@ function collectStructureStyleFacts (ast) {
 
     /* 1. Style Grading for Declaration and Use of Variable   */
 >>>>>>> Stashed changes
+=======
+function collectStructureStyleFacts (ast) {
+  var dObj      = {};
+
+/******************************************************************/
+/* 1. Style Grading for Declaration and Use of Variable           */
+/*    a. numDecVars(ast)      ==> integer >= 0                    */
+/*    b. listDecVars(ast)     ==> [ string ]                      */
+/*    c. numUndecVars(ast)    ==> integer >= 0                    */
+/*    d. listUndecVars(ast)   ==> [ string ]                      */
+/*    e. listVarsUsed(ast)    ==> [ string ]                      */
+/*    f. isAnyFuncVar(ast)    ==> boolean ? true:false            */
+/*    g. listFuncVars(ast)    ==> [ string]                       */
+/******************************************************************/
+>>>>>>> myx
     dObj.nDV      = numDecVars(ast);
     dObj.lDV      = listDecVars(ast);
     dObj.nUDV     = numUndecVars(ast);
@@ -100,6 +116,7 @@ function collectStructureStyleFacts (ast) {
     dObj.nAU      = numArrsUsed(ast);
     dObj.lAU      = listArrsUsed(ast);
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
     /* 3. Style Grading for Declaration and Use of Object     */
@@ -167,11 +184,14 @@ function collectStructureStyleFacts (ast) {
 }
 >>>>>>> parent of 0f52c73... Merge branch 'myx'
 >>>>>>> Stashed changes
+=======
+>>>>>>> myx
 
   return dObj;
 }
 
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
 //------------------------------------------------------------------------
@@ -181,6 +201,8 @@ function collectStructureStyleFacts (ast) {
 //------------------------------------------------------------------------
   function styleGrading(ast) {
 >>>>>>> Stashed changes
+=======
+>>>>>>> myx
 
 
 
@@ -197,6 +219,15 @@ function collectStructureStyleFacts (ast) {
 
 //------------------------------------------------------------------------
 // 1-a. calculate total number of declared variables in a program
+//      ex: function bar() {
+//            var d = 0;
+//    
+//            for(var i=0; i<10; i++) {
+//              while(d==0) {
+//                var d=1;
+//              }
+//            }
+//          }
 //------------------------------------------------------------------------  
   function numDecVars(ast) {
     // console.log("numDecVars: "+listDecVars(ast).length);
@@ -335,7 +366,7 @@ function numBadGlobalUses(ast) {
 
     // check for the use of undelcared vars
     for(m in usedVars) { 
-      if(typeof map.getItem(usedVars[m]) != undefined) {
+      if(map.getItem(usedVars[m]) == undefined) {
         arr.push(usedVars[m]);
       }
     }
@@ -347,26 +378,75 @@ function numBadGlobalUses(ast) {
 
 //------------------------------------------------------------------------
 // 1-e. list all variables that are used in a program
+//      ex. (array) arr.push(val)
+//          alert(val)
+//          var num = val + 1
+//          num = val + 1
 //------------------------------------------------------------------------ 
   function listVarsUsed(ast) {
     var count      = 0;
-    var usedVarArr = [];
-    var nd, m;
+    var usedVars = [];
+    var nd, m, args, cal;
     for(m in ast.body) {
       nd = ast.body[m];
 
       switch(nd.type) {
+        case "VariableDeclaration":
+          decs = nd.declarations;
+
+          for(d in decs) {
+            if(decs[d].init!=null && decs[d].init.type=="Identifier") {
+              usedVars.push(decs[d].init.name);
+            }
+            else if(decs[d].init!=null && decs[d].init.type=="BinaryExpression") {
+              usedVars = usedVars.concat(listOperatorVars(decs[d].init.left));
+              usedVars = usedVars.concat(listOperatorVars(decs[d].init.right));
+            }
+          }
+          break;
         case "ExpressionStatement":
-          switch(nd.expression.type) {
-            case "Identifier":
-              usedVarArr.push(nd.expression.name);
-              break;
+          exp = nd.expression;
+
+          switch(exp.type) {
             case "UpdateExpression":
-              usedVarArr.push(nd.expression.argument.name);
+              usedVars.push(exp.argument.name);
               break;
             case "AssignmentExpression":
-              usedVarArr = usedVarArr.concat(listOperatorVars(nd.expression.left));
-              usedVarArr = usedVarArr.concat(listOperatorVars(nd.expression.right));
+              usedVars = usedVars.concat(listOperatorVars(exp.left));
+              usedVars = usedVars.concat(listOperatorVars(exp.right));
+              break;
+            case "CallExpression":
+              cal = exp.callee;
+
+              // check for passing arguments in call functions
+              if(cal.type=="Identifier") {
+                args = exp.arguments;
+
+                if(args.length>0) {
+                  for(n in args) {
+                    if(args[n].type=="Identifier") {
+                      usedVars.push(args[n].name);
+                    }
+                  }
+                }
+              }
+              else if(cal.type=="MemberExpression") {
+                args = exp.arguments;
+
+                // check for objects that calls their property functions
+                if(cal.object=="Identifier") {
+                  usedVars.push(cal.object.name);
+                }
+
+                // check for passing arguments in call functions
+                if(args.length>0) {
+                  for(n in args) {
+                    if(args[n].type=="Identifier") {
+                      usedVars.push(args[n].name);
+                    }
+                  }
+                }
+              }
               break;
           }
           break;
@@ -379,26 +459,31 @@ function numBadGlobalUses(ast) {
             var left  = listOperatorVars(nd.init.left);
             var right = listOperatorVars(nd.init.right);
 
-            for(n in left)  { usedVarArr.push(left  + " <= " + floop); }
-            for(n in right) { usedVarArr.push(right + " <= " + floop); }
+            for(n in left)  { usedVars.push(left  + " <= " + floop); }
+            for(n in right) { usedVars.push(right + " <= " + floop); }
           }
           else if(nd.init != null && nd.init.type=="VariableDeclaration") { 
             // left-hand side var declaration
-            usedVarArr.push(nd.init.declarations[0].id.name + " <= " + floop);
+            usedVars.push(nd.init.declarations[0].id.name + " <= " + floop);
 
             // right-hand side possilble var assignment
             if(nd.init.declarations[0].init.type=="BinaryExpression") {
               var left  = listOperatorVars(nd.init.declarations[0].init.left);
               var right = listOperatorVars(nd.init.declarations[0].init.right);
 
+<<<<<<< HEAD
               for(n in left)  { usedVarArr.push(left  + " <= " + floop); }
               for(n in right) { usedVarArr.push(right + " <= " + floop); }
+=======
+              for(n in left)  { usedVars.push(left  + " <= " + floop); }
+              for(n in right) { usedVars.push(right + " <= " + floop); }
+>>>>>>> myx
             }
           } else {
             // check vars in loop body
             if(nd.body.body.length > 0) { 
               var lpVars = listVarsUsed(nd.body);
-              for(n in lpVars) { usedVarArr.push(lpVars[n] + " <= " + floop); }
+              for(n in lpVars) { usedVars.push(lpVars[n] + " <= " + floop); }
             }
           }
           break;
@@ -409,18 +494,19 @@ function numBadGlobalUses(ast) {
           var wloop = "while loop";
           if(nd.body.body.length > 0) { 
             var wpVars = listVarsUsed(nd.body);
-            for(n in wpVars) { usedVarArr.push(wpVars[n] + " <= " + wloop); }
+            for(n in wpVars) { usedVars.push(wpVars[n] + " <= " + wloop); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName = nd.id.name;
             var ndVars = listVarsUsed(nd.body);
-            for(n in ndVars) { usedVarArr.push(ndVars[n] + " <= Function " + ndName + "()"); }
+            for(n in ndVars) { usedVars.push(ndVars[n] + " <= Function " + ndName + "()"); }
           }
           break;
       }
     }
+<<<<<<< HEAD
     // console.log("ListVarsUsed:" +usedVarArr);
     return usedVarArr;
   } 
@@ -455,6 +541,13 @@ function numBadGlobalUses(ast) {
 
 //------------------------------------------------------------------------
 >>>>>>> Stashed changes
+=======
+    // console.log("ListVarsUsed:" +usedVars);
+    return usedVars;
+  } 
+
+//------------------------------------------------------------------------
+>>>>>>> myx
 // 1-f. exam if any function gets assigned to a variable in global level
 //      ex: function bar() { }
 //          var f2 = bar;
@@ -512,6 +605,31 @@ function numBadGlobalUses(ast) {
       }
     }
     // console.log("ListFuncVars: " +arr);
+<<<<<<< HEAD
+=======
+    return arr;
+  }
+
+//------------------------------------------------------------------------
+// private function:
+// list all operator variables (right-hand side variables)
+//------------------------------------------------------------------------ 
+  function listOperatorVars(nd) {
+    var arr = [];
+    switch(nd.type) {
+      case "Identifier":
+        arr.push(nd.name);
+        break;
+      case "BinaryExpression":
+        arr = arr.concat(listOperatorVars(nd.left));
+        arr = arr.concat(listOperatorVars(nd.right));
+        break;
+      case "Literal":
+        break;
+      case "CallExpression":
+        break;
+    }
+>>>>>>> myx
     return arr;
   }
 
@@ -545,6 +663,10 @@ function usesBadGlobalVars(ast) {
 
 <<<<<<< Updated upstream
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> myx
 /******************************************************************/
 /* 2. Style Grading for Declaration and Use of Array              */
 /*    a. numDecArrs(ast)      ==> integer >= 0                    */
@@ -554,6 +676,7 @@ function usesBadGlobalVars(ast) {
 /*    e. numArrsUsed(ast)     ==> integer >= 0                    */
 /*    f. listArrsUsed(ast)    ==> [ string ]                      */
 /******************************************************************/
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 /**********************************************************/
@@ -566,6 +689,8 @@ function usesBadGlobalVars(ast) {
 /*    f. listArrsUsed(ast)    ==> [ string ]              */
 /**********************************************************/
 >>>>>>> Stashed changes
+=======
+>>>>>>> myx
 
 //------------------------------------------------------------------------
 // 2-a. calculate total number of declared arrays in a program
@@ -675,8 +800,8 @@ function usesBadGlobalVars(ast) {
 
     // check for the use of undelcared vars
     for(m in usedArrs) { 
-      if(typeof map.getItem(usedArrs[m]) != undefined) {
-        arr.push(usedVars[m]);
+      if(map.getItem(usedArrs[m]) == undefined) {
+        arr.push(usedArrs[m]);
       }
     }
     console.log("listUndecArrs: " + arr);
@@ -730,11 +855,14 @@ function usesBadGlobalVars(ast) {
               }              
               break;
             case "CallExpression":
-              method = exp.callee.property.name;
-              if(method=="push" || method=="sort"  || method=="join" || method=="valueOf" ||
-                 method=="pop"  || method=="shift" || method=="unshift") {
-                usedArrs.push(exp.callee.object.name);
-              } 
+              if(exp.callee.type=="MemberExpression") {
+                method = exp.callee.property.name;
+
+                if(method=="push" || method=="sort"  || method=="join" || method=="valueOf" ||
+                   method=="pop"  || method=="shift" || method=="unshift") {
+                  usedArrs.push(exp.callee.object.name);
+                } 
+              }
               break;
           }
           break;
@@ -771,6 +899,7 @@ function usesBadGlobalVars(ast) {
 
 
 
+<<<<<<< HEAD
 
 
 
@@ -2015,6 +2144,11 @@ function subnode(nd, funcList, funcnNum) {
 }
 
 
+=======
+
+
+
+>>>>>>> myx
 
 //------------------------------------------------------------------------
 <<<<<<< HEAD
@@ -2088,6 +2222,7 @@ function isRecuriveFunction(ast) {
     }
 >>>>>>> parent of 0f52c73... Merge branch 'myx'
   }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 
 
@@ -2095,6 +2230,9 @@ function isRecuriveFunction(ast) {
   return false;
 }
 >>>>>>> Stashed changes
+=======
+
+>>>>>>> myx
 
 function recursionDetector(nd, funcName) {
   if(nd.type=="Identifier") { return false; }
@@ -2108,6 +2246,7 @@ function recursionDetector(nd, funcName) {
 // all functions have been declared local to this anonymous function
 // now put them all into an object as methods and send that object back
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
 <<<<<<< HEAD
@@ -2205,6 +2344,10 @@ return {
 <<<<<<< Updated upstream
   isRecuriveFunction: isRecuriveFunction,
 
+=======
+return {
+  collectStructureStyleFacts: collectStructureStyleFacts,
+>>>>>>> myx
 
   /* 1. Style Grading for Declaration and Use of Variable   */
   numDecVars                 : numDecVars,
@@ -2223,11 +2366,14 @@ return {
   numArrsUsed                : numArrsUsed,
   listArrsUsed               : listArrsUsed,
 }
+<<<<<<< HEAD
 =======
   isRecuriveFunction: isRecuriveFunction
 }
 >>>>>>> parent of 0f52c73... Merge branch 'myx'
 >>>>>>> Stashed changes
+=======
+>>>>>>> myx
 
 })  // end anonymous function declaration 
 (); // now run it to create and return the object with all the methods
