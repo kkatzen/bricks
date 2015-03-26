@@ -2,13 +2,13 @@
 
 //------------------------------------------------------------------------
 //
-//  this JavaScript code implements an API for AST analysis
-//  the analysis is intended for simple auto grading 
-//  and for enforcing basic programming structure and style guidelines 
-//  for an intro programming class
+//  This JavaScript code implements an API for AST analysis
+//    the analysis is intended for simple auto grading 
+//    and for enforcing basic programming structure and style guidelines 
+//    for an intro programming class
 //
 //  We use the Acorn parser to generate an AST 
-//  The AST is a JSON object, in Mozilla SpiderMonkey format
+//    The AST is a JSON object, in Mozilla SpiderMonkey format
 //
 //  To adapt this API to another language you will have to
 //   -- get an AST for the target language in SpiderMonkey format 
