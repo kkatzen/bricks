@@ -31,46 +31,48 @@ var pnut = (function () {
 //   - data object will be sent to the server for analysis/grading
 //------------------------------------------------------------------------
 
-function collectStructureStyleFacts (ast) {
-  var dObj      = {};
+  function collectStructureStyleFacts (ast) {
+    var dObj      = {};
 
-/******************************************************************/
-/* 1. Style Grading for Declaration and Use of Variable           */
-/*    a. numDecVars(ast)      ==> integer >= 0                    */
-/*    b. listDecVars(ast)     ==> [ string ]                      */
-/*    c. numUndecVars(ast)    ==> integer >= 0                    */
-/*    d. listUndecVars(ast)   ==> [ string ]                      */
-/*    e. listVarsUsed(ast)    ==> [ string ]                      */
-/*    f. isAnyFuncVar(ast)    ==> boolean ? true:false            */
-/*    g. listFuncVars(ast)    ==> [ string]                       */
-/******************************************************************/
-    dObj.nDV      = numDecVars(ast);
-    dObj.lDV      = listDecVars(ast);
-    dObj.nUDV     = numUndecVars(ast);
-    dObj.lUDV     = listUndecVars(ast);
-    dObj.lVU      = listVarsUsed(ast);
-    dObj.isFV     = isAnyFuncVar(ast);
-    dObj.lFV      = listFuncVars(ast);
+  /******************************************************************/
+  /* 1. Style Grading for Declaration and Use of Variable           */
+  /*    a. numDecVars(ast)      ==> integer >= 0                    */
+  /*    b. listDecVars(ast)     ==> [ string ]                      */
+  /*    c. numUndecVars(ast)    ==> integer >= 0                    */
+  /*    d. listUndecVars(ast)   ==> [ string ]                      */
+  /*    e. listVarsUsed(ast)    ==> [ string ]                      */
+  /*    f. isAnyFuncVar(ast)    ==> boolean ? true:false            */
+  /*    g. listFuncVars(ast)    ==> [ string]                       */
+  /******************************************************************/
+      dObj.nDV      = numDecVars(ast);
+      dObj.lDV      = listDecVars(ast);
+      dObj.nUDV     = numUndecVars(ast);
+      dObj.lUDV     = listUndecVars(ast);
+      dObj.lVU      = listVarsUsed(ast);
+      dObj.isFV     = isAnyFuncVar(ast);
+      dObj.lFV      = listFuncVars(ast);
 
-/******************************************************************/
-/* 2. Style Grading for Declaration and Use of Array              */
-/*    a. numDecArrs(ast)      ==> integer >= 0                    */
-/*    b. listDecArrs(ast)     ==> [ string ]                      */
-/*    c. numUndecArrs(ast)    ==> integer >= 0                    */
-/*    d. listUndecArrs(ast)   ==> [ string ]                      */
-/*    e. numArrsUsed(ast)     ==> integer >= 0                    */
-/*    f. listArrsUsed(ast)    ==> [ string ]                      */
-/******************************************************************/
-    dObj.nDA      = numDecArrs(ast);
-    dObj.lDA      = listDecArrs(ast);
-    dObj.nUDA     = numUndecArrs(ast);
-    dObj.lUDA     = listUndecArrs(ast);
-    dObj.nAU      = numArrsUsed(ast);
-    dObj.lAU      = listArrsUsed(ast);
+  /******************************************************************/
+  /* 2. Style Grading for Declaration and Use of Array              */
+  /*    a. numDecArrs(ast)      ==> integer >= 0                    */
+  /*    b. listDecArrs(ast)     ==> [ string ]                      */
+  /*    c. numUndecArrs(ast)    ==> integer >= 0                    */
+  /*    d. listUndecArrs(ast)   ==> [ string ]                      */
+  /*    e. numArrsUsed(ast)     ==> integer >= 0                    */
+  /*    f. listArrsUsed(ast)    ==> [ string ]                      */
+  /******************************************************************/
+      dObj.nDA      = numDecArrs(ast);
+      dObj.lDA      = listDecArrs(ast);
+      dObj.nUDA     = numUndecArrs(ast);
+      dObj.lUDA     = listUndecArrs(ast);
+      dObj.nAU      = numArrsUsed(ast);
+      dObj.lAU      = listArrsUsed(ast);
 
 
-  return dObj;
-}
+
+
+    return dObj;
+  }
 
 
 
