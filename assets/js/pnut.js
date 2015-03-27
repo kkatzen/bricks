@@ -355,7 +355,7 @@ function collectStructureStyleFacts (ast) {
           var subnode = node.declarations;
           for(n in subnode) {
             if(subnode[n].init!=null && subnode[n].init.type=="Identifier") {
-              if(!funcs.has(subnode[n].init.name) && !used.has(subnode[n].init.name)){
+              if(!func.has(subnode[n].init.name) && !used.has(subnode[n].init.name)){
                 used.add(subnode[n].id.name);
                 arr.push(subnode[n].id.name);
               }
@@ -379,7 +379,7 @@ function collectStructureStyleFacts (ast) {
   }
 
 //------------------------------------------------------------------------
-// private function:
+// private function: 
 // list all operator variables (right-hand side variables)
 //------------------------------------------------------------------------ 
   function listOperatorVars(nd) {
