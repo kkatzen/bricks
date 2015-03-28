@@ -31,8 +31,8 @@ var pnut = (function () {
 //   - data object will be sent to the server for analysis/grading
 //------------------------------------------------------------------------
 
-function collectStructureStyleFacts (ast) {
-  var dObj      = {};
+  function collectStructureStyleFacts (ast) {
+    var dObj      = {};
 
 /******************************************************************/
 /* 1. Style Grading for Declaration and Use of Variable           */
@@ -69,8 +69,8 @@ function collectStructureStyleFacts (ast) {
     dObj.lAU      = listArrsUsed(ast);
 
 
-  return dObj;
-}
+    return dObj;
+  }
 
 
 
