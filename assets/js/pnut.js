@@ -115,6 +115,25 @@ var pnut = (function () {
     dObj.nNFLF    = numNestedForLoopsInFuncs(ast);
     dObj.nFLAP    = numForLoopsInAProgram(ast);
 
+/******************************************************************/
+/* 6. Style Grading for Declaration and Use of Function           */
+/*    a. numDecFuncs(ast)               ==> integer >= 0          */
+/*    b. listDecFuncs(ast)              ==> [ string ]            */
+/*    c. areCallExpsAllValid(ast)       ==> integer >= 0          */
+/*    d. listInvalidFuncCallExps(ast)   ==> [ string ]            */
+/*    e. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
+/*    f. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
+/*    g. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
+/*    h. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
+/******************************************************************/
+    dObj.nDF      = numDecFuncs(ast);
+    dObj.lDF      = listDecFuncs(ast);
+    dObj.areCEAV  = areCallExpsAllValid(ast);
+    dObj.lIFCE    = listInvalidFuncCallExps(ast);
+    dObj.areDFC   = areDecFuncsCalled(ast);
+    dObj.areDFCO  = areDecFuncsCalledOnce(ast);
+    dObj.isADFPBR = isAnyDecFuncPassedByRef(ast);
+    dObj.isAFRO   = isAnyFuncReturnObj(ast);
 
 /******************************************************************/
 /* 7. Style Grading for Recursive Function                        */
@@ -1214,7 +1233,6 @@ var pnut = (function () {
 
 
 
-
 /******************************************************************/
 /* 6. Style Grading for Declaration and Use of Function           */
 /*    a. numDecFuncs(ast)               ==> integer >= 0          */
@@ -1234,7 +1252,8 @@ var pnut = (function () {
 //        var a = function() {}
 //------------------------------------------------------------------------
   function numDecFuncs(ast) {
-    return listDecFunc(ast).length;
+    // console.log("numDecFuncs: " + DictDecFuncs(ast).length);
+    return DictDecFuncs(ast).length;
   }
 
 //------------------------------------------------------------------------
@@ -1246,7 +1265,8 @@ var pnut = (function () {
 //        var a = function() {}
 //------------------------------------------------------------------------
   function listDecFuncs(ast) {
-    return DictDecFuncs(ast).keys; 
+    // console.log("listDecFuncs: " + DictDecFuncs(ast).keys());
+    return DictDecFuncs(ast).keys(); 
   }
 
 //------------------------------------------------------------------------
@@ -1261,7 +1281,8 @@ var pnut = (function () {
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
   function areCallExpsAllValid(ast) {
-    return listInvalidFuncCallExps(ast).length>0;
+    // console.log("areCallExpsAllValid: " + (listInvalidFuncCallExps(ast).length==0));
+    return listInvalidFuncCallExps(ast).length==0;
   }
 
 //------------------------------------------------------------------------
@@ -1278,7 +1299,7 @@ var pnut = (function () {
   function listInvalidFuncCallExps(ast) {
     var decs  = DictDecFuncs(ast);
     var calls = DictFuncCalls(ast);
-    var exps  = decs.keys;
+    var exps  = decs.keys();
     var list  = [];
 
     for(m in exps) {
@@ -1289,7 +1310,7 @@ var pnut = (function () {
         list.push(exps[m]);
       }
     }
-
+    // console.log("listInvalidFuncCallExps: " + list);
     return list;
   }
 
@@ -1302,15 +1323,16 @@ var pnut = (function () {
 //          foo(); foo();
 //------------------------------------------------------------------------
   function areDecFuncsCalled(ast) {
-    var dict = dictFuncsAndCallNum(ast);
-    var nums = dict.values; // num of each function gets called
+    var dict = dictDecFuncsAndCallNum(ast);
+    var nums = dict.values(); // num of each function gets called
 
     for(m in nums) {
       if(nums[m]==0) {
+        // console.log("areDecFuncsCalled: " + false);
         return false;
       }
     }
-
+    // console.log("areDecFuncsCalled: " + true);
     return true;
   }
 
@@ -1323,15 +1345,16 @@ var pnut = (function () {
 //          foo();
 //------------------------------------------------------------------------
   function areDecFuncsCalledOnce(ast) {
-    var dict = dictFuncsAndCallNum(ast);
-    var nums = dict.values; // num of each function gets called
+    var dict = dictDecFuncsAndCallNum(ast);
+    var nums = dict.values(); // num of each function gets called
 
     for(m in nums) {
       if(nums[m]!=1) {
+        // console.log("areDecFuncsCalledOnce: " + false);
         return false;
       }
     }
-
+    // console.log("areDecFuncsCalledOnce: " + true);
     return true;
   }
 
@@ -1341,17 +1364,18 @@ var pnut = (function () {
 //      ex: CORRECT: function bar(x) { return x; }
 //          WRONG:   funciton bar()  { return 5; }
 //------------------------------------------------------------------------
-  function isADecFuncPassedByRef(ast) {
+  function isAnyDecFuncPassedByRef(ast) {
     var nd;
 
     for(m in ast.body) {
       nd = ast.body[m];
       if(nd.type=="FunctionDeclaration" &&
         nd.params.length>0) {
+        // console.log("isADecFuncPassedByRef: " + false);
         return true;
       }
     }
-
+    // console.log("isADecFuncPassedByRef: " + true);
     return false;
   }
 
@@ -1372,7 +1396,7 @@ var pnut = (function () {
     for(m in ast.body) {
       nd = ast.body[m];
 
-      if(nd.type=="FunctionDeclaration") {
+      if(nd.type=="FunctionDeclaration" && nd.body.body.length>0) {
         var rtn  = nd.body.body[nd.body.body.length-1];
 
         if(rtn.type=="ReturnStatement") {
@@ -1382,11 +1406,13 @@ var pnut = (function () {
               var set = setObjsInAFunc(nd.body);
 
               if(set.has(rtn.argument.name)) {
+                // console.log("isAnyFuncReturnObj: " + true);
                 return true;
               }
               break;
             case "ObjectExpression":
                 if(rtn.properties.length>0) {
+                  // console.log("isAnyFuncReturnObj: " + true);
                   return true;
                 }
               break;
@@ -1394,6 +1420,7 @@ var pnut = (function () {
         }
       }
     }
+    // console.log("isAnyFuncReturnObj: " + false);
     return false;
   } 
 
@@ -1452,7 +1479,7 @@ var pnut = (function () {
       nd = ast.body[m];
 
       switch(nd.type) {
-        case "ExpressionStatement":
+        case "VariableDeclaration":
           for(n in nd.declarations) {
             dec = nd.declarations[n];
             if(dec.init!=null && dec.init.type=="CallExpression") {
@@ -1470,7 +1497,7 @@ var pnut = (function () {
             }
           }
           break;
-        case "VariableDeclaration":
+        case "ExpressionStatement":
           exp = nd.expression;
           if(exp.type=="CallExpression") {
             if(exp.arguments.length<2) {
@@ -1543,7 +1570,6 @@ var pnut = (function () {
     }
     return map;
   }
-
 
 
 
@@ -1737,6 +1763,16 @@ var pnut = (function () {
     numForLoopsInFuncs         : numForLoopsInFuncs,
     numNestedForLoopsInFuncs   : numNestedForLoopsInFuncs,
     numForLoopsInAProgram      : numForLoopsInAProgram,
+
+    /* 6. Style Grading for Declaration and Use of Function   */
+    numDecFuncs                : numDecFuncs,
+    listDecFuncs               : listDecFuncs,
+    areCallExpsAllValid        : areCallExpsAllValid,
+    listInvalidFuncCallExps    : listInvalidFuncCallExps,
+    areDecFuncsCalled          : areDecFuncsCalled,
+    areDecFuncsCalledOnce      : areDecFuncsCalledOnce,
+    isAnyDecFuncPassedByRef    : isAnyDecFuncPassedByRef,
+    isAnyFuncReturnObj         : isAnyFuncReturnObj,
 
     /* 7. Style Grading for Recursive Function                */
     isRecuriveFunction         : isRecuriveFunction,
