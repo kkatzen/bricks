@@ -719,7 +719,7 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function numDecObjs(ast) {
     // console.log("numDecObjs: "+ listDecObjs(ast).length);
-    return listDecObjs(ast).length;  
+    return dictDecObjs(ast).length;   
   } 
 
 
@@ -735,56 +735,8 @@ var pnut = (function () {
 //          var z = new Boolean(); 
 //------------------------------------------------------------------------  
   function listDecObjs(ast) {
-    var arr = [];
-    var nd, m, n;
-    for(m in ast.body) {
-      nd = ast.body[m];
-
-      switch(nd.type) {
-        case "VariableDeclaration":
-          decs = nd.declarations;
-
-          for(n in decs) {
-            if(decs[n].init != null) {
-              if(decs[n].init.type=="ObjectExpression") { 
-                arr.push(decs[n].id.name); 
-              }
-              else if(decs[n].init.type=="NewExpression" && 
-                decs[n].init.callee.name == "Object") {
-               arr.push(decs[n].id.name); 
-             }
-            }
-          } 
-          break;
-        case "ForStatement":
-          var floop = "for loop";
-
-          // check var in loop body
-          if(nd.body.body.length > 0) { 
-            var lpObjs = listDecObjs(nd.body);
-            for(n in lpObjs) { arr.push(lpObjs[n] + " <= " + floop); }
-          }
-          break;
-        case "WhileStatement":
-          var wloop = "while loop";
-
-          if(nd.body.body.length > 0) { 
-            var wpObjs = listDecObjs(nd.body);
-            for(n in wpObjs) { arr.push(wpObjs[n] + " <= " + wloop); }
-          }
-          break;
-        case "FunctionDeclaration":
-          if(nd.body.body.length > 0) {
-            var ndName = nd.id.name;
-            var ndObjs = listDecObjs(nd.body);
-            for(n in ndObjs) { arr.push(ndObjs[n] + " <= Function " + ndName + "()"); }
-          }
-          break;
-      }
-    }
-    // console.log("listDecObjs: "+ arr);
-    // console.log("isAnyFuncBoundToAFuncRtnObj: " + isAnyFuncBoundToAFuncRtnObj(ast));
-    return arr;   
+    // console.log("listDecObjs: "+ dictDecObjs(ast).keys());
+    return dictDecObjs(ast).keys();   
   } 
 
 //------------------------------------------------------------------------
@@ -795,7 +747,8 @@ var pnut = (function () {
 //        (undeclared a)   a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function numUndecObjs(ast) {
-    return 0;
+    // console.log("numUndecObjs: "+ listUndecObjs(ast).length);
+    return listUndecObjs(ast).length;
   } 
 
 //------------------------------------------------------------------------
@@ -806,7 +759,21 @@ var pnut = (function () {
 //        (undeclared a)   a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function listUndecObjs(ast) {
-    return [];
+    var decObjs  = dictDecObjs(ast);
+    var usedObjs = dictUsedObjs(ast);
+    var dict     = new HashMap();
+    var keys     = usedObjs.keys();
+
+    for(m in keys) {
+      if(decObjs.getItem(keys[m])==undefined) {
+        dict.setItem(keys[m], usedObjs.getItem(keys[m]));
+      }
+      else if(decObjs.getItem(keys[m])>usedObjs.getItem(keys[m])) {
+        dict.setItem(keys[m], usedObjs.getItem(keys[m]));
+      }
+    }
+    // console.log("listUndecObjs: "+ dict.keys());
+    return dict.keys();
   } 
 
 //------------------------------------------------------------------------
@@ -816,7 +783,8 @@ var pnut = (function () {
 //        a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function numObjsUsed(ast) {
-    return 0;
+    // console.log("numObjsUsed: "+ dictDecObjs(ast).length);
+    return dictDecObjs(ast).length;
   } 
 
 //------------------------------------------------------------------------
@@ -825,7 +793,8 @@ var pnut = (function () {
 //        a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function listObjsUsed(ast) {
-    return [];
+    // console.log("listObjsUsed: "+ dictDecObjs(ast).keys());
+    return dictDecObjs(ast).keys();
   } 
 
 //------------------------------------------------------------------------
@@ -841,7 +810,7 @@ var pnut = (function () {
 //
 //        OR
 //
-//        function foo() {
+//        function bar() {
 //          function inner() {}
 //
 //          var ob = {
@@ -854,6 +823,7 @@ var pnut = (function () {
   function isAnyFuncBoundToAFuncRtnObj(ast) {
     var list  = [];
     var nd, bodys, decs, props, funcs, funcObjs;
+    var check = false;
 
     for(m in ast.body) {
       nd = ast.body[m];
@@ -864,7 +834,7 @@ var pnut = (function () {
         funcObjs = new Set();
 
         for(n in bodys) {
-          switch(bodys[n]) {
+          switch(bodys[n].type) {
             case "FunctionDeclaration":
               funcs.add(bodys[n].id.name);
               break;
@@ -877,11 +847,11 @@ var pnut = (function () {
 
                   for(p in props) {
                     if(props[p].value.type=="FunctionExpression") {
-                      funcObj.add(decs[d].id.name);
+                      funcObjs.add(decs[d].id.name);
                     }
                     else if(props[p].value.type=="Identifier") {
                       if(funcs.has(props[p].value.name)) {
-                        funcObj.add(decs[d].id.name);
+                        funcObjs.add(decs[d].id.name);
                       }
                     }
                   }
@@ -891,15 +861,163 @@ var pnut = (function () {
             case "ReturnStatement":
               if(bodys[n].argument.type=="Identifier" && 
                 funcObjs.has(bodys[n].argument.name)) {
-                return true;
+                check = true;
               }
               break;
           }
         }
       }
     }
+    // console.log("isAnyFuncBoundToAFuncRtnObj: " + check);
+    return check;
+  }
 
-    return false;
+//------------------------------------------------------------------------
+// private function:
+// create a dictionary that maps all declared objects 
+// with their occurance orders  
+//------------------------------------------------------------------------  
+  function dictDecObjs(ast) {
+    var dict = new HashMap();
+    var arr = [];
+    var nd, m, n, name, keys;
+    var floop = "for loop";
+    var wloop = "while loop";
+
+    for(m in ast.body) {
+      nd = ast.body[m];
+
+      switch(nd.type) {
+        case "VariableDeclaration":
+          decs = nd.declarations;
+
+          for(n in decs) {
+            if(decs[n].init != null) {
+              if(decs[n].init.type=="ObjectExpression") { 
+                dict.setItem(decs[n].id.name, nd.start);
+              }
+              else if(decs[n].init.type=="NewExpression" && 
+                decs[n].init.callee.name == "Object") {
+                dict.setItem(decs[n].id.name, nd.start);
+             }
+            }
+          } 
+          break;
+        case "ForStatement":
+          // check objs in loop body
+          if(nd.body.body.length > 0) { 
+            var lpObjs = dictDecObjs(nd.body);
+            keys   = lpObjs.keys();
+
+            for(n in keys) {
+              name = keys[n] + " <= " + floop;
+              dict.setItem(name, lpObjs.getItem(keys[n]));
+            }
+          }
+          break;
+        case "WhileStatement":
+          // check objs in loop body
+          if(nd.body.body.length > 0) { 
+            var wpObjs = dictDecObjs(nd.body);
+            keys   = wpObjs.keys();
+
+            for(n in keys) {
+              name = keys[n] + " <= " + wloop;
+              dict.setItem(name, wpObjs.getItem(keys[n]));
+            }
+          }
+          break;
+        case "FunctionDeclaration":
+          if(nd.body.body.length > 0) {
+            var ndName = nd.id.name;
+            var ndObjs = dictDecObjs(nd.body);
+            keys       = ndObjs.keys();
+
+            for(n in keys) {
+              name = keys[n] + " <= Function " + ndName + "()";
+              dict.setItem(name, ndObjs.getItem(keys[n]));
+            }
+          }
+          break;
+      }
+    } 
+    return dict;   
+  }
+
+//------------------------------------------------------------------------
+// private function:
+// create a dictionary that maps all used objects with occurance orders
+//------------------------------------------------------------------------  
+  function dictUsedObjs(ast) {
+    var usedObjs = new HashMap();
+    var floop    = "for loop";
+    var wloop    = "while loop";
+    var nd, m, n, name, keys;
+
+    for(m in ast.body) {
+      nd = ast.body[m];
+
+      switch(nd.type) {
+        case "ExpressionStatement":
+          exp = nd.expression;
+
+          if(exp.type=="AssignmentExpression") {
+            if(exp.right.type=="ObjectExpression" && exp.left.type=="Identifier"){
+              usedObjs.setItem(exp.left.name, nd.start);
+            }
+            else if(exp.right.type=="NewExpression" && exp.left.type=="Identifier") {
+              usedObjs.setItem(exp.left.name, nd.start);
+            }
+            else if(exp.left.type=="MemberExpression") {
+              usedObjs.setItem(exp.left.object.name, nd.start);
+            }
+          }
+          else if(exp.type=="CallExpression" &&
+            exp.callee.type=="MemberExpression") {
+            usedObjs.setItem(exp.callee.object.name, nd.start);
+          }
+
+          break;
+        case "ForStatement":
+          // check objs in loop body
+          if(nd.body.body.length > 0) { 
+            var lpObjs = dictUsedObjs(nd.body);
+            keys       = lpObjs.keys();
+
+            for(n in keys) {
+              name = keys[n] + " <= " + floop;
+              usedObjs.setItem(name, lpObjs.getItem(keys[n]));
+            }
+          }
+          break;
+        case "WhileStatement":
+          // check objs in loop body
+          if(nd.body.body.length > 0) { 
+            var wpObjs = dictUsedObjs(nd.body);
+            keys       = wpObjs.keys();
+
+            for(n in keys) {
+              name = keys[n] + " <= " + wloop;
+              usedObjs.setItem(name, wpObjs.getItem(keys[n]));
+            }
+          }
+          break;
+        case "FunctionDeclaration":
+          if(nd.body.body.length > 0) {
+            var ndName = nd.id.name;
+            var ndObjs = dictUsedObjs(nd.body);
+            keys       = ndObjs.keys();
+
+            for(n in keys) {
+              name = keys[n] + " <= Function " + ndName + "()";
+              usedObjs.setItem(name, ndObjs.getItem(keys[n]));
+            }
+          }
+          break;
+      }
+    }
+
+    return usedObjs;   
   }
 
 
@@ -1623,7 +1741,7 @@ var pnut = (function () {
         }
       }
     }
-    console.log("Recursion: " + false);
+    // console.log("Recursion: " + false);
     return false;
   }
 
