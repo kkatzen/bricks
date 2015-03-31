@@ -156,6 +156,11 @@ User.find({admin: true}).exec(function(err, users) {
 	 	    	</div>
 		 	</div>
 		</div>
+		<div id="consoleHeader" class="console">
+		Test Results Console
+        </div>
+		<textarea id="console" class="textConsole" readonly>
+    	</textarea>
 
 		<!--CodeMirror Start-->
         <% if (req.isAuthenticated()) { %>
@@ -165,11 +170,6 @@ User.find({admin: true}).exec(function(err, users) {
         <%}%>
 		<!--CodeMirror End-->
 
-		<div id="consoleHeader" class="console">
-		Test Results Console
-        </div>
-		<textarea id="console" class="textConsole" readonly>
-    	</textarea>
 
     	<div id="submissions" class='panel panel-default hidden'>
       		<div class='panel-heading'> 

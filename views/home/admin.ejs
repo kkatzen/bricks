@@ -44,8 +44,8 @@
 
 <script src="/js/admin.js"></script>
 <style>
-  #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-  #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; }
+  #sortable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+  #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; width: 100%;}
   #sortable li span { position: absolute; margin-left: -1.3em; }
 
 #navigationPanel {
@@ -57,6 +57,9 @@ form > button {
 }
 .navbar-default {
     margin-top: 20px;
+}
+#folderBar {
+  padding: 0px;
 }
 #folderBar > div {
 	margin-right: 10px;
@@ -95,6 +98,7 @@ form > button {
     <!--Navigation starts-->
 	<div id="navigationPanel" class="panel panel-default col-md-2  ">
     <button id="sortFolders">Sort Folders</button>
+    <p>
     <ul id="folderBar" >
          <!-- folder dropdowns inserted here -->
     </ul>

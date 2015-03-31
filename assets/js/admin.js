@@ -512,8 +512,6 @@ function loadSortableFolders() {
 
     $.post("/folder/read", null, function (folders) {
         $("#folderBar").append('<ul id="sortable"></ul>');
-        $( "#sortable" ).sortable();
-        $( "#sortable" ).disableSelection();
 
         numFolders = folders.length;
         folders.forEach(function (folder) {
@@ -522,7 +520,17 @@ function loadSortableFolders() {
 
         });
        // addProblems();
-
+        $( "#sortable" ).sortable({
+            update : function () {
+                console.log("updated");
+                alert("updated");
+//                var inputs = $('#sortable').serialize("toArray");
+  //              console.log(inputs.toString());
+    //            alert(inputs.toString());
+               // $.post("pagewhereyouuselist.php",{'neworder': neworder},function(data){});
+            }
+        });
+        $( "#sortable" ).disableSelection();
     });
 
     //var asdf ='<ul id="sortable"><li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+ 'krista' + '</li><li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 2</li><li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 3</li></ul>';
@@ -547,7 +555,15 @@ function loadUsers() {
         });
     });
 }
-
+var blinkTimer;
+function blinking(elm) {
+    blinkTimer = setInterval(blink, 10);
+    function blink() {
+        elm.fadeOut(600, function() {
+           elm.fadeIn(600);
+        });
+    }
+}
 window.onload = function () {
     curProblem = null;
     curStudent = null;
@@ -689,19 +705,16 @@ window.onload = function () {
             }
         });
     });
-
     $('#sortFolders').on('click', function() {
         if($(this).text() == 'Sort Folders') {
+            blinking($("#sortFolders"));
             $(this).text('Done');
             $("#folderBar").empty();
             loadSortableFolders();
         } else {
+            clearInterval(blinkTimer);
             $(this).text('Sort Folders');
             reloadFolders();
         }
-
-
     });
-
-
 };
