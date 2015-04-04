@@ -406,7 +406,7 @@ function addFolder(folder) {
     //if first folder
     if(folder.num == 0) {
         //move up button is disabled
-       moveUpButton.click(function(e) {
+       moveUpButton.click(function(e) { 
             e.preventDefault();
        })
        .css("color", "gray");
@@ -515,27 +515,30 @@ function loadSortableFolders() {
 
         numFolders = folders.length;
         folders.forEach(function (folder) {
-            var myAppend = '<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+ folder.name + '</li>';
+            var myAppend = '<li class="ui-state-default" id="' + folder.id + '"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+ folder.name + '</li>';
              $("#sortable").append(myAppend);
 
         });
-       // addProblems();
+
         $( "#sortable" ).sortable({
-            update : function () {
-                console.log("updated");
-                alert("updated");
-//                var inputs = $('#sortable').serialize("toArray");
-  //              console.log(inputs.toString());
-    //            alert(inputs.toString());
-               // $.post("pagewhereyouuselist.php",{'neworder': neworder},function(data){});
+            start: function(e, ui) {
+                // creates a temporary attribute on the element with the old index
+                $(this).attr('data-previndex', ui.item.index());
+            },
+            update : function (e, ui) {
+                var newIndex = ui.item.index();
+                var oldIndex = $(this).attr('data-previndex');
+                var id = ui.item.attr('id');
+                var difference = oldIndex - newIndex;
+
+                $.post("/folder/update", {id: id, num: oldIndex, dir: difference}, function (folder) {
+                });
+
             }
         });
         $( "#sortable" ).disableSelection();
     });
 
-    //var asdf ='<ul id="sortable"><li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+ 'krista' + '</li><li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 2</li><li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 3</li></ul>';
-
-//    $("#folderBar").append(asdf);
 }
 
 function loadUsers() {
