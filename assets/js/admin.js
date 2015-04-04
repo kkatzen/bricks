@@ -184,7 +184,6 @@ function loadIndividualProblems(user){
 
 }
 
-
 //check score of student for problem
 function problemCorrect(user, problem, student, totalStudents){
     var rsection = $("<td></td>");
@@ -229,6 +228,7 @@ function problemCorrect(user, problem, student, totalStudents){
 function reloadFolders() {
 	$("#folders").empty();
 	$("#folderBar").empty();
+    $("#folderAccordion").empty();
 	$("#folderDropdown").empty();
     $("#problemsfolderDropdown").empty();
     $("#editfolderDropdown").empty();
@@ -385,6 +385,7 @@ function reorderProblems() {
 }
 
 function addFolder(folder) {
+    /*
 	// add in Folders list
 	var removeButton = $("<a href='#'></a>")
 	.css("color","red")
@@ -446,27 +447,31 @@ function addFolder(folder) {
         });
 
     }
+    */
     //append name and buttons to folder label
-	var label = $("<li></li>").attr("class","list-group-item").append(removeButton).append(folder.name).append(moveUpButton).append(moveDownButton);
+	//var label = $("<li></li>").attr("class","list-group-item").append(removeButton).append(folder.name).append(moveUpButton).append(moveDownButton);
     //add label to folder ui lists
-	$("#folders").append(label);
+	//$("#folders").append(label);
 	$("#folderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
 	$("#problemsfolderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
 	$("#editfolderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
     //make folder object
-	var fObj = {
+	/*var fObj = {
 		data: folder,
 		listNode: label,
 		menuNode: $("<div class='btn-group'></div>"),
 		allProblems: {}
 	};
 	fObj.__proto__ = folderActions;
+
     //add folder object to allFolders
 	allFolders[folder.id] = fObj;
 	fObj.reload();
+    
     //setup menu bar of folders
-	$("#folderBar").append(fObj.menuNode);
+	$("#folderBar").append(fObj.menuNode);*/
     //if necessary, update folder of current problem - it shifted back to the first folder during reload
+
     if(curProblem) {
         $("#editfolderDropdown").val(curProblem.folder);
     }
@@ -475,6 +480,29 @@ function addFolder(folder) {
     }
 
 ////krista
+
+    var accordianFolderName = "accoridanFolder" + folder.id;
+    var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
+    var accordian = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + "</h4></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div>";
+
+    $("#folderAccordion").append(accordian);
+    var accordianFolderBody = '';
+    $("#" + accordianFolderName).append(accordianFolderBody);
+    var folderScore = 0;
+    $("#avail-" + accordianFolderName).empty().append(folderScore);
+    //var fObj = { domNode : dropdown, data : folder };
+    //fObj.__proto__ = fProto;
+    //allFolders[folder.id] = fObj;
+    $("#" + accordianFolderName).empty();
+    $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
+        problems.forEach( function (problem) {
+            //fObj.addProblem(problem);
+            var link = addProblemToAccordian(problem, accordianFolderName);
+            folderScore += parseInt(problem.value.style) + parseInt(problem.value.correct);
+            $("#" + accordianFolderName).append(link);
+        });
+    });
+
 
     var dropdown = $("<li></li>").addClass("dropdown");
     var toggle = $("<a></a>")
@@ -498,6 +526,26 @@ function addFolder(folder) {
 
 }
 
+
+function addProblemToAccordian(problem,folderName){
+    console.log("addProblemToAccordian()");
+    var link = $("<li></li>").append(
+        $("<a></a>")
+            .attr("href","#")
+            .append(problem.name)
+    );
+    //kkatz
+    if(problem.phase == 0) {
+        link.css("background-color","lightgray");
+    }
+    link.click(function () { 
+        curProblem = problem;
+        fillForm(curProblem);
+    });
+
+    return link;
+}
+
 function loadFolders() {
 	$.post("/folder/read", null, function (folders) {
         numFolders = folders.length;
@@ -515,8 +563,20 @@ function loadSortableFolders() {
 
         numFolders = folders.length;
         folders.forEach(function (folder) {
+            var removeButton = $("<a href='#'></a>")
+            .css("color","red")
+            .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
+            .click(function () {
+                $.post("/folder/destroy", {id: folder.id}, function () {
+                    reorderFolders();
+                    //reloadFolders();
+                });
+               //allFolders[folder.id].remove();
+            });
+
             var myAppend = '<li class="ui-state-default" id="' + folder.id + '"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+ folder.name + '</li>';
-             $("#sortable").append(myAppend);
+            //ADD REMOVE BUTTON TO THE DIV SOMEHOW
+            $("#sortable").append(myAppend);
 
         });
 
@@ -566,7 +626,8 @@ function blinking(elm) {
            elm.fadeIn(600);
         });
     }
-}
+} 
+
 window.onload = function () {
     curProblem = null;
     curStudent = null;
@@ -713,6 +774,7 @@ window.onload = function () {
             blinking($("#sortFolders"));
             $(this).text('Done');
             $("#folderBar").empty();
+            $("#folderAccordion").empty();
             loadSortableFolders();
         } else {
             clearInterval(blinkTimer);

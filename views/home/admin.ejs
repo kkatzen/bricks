@@ -97,11 +97,21 @@ form > button {
 <% if (req.isAuthenticated() && req.user.admin) {%>
     <!--Navigation starts-->
 	<div id="navigationPanel" class="panel panel-default col-md-2  ">
-    <button id="sortFolders">Sort Folders</button>
+    <button id="sortFolders" type="button" class="btn btn-default">Sort Folders</button>
+    <button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add</button>
     <p>
     <ul id="folderBar" >
          <!-- folder dropdowns inserted here -->
     </ul>
+  <div class="panel-group" id="folderAccordion">
+  </div>
+     <div class="input-group">
+         <input type="text" id="newFolder" class="form-control" placeholder="Add folder..."></input>
+         <span class="input-group-btn">
+             <button type="submit" id="newFolderBtn" class="btn btn-default"><span class="glyphicon glyphicon-plus" style="color:green;"></span></button>
+         </span>
+     </div>
+     <div id="newFolderError"></div>
   </div>
   <!--Navigation ends-->
   <!--Content starts-->
@@ -119,15 +129,15 @@ form > button {
         <!--Edit Folders sub-section starts-->
         <div class="col-md-12">
             <div class="row">
-                 <div class="col-md-6">
+                 <!-- <div class="col-md-6">
                      <div class="panel panel-default">
                          <div class="panel-heading">
                              Manage folders
                              <button id="folderDisplay" class="btn btn-default">Hide</button>
                          </div>
-                         <ul id="folders" class="list-group folderContent">
+                         <ul id="folders" class="list-group folderContent"> -->
                             <!-- folder names inserted here -->
-                         </ul>
+                         <!-- </ul>
                          <div class="panel-body folderContent">
                              <div class="input-group">
                                  <input type="text" id="newFolder" class="form-control" placeholder="Add folder..."></input>
@@ -138,7 +148,7 @@ form > button {
                              <div id="newFolderError"></div>
                          </div>
                      </div>
-                 </div>
+                 </div> -->
                      <div class="col-md-6">
                          <div class="panel panel-default">
                              <div class="panel-heading">
@@ -240,9 +250,13 @@ form > button {
 </div>
 <!--Update a question sub-section ends-->
 
+
+
+</div>
+<!--Questions section ends-->
+
 <!--Add a question sub-section starts-->
-  <div class="col-md-12">
-    <div class="panel panel-default">
+    <div  class="panel panel-default tab-pane" id="addquestion">
       <div class="panel-heading">
         Add a new question
       </div>
@@ -314,17 +328,12 @@ form > button {
               </div>
             </div>
           </div>
-	  <button class="btn btn-default form-control" id="addProblem">Add Problem</button>
+    <button class="btn btn-default form-control" id="addProblem">Add Problem</button>
           <div id="newProblemError"></div>
         </form>
       </div>
     </div>
-  </div>
 <!--Add a question sub-section ends-->
-
-</div>
-<!--Questions section ends-->
-
 
 
 <!--Individual section starts-->
