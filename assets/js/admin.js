@@ -467,7 +467,7 @@ function addFolder(folder) {
     //add folder object to allFolders
 	allFolders[folder.id] = fObj;
 	fObj.reload();
-    
+
     //setup menu bar of folders
 	$("#folderBar").append(fObj.menuNode);*/
     //if necessary, update folder of current problem - it shifted back to the first folder during reload
@@ -526,12 +526,12 @@ function addFolder(folder) {
 
 }
 
-
 function addProblemToAccordian(problem,folderName){
     console.log("addProblemToAccordian()");
     var link = $("<li></li>").append(
         $("<a></a>")
-            .attr("href","#")
+            .attr("href","#questions")
+            .attr("data-toggle","pill")
             .append(problem.name)
     );
     //kkatz
