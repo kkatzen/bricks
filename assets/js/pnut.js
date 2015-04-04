@@ -16,7 +16,7 @@
 //   -- or write adapter functions
 //
 //  David Stotts, 5/16/2014
-//  Yuxin Mo, 2/12/2015 
+//  Yuxin Mo, 4/1/2015 
 //
 //------------------------------------------------------------------------
 
@@ -174,34 +174,91 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function numDecVars(ast) {
     // console.log("numDecVars: "+listDecVars(ast).length);
+    // console.log("listDecVars: "+listDecVars(ast));
     return listDecVars(ast).length;
   }
 
 
 //------------------------------------------------------------------------
-// 1-b. list all declared variables in a program
+// 1-b. list all declared variables in a program:      
+//      * dynamically scope variables
 //------------------------------------------------------------------------  
-  function listDecVars(ast) {
+  function listDecVars(ast, decVars) {
+    var map, nd, m, n, decs;
     var arr = [];
-    var nd, m, n;
+
+    if(arguments.length!=1) { 
+      map = decVars; 
+    }
+    else {
+      map = new HashMap(); 
+    }
+
     for(m in ast.body) {
       nd = ast.body[m];
 
       switch(nd.type) {
-        case "VariableDeclaration":
-          for(n in nd.declarations) { arr.push("var " + nd.declarations[n].id.name); }
+        case "VariableDeclaration":  // base case for a variable declaration
+          decs = nd.declarations;
+
+          for(n in decs) {
+            if(decs[n].init!=null) { // make sure a declaration trys to bind a var with a value;
+              var add = 0;
+
+              if(decs[n].init.type=="Identifier") {  // check for variable pointer 
+                var pos = map.getItem(decs[n].init.name);
+
+                if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+                  arr.push("var " + decs[n].id.name); 
+                  add = 1;
+                }
+              } 
+              else if(decs[n].init.type=="Literal") {// check for variable initialization    
+                arr.push("var " + decs[n].id.name);
+                add = 1;
+              }
+
+              if(add==1 && map.getItem(decs[n].id.name)==undefined) {
+                map.setItem(decs[n].id.name, [ast.start, ast.end]);
+              }
+            }
+          }
           break;
         case "ForStatement":
           var floop = "for loop";
 
           // check var in loop initilization
-          if(nd.init != null && nd.init.type=="VariableDeclaration") {
-           arr.push(nd.init.declarations[0].id.name + " <= " + floop); 
+          if(nd.init!=null                      && 
+            nd.init.type=="VariableDeclaration" &&
+            nd.init.declarations[0].init!= null) {
+            var dec = nd.init.declarations[0];
+            var add = 0;
+
+            if(dec.init.type=="Literal") {
+              arr.push(dec.id.name + " <= " + floop);
+              add = 1;
+            }
+            else if(dec.init.type=="Identifier") {
+              var pos = map.getItem(dec.init.name);
+
+              // exam if a declared var is in a calling scope or not
+              if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+                arr.push(dec.id.name + " <= " + floop);
+                add = 1;
+              }
+            }
+
+            if(add==1 && map.getItem(dec.id.name)==undefined) { 
+              map.setItem(dec.id.name, [ast.start, ast.end]);
+            }
           }
 
           // check var in loop body
           if(nd.body.body.length > 0) { 
-            var lpVars = listDecVars(nd.body);
+            var list    = listDecVars(nd.body, map);
+            var lpVars  = list.arr;
+            map         = list.map;
+
             for(n in lpVars) { arr.push(lpVars[n] + " <= " + floop); }
           }
           break;
@@ -209,21 +266,35 @@ var pnut = (function () {
           var wloop = "while loop";
 
           if(nd.body.body.length > 0) { 
-            var wpVars = listDecVars(nd.body);
+            var list   = listDecVars(nd.body, map);
+            var wpVars = list.arr;
+            map        = list.map;
+
             for(n in wpVars) { arr.push(wpVars[n] + " <= " + wloop); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName = nd.id.name;
-            var ndVars = listDecVars(nd.body);
+            var list    = listDecVars(nd.body, map);
+            var ndVars  = list.arr;
+            map         = list.map;
+
             for(n in ndVars) { arr.push(ndVars[n] + " <= Function " + ndName + "()"); }
           }
           break;
       }
     }
-    // console.log("ListDecVars: "+arr);
-    return arr;
+
+    /* function overlading */
+    switch(arguments.length) {
+      case 1: // listDecVars(ast)
+        // console.log("ListDecVars: "+arr);
+        return arr;  
+      case 2: // do listDecVars(ast, map)
+        // console.log("ListDecVars: "+arr);
+        return {arr: arr, map: map};
+    }
   }
 
 
@@ -247,9 +318,7 @@ var pnut = (function () {
     var arr      = [];
 
     // store all declared vars in a hashmap
-    for(m in decVars) { 
-      map.setItem(decVars[m], 0); 
-    }
+    for(m in decVars) { map.setItem(decVars[m], 0); }
 
     // check for the use of undelcared vars
     for(m in usedVars) { 
@@ -274,6 +343,7 @@ var pnut = (function () {
     var count      = 0;
     var usedVars = [];
     var nd, m, args, cal;
+
     for(m in ast.body) {
       nd = ast.body[m];
 
@@ -413,22 +483,17 @@ var pnut = (function () {
     var used = new Set();
     var arr  = [];
 
-
-    for(m in ast.body) {
-      node = ast.body[m];
-
-      if(node.type=="FunctionDeclaration" && node.id.type=="Identifier") {
-        func.add(node.id.name);
-      }
-    }
-
     for(m in ast.body) {
       node = ast.body[m];
 
       switch(node.type) {
+        case "FunctionDeclaration":  
+          func.add(node.id.name); // collect declared functions into Set func
         case "VariableDeclaration":
+          /* loop through the program to validate each var-to-func pair */
+          
           var subnode = node.declarations;
-          for(n in subnode) {
+          for(n in subnode) {    
             if(subnode[n].init!=null && subnode[n].init.type=="Identifier") {
               if(!func.has(subnode[n].init.name) && !used.has(subnode[n].init.name)){
                 used.add(subnode[n].id.name);
@@ -438,6 +503,8 @@ var pnut = (function () {
           }
           break;
         case "ExpressionStatement":
+          /* loop through the program to validate each var-to-func pair */
+
           var exp = node.expression;
           if(exp.type=="AssignmentExpression" && 
             exp.left.type=="Identifier" && exp.right.type=="Identifier") {
@@ -509,9 +576,17 @@ var pnut = (function () {
 //          var b = [one, two, three];
 //          var c = new Array();
 //------------------------------------------------------------------------  
-  function listDecArrs(ast) {
+  function listDecArrs(ast, decArrs) {
+    var map, nd, m, n;
     var arr = [];
-    var nd, m, n;
+
+    if(arguments.length!=1) { 
+      map = decArrs; 
+    }
+    else {
+      map = new HashMap(); 
+    }
+
     for(m in ast.body) {
       nd = ast.body[m];
 
@@ -520,44 +595,74 @@ var pnut = (function () {
           decs = nd.declarations;
           for(n in decs) {
             if(decs[n].init != null) {
+              var add = 0;
               if(decs[n].init.type == "ArrayExpression") { 
-                arr.push(decs[n].id.name); 
+                add = 1;
               }
               else if(decs[n].init.type == "NewExpression" && 
                 decs[n].init.callee.name == "Array") {
+                add = 1;
+              }
+              else if(decs[n].init.type=="Identifier") {
+                var pos = map.getItem(decs[n].init.name);
+
+                if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+                  add = 1;
+                }
+              }
+
+              if(add==1) {
                 arr.push(decs[n].id.name);
+
+                if(map.getItem(decs[n].id.name)==undefined) {
+                  map.setItem(decs[n].id.name, [ast.start, ast.end]);
+                }
               }
             }
           } 
           break;
         case "ForStatement":
-          var floop = "for loop";
-
           // check var in loop body
-          if(nd.body.body.length > 0) { 
-            var lpArrs = listDecArrs(nd.body);
+          if(nd.body.body.length > 0) {
+            var floop = "for loop";
+            var list    = listDecArrs(nd.body, map);
+            var lpArrs  = list.arr;
+            map         = list.map;
+
             for(n in lpArrs) { arr.push(lpArrs[n] + " <= " + floop); }
           }
           break;
         case "WhileStatement":
-          var wloop = "while loop";
-
           if(nd.body.body.length > 0) { 
-            var wpArrs = listDecArrs(nd.body);
+            var wloop = "while loop";
+            var list   = listDecArrs(nd.body, map);
+            var wpArrs = list.arr;
+            map        = list.map;
+
             for(n in wpArrs) { arr.push(wpArrs[n] + " <= " + wloop); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName = nd.id.name;
-            var ndArrs = listDecArrs(nd.body);
+            var list    = listDecArrs(nd.body, map);
+            var ndArrs  = list.arr;
+            map         = list.map;
+
             for(n in ndArrs) { arr.push(ndArrs[n] + " <= Function " + ndName + "()"); }
           }
           break;
       }
     }
-    // console.log("listDecArrs: " + arr);
-    return arr;  
+
+    /* function overlading */
+    switch(arguments.length) {
+      case 1: // listDecArrs(ast)
+        // console.log("listDecArrs: " + arr);
+        return arr;  
+      case 2: // do listDecArrs(ast, map)
+        return {arr: arr, map: map};
+    }
   } 
 
 
@@ -763,12 +868,16 @@ var pnut = (function () {
     var usedObjs = dictUsedObjs(ast);
     var dict     = new HashMap();
     var keys     = usedObjs.keys();
+    var dec, use;
 
     for(m in keys) {
-      if(decObjs.getItem(keys[m])==undefined) {
+      dec = decObjs.getItem(keys[m]);
+      use = usedObjs.getItem(keys[m]);
+
+      if(dec==undefined) {
         dict.setItem(keys[m], usedObjs.getItem(keys[m]));
       }
-      else if(decObjs.getItem(keys[m])>usedObjs.getItem(keys[m])) {
+      else if(dec[0]<use[0] && dec[1]>use[1]) {
         dict.setItem(keys[m], usedObjs.getItem(keys[m]));
       }
     }
@@ -868,7 +977,7 @@ var pnut = (function () {
         }
       }
     }
-    // console.log("isAnyFuncBoundToAFuncRtnObj: " + check);
+    console.log("isAnyFuncBoundToAFuncRtnObj: " + check);
     return check;
   }
 
@@ -877,12 +986,17 @@ var pnut = (function () {
 // create a dictionary that maps all declared objects 
 // with their occurance orders  
 //------------------------------------------------------------------------  
-  function dictDecObjs(ast) {
-    var dict = new HashMap();
-    var arr = [];
-    var nd, m, n, name, keys;
+  function dictDecObjs(ast, decObjs) {
+    var dict, nd, m, n, name, keys;
     var floop = "for loop";
     var wloop = "while loop";
+
+    if(arguments.length!=1) { 
+      dict = decObjs; 
+    }
+    else {
+      dict = new HashMap(); 
+    }
 
     for(m in ast.body) {
       nd = ast.body[m];
@@ -893,56 +1007,43 @@ var pnut = (function () {
 
           for(n in decs) {
             if(decs[n].init != null) {
-              if(decs[n].init.type=="ObjectExpression") { 
-                dict.setItem(decs[n].id.name, nd.start);
-              }
+              var add = 0;
+
+              if(decs[n].init.type=="ObjectExpression") { add = 1; }
               else if(decs[n].init.type=="NewExpression" && 
                 decs[n].init.callee.name == "Object") {
-                dict.setItem(decs[n].id.name, nd.start);
-             }
+                add = 1;
+              }
+              else if(decs[n].init.type=="Identifier") {
+                var pos = dict.getItem(decs[n].init.name);
+
+                if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+                  add = 1;
+                }
+              }
+
+              if(add==1 && dict.getItem(decs[n].id.name)==undefined) {
+                dict.setItem(decs[n].id.name, [ast.start, ast.end]);
+              }
             }
           } 
           break;
         case "ForStatement":
           // check objs in loop body
-          if(nd.body.body.length > 0) { 
-            var lpObjs = dictDecObjs(nd.body);
-            keys   = lpObjs.keys();
-
-            for(n in keys) {
-              name = keys[n] + " <= " + floop;
-              dict.setItem(name, lpObjs.getItem(keys[n]));
-            }
-          }
+          if(nd.body.body.length > 0) { dict = dictDecObjs(nd.body, dict); }
           break;
         case "WhileStatement":
           // check objs in loop body
-          if(nd.body.body.length > 0) { 
-            var wpObjs = dictDecObjs(nd.body);
-            keys   = wpObjs.keys();
-
-            for(n in keys) {
-              name = keys[n] + " <= " + wloop;
-              dict.setItem(name, wpObjs.getItem(keys[n]));
-            }
-          }
+          if(nd.body.body.length > 0) { dict = dictDecObjs(nd.body, dict); }
           break;
         case "FunctionDeclaration":
-          if(nd.body.body.length > 0) {
-            var ndName = nd.id.name;
-            var ndObjs = dictDecObjs(nd.body);
-            keys       = ndObjs.keys();
-
-            for(n in keys) {
-              name = keys[n] + " <= Function " + ndName + "()";
-              dict.setItem(name, ndObjs.getItem(keys[n]));
-            }
-          }
+          if(nd.body.body.length > 0) { dict = dictDecObjs(nd.body, dict); }
           break;
       }
     } 
     return dict;   
   }
+
 
 //------------------------------------------------------------------------
 // private function:
