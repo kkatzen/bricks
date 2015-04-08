@@ -40,6 +40,7 @@ function fillForm(problem) {
 
 	// TODO - Finish inserting form data
 }
+
 function getStudentResults(problem) {
     if(curProblem == null) {
         return;
@@ -58,24 +59,20 @@ function getStudentResults(problem) {
                 .click(function (event) {
                     event.preventDefault();
                     $.post("/user/read/" + user.id, {}, function (user) {
-
-                    //$.post("/user/read/", {id: user.id}, function (user) {
                         if (!user) {
                             alert("No user with that id found");
                             return;
                         }
-                        curStudent = user;
                         console.log("help ive been clicked");
                         getIndividual(user);
                     });
-                });            
+                });
             var student = $("<tr></tr>");
             student.append(a);
             problemCorrect(user, problem, student, users.length);
         });
     });
 }
-
 
 function getStudents() {
     console.log("getStudents();");
@@ -97,7 +94,6 @@ function getStudents() {
                             alert("No user with that id found");
                             return;
                         }
-                        curStudent = user;
                         console.log("help ive been clicked");
                         getIndividual(user);
                     });
@@ -109,25 +105,39 @@ function getStudents() {
         });
     });
 }
+
 //load submission
-function getSubmission(submission) {
-
+function getSubmission(submission,user,problem) {
     $("#submissionCreatedAt").html(submission.createdAt);
+    var a = $("<td></td>")
+        .html("<a href='#individual' data-toggle='pill'>" + user.displayName + "</a>")
+        .click(function (event) {
+            event.preventDefault();
+            $.post("/user/read/" + user.id, {}, function (user) {
+                if (!user) {
+                    alert("No user with that id found");
+                    return;
+                }
+                console.log("help ive been clicked");
+                getIndividual(user);
+            });
+        });
+    $("#submissionCreatedBy").empty().append(a);
+    $("#submissionProblem").html(problem.name);
+    $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
+    $("#submissionCodebox").html(submission.code);
+    $("#submissionMessage").html(submission.message);
     $("#submissionTitle").html("heres a submission");
-
 }
 
 //load individual's page
 function getIndividual(user) {
-    $("#individualName").html(user.displayName);
-    createIndividualProgressBar(user);
- //   loadIndividualProblems(user);
+    if(curStudent == user){
+        return;
+    }
+    curStudent = user;
+    $("#individualName").html(user.displayName + " " + user.username);
     $("#individualSubmissionList").empty();
-    $("#individualSubmissionList").append("<ul></ul>");
-}
-
-//generate individual's progress bar
-function createIndividualProgressBar(user){
     $("#individualProgessBar").empty().append('<div class="progress"><div id="pbgreen" class="progress-bar progress-bar-success" style="width: 0%;"><span class="sr-only">35% Complete (success)</span></div> <div id="pbyellow" class="progress-bar progress-bar-warning progress-bar-striped" style="width: 0%"><span class="sr-only">20% Complete (warning)</span></div><div id="pbred" class="progress-bar progress-bar-danger" style="width: 0%"><span class="sr-only">10% Complete (danger)</span></div></div>');
     $.post("/folder/read", null, function (folders) {
         var totalEarned = 0;
@@ -150,20 +160,10 @@ function createIndividualProgressBar(user){
                             .html("<a href='#submission' data-toggle='pill'>" + submission.createdAt + "</a>")
                             .click(function (event) {
                                 event.preventDefault();
-                                $.post("/submission/read/" + submission.id, {}, function (submission) {
-
-                                //$.post("/user/read/", {id: user.id}, function (user) {
-                                    if (!submission) {
-                                        alert("No submission with that id found");
-                                        return;
-                                    }
-                                    console.log("help ive been CLICKED");
-                                    getSubmission(submission);
-
-                                });
+                                    getSubmission(submission,user,problem);
                             });
                             $("#ISL" + problem.id).append(a);
-                            $("#ISL" + problem.id).append("style: " + earnedStylePoints  + "correct: " + earnedFuncPoints + "</li>");
+                            $("#ISL" + problem.id).append("style: " + submission.value.style  + "correct: " + submission.value.correct + "</li>");
                             if (parseInt(submission.value.style) > parseInt(earnedStylePoints)){
                                 earnedStylePoints = parseInt(submission.value.style);
                                 totalEarned += parseInt(earnedStylePoints);
@@ -185,7 +185,7 @@ function createIndividualProgressBar(user){
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
                         console.log("attempted" + percent);
-                        $("#ISLP" + problem.id).append(earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
+                        $("#ISLP" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
                     });
                 });
             });

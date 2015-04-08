@@ -67,6 +67,13 @@ form > button {
     margin-top: 10px;
     margin-bottom: 0;
 }
+#submissionCodebox {
+  background: black;
+  color: white;
+  font-family: consolas;
+  padding: 20px;
+
+}
 </style>
 <nav style="margin-bottom: 0" class="navbar navbar-inverse" role="navigation">
   <div class="container-fluid">
@@ -352,7 +359,14 @@ form > button {
 <!--Submission section starts-->
   <div class="tab-pane" id="submission">
     <h1 id="submissionTitle"></h1>
-    Created At: <span id="submissionCreatedAt"></span>
+    Created At: <span id="submissionCreatedAt"></span><br />
+    Created By: <span id="submissionCreatedBy"></span><br />
+    Problem: <span id="submissionProblem"></span>
+    Points: <span id="submissionPoints"></span>
+
+    <div class="alert alert-warning" id="submissionMessage"></div>
+    <div id="submissionCodebox">
+    </div>
   </div>
 <!--submission section ends-->
 
