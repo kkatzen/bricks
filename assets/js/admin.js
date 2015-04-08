@@ -109,79 +109,88 @@ function getStudents() {
         });
     });
 }
+//load submission
+function getSubmission(submission) {
 
+    $("#submissionCreatedAt").html(submission.createdAt);
+    $("#submissionTitle").html("heres a submission");
 
+}
+
+//load individual's page
 function getIndividual(user) {
-    console.log("getIndividual");
-    if(user == null) {
-        console.log("user null");
-        return;
-    }else{
-        console.log("user not null");
-    }
     $("#individualName").html(user.displayName);
     createIndividualProgressBar(user);
-    loadIndividualProblems(user);
+ //   loadIndividualProblems(user);
     $("#individualSubmissionList").empty();
     $("#individualSubmissionList").append("<ul></ul>");
-
 }
+
+//generate individual's progress bar
 function createIndividualProgressBar(user){
-    $("#individualProgessBar").empty().append("placefiller");
-/*
-    $.post("/submission/read/", {student: user.username}, function(submissions){
-        //student.append("<td>" + submissions.length + "</td>");
-        pointsEarned = 0;
-        pointsAttempted = 0;
-        pointsUnattempted = 0;
-        if(submissions.length == 0){
-            console.log("no submission");
-        } else {
-            var attempted = true;
-            submissions.forEach(function(submission) {
-                    pointsEarned += parseInt(submission.value.correct);
-                    pointsEarned += parseInt(submission.value.style);
-            });
-            console.log("some submission");
-            $("#individualProgessBar").append("pointsEarned = " + pointsEarned);
-        }
-        /*if(results.tried) {
-            if(results.correct) {
-                numfunct++;
-                rsection.append(correct());
-            } else {
-                rsection.append(wrong());
-            } if(results.style) {
-                numstyle++;
-                rsection.append(correct());
-            } else {
-                rsection.append(wrong());
-            }
-        }
-        student.append(rsection);
-        $("#studentResults").append(student);
-        //update quickview progress labels
-        $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
-        $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
-        
-    });*/
-
-}
-
-function loadIndividualProblems(user){
-    console.log("loadIndividualProblems called");
+    $("#individualProgessBar").empty().append('<div class="progress"><div id="pbgreen" class="progress-bar progress-bar-success" style="width: 0%;"><span class="sr-only">35% Complete (success)</span></div> <div id="pbyellow" class="progress-bar progress-bar-warning progress-bar-striped" style="width: 0%"><span class="sr-only">20% Complete (warning)</span></div><div id="pbred" class="progress-bar progress-bar-danger" style="width: 0%"><span class="sr-only">10% Complete (danger)</span></div></div>');
     $.post("/folder/read", null, function (folders) {
+        var totalEarned = 0;
+        var totalAttempted = 0;
         numFolders = folders.length;
         folders.forEach(function (folder) {
-            var button = $("<button></button>")
-            .attr("type","button")
-            .attr("class","btn btn-default dropdown-toggle")
-            .attr("data-toggle","dropdown")
-            .html(folder.name + " <span class='caret'></span>");
-           $("#individualSubmissionList").append("<li>" + folder.name + "</li>");
+            $("#individualSubmissionList").append("<h4>" + folder.name + "</h4><ul id ='ISL" + folder.id + "'></ul>");
+            $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
+                problems.forEach( function (problem) {
+                    var availableStylePoints = problem.value.style;
+                    var availableFuncPoints = problem.value.correct;
+                    var earnedStylePoints = parseInt(0);
+                    var earnedFuncPoints = parseInt(0);
+                    var attemptedStylePoints = parseInt(0);
+                    var attemptedFuncPoints = parseInt(0);
+                    $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
+                        $("#ISL" + folder.id).append("<li>" + problem.name + "<span id='ISLP" + problem.id + "'></span><ul id='ISL" + problem.id + "'></ul></li>");
+                        submissions.forEach( function (submission) {
+                            var a = $("<li></li>")
+                            .html("<a href='#submission' data-toggle='pill'>" + submission.createdAt + "</a>")
+                            .click(function (event) {
+                                event.preventDefault();
+                                $.post("/submission/read/" + submission.id, {}, function (submission) {
+
+                                //$.post("/user/read/", {id: user.id}, function (user) {
+                                    if (!submission) {
+                                        alert("No submission with that id found");
+                                        return;
+                                    }
+                                    console.log("help ive been CLICKED");
+                                    getSubmission(submission);
+
+                                });
+                            });
+                            $("#ISL" + problem.id).append(a);
+                            $("#ISL" + problem.id).append("style: " + earnedStylePoints  + "correct: " + earnedFuncPoints + "</li>");
+                            if (parseInt(submission.value.style) > parseInt(earnedStylePoints)){
+                                earnedStylePoints = parseInt(submission.value.style);
+                                totalEarned += parseInt(earnedStylePoints);
+                            }
+                            if (parseInt(submission.value.correct) > parseInt(earnedFuncPoints)){
+                                earnedFuncPoints = parseInt(submission.value.correct);
+                                totalEarned += parseInt(earnedFuncPoints);
+                            }
+                            var percent = parseInt(totalEarned) / parseInt(492) * parseInt(100);
+                            percent = percent + "%";
+                            $("#pbgreen").css("width",percent);
+                            console.log(percent);
+                        });
+                        if(submissions.length > 0){
+                            totalAttempted += parseInt(availableStylePoints) - parseInt(earnedStylePoints);
+                            totalAttempted += parseInt(availableFuncPoints) - parseInt(earnedFuncPoints);
+                        }
+                        var percent = parseInt(totalAttempted) / parseInt(492) * parseInt(100);
+                        percent = percent + "%";
+                        $("#pbyellow").css("width",percent);
+                        console.log("attempted" + percent);
+                        $("#ISLP" + problem.id).append(earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
+                    });
+                });
+            });
         });
     });
-
 }
 
 //check score of student for problem
@@ -485,6 +494,7 @@ function addFolder(folder) {
     var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
     var accordian = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + "</h4></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div>";
 
+
     $("#folderAccordion").append(accordian);
     var accordianFolderBody = '';
     $("#" + accordianFolderName).append(accordianFolderBody);
@@ -527,14 +537,12 @@ function addFolder(folder) {
 }
 
 function addProblemToAccordian(problem,folderName){
-    console.log("addProblemToAccordian()");
     var link = $("<li></li>").append(
         $("<a></a>")
             .attr("href","#questions")
             .attr("data-toggle","pill")
             .append(problem.name)
     );
-    //kkatz
     if(problem.phase == 0) {
         link.css("background-color","lightgray");
     }
@@ -542,7 +550,6 @@ function addProblemToAccordian(problem,folderName){
         curProblem = problem;
         fillForm(curProblem);
     });
-
     return link;
 }
 
@@ -552,14 +559,18 @@ function loadFolders() {
 		folders.forEach(function (folder) {
 			addFolder(folder);
 		});
+        //Add Folder
         addProblems();
 	});
 }
 
 function loadSortableFolders() {
+    $("#folderBar").empty();
+    $("#folderAccordion").empty();
 
     $.post("/folder/read", null, function (folders) {
-        $("#folderBar").append('<ul id="sortable"></ul>');
+
+        $("#folderBar").append('<ul id="sortable" class="panel-default"></ul>');
 
         numFolders = folders.length;
         folders.forEach(function (folder) {
@@ -568,19 +579,26 @@ function loadSortableFolders() {
             .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
             .click(function () {
                 $.post("/folder/destroy", {id: folder.id}, function () {
-                    reorderFolders();
+                    loadSortableFolders();
                     //reloadFolders();
                 });
                //allFolders[folder.id].remove();
             });
+            var sortableItem = $("<li></li>")
+            .attr("class","ui-state-default sortableItem")
+            .attr("id",folder.id);
+            sortableItem.append('<span class="sortableGrip ui-icon ui-icon-arrowthick-2-n-s"></span>');
+            sortableItem.append(folder.name);
+            sortableItem.append(removeButton);
 
-            var myAppend = '<li class="ui-state-default" id="' + folder.id + '"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>'+ folder.name + '</li>';
+           // var myAppend = '<li class="ui-state-default" id="' + folder.id + '"><span class="sortableGrip ui-icon ui-icon-arrowthick-2-n-s"></span>'+ folder.name + '</li>';
             //ADD REMOVE BUTTON TO THE DIV SOMEHOW
-            $("#sortable").append(myAppend);
+            $("#sortable").append(sortableItem);
 
         });
 
         $( "#sortable" ).sortable({
+            handle: ".sortableGrip",
             start: function(e, ui) {
                 // creates a temporary attribute on the element with the old index
                 $(this).attr('data-previndex', ui.item.index());
@@ -666,7 +684,11 @@ window.onload = function () {
 			$("#newFolderError").append(noNameError);
 		} else {
 			$.post("/folder/create", {name: $("#newFolder").val()}, function (folder) {
-                reloadFolders();
+                if(blinkTimer > 0){
+                    loadSortableFolders();
+                }else {
+                   reloadFolders();
+                }
 				$("#newFolder").val("");
 			});
 		}
@@ -773,8 +795,6 @@ window.onload = function () {
         if($(this).text() == 'Sort Folders') {
             blinking($("#sortFolders"));
             $(this).text('Done');
-            $("#folderBar").empty();
-            $("#folderAccordion").empty();
             loadSortableFolders();
         } else {
             clearInterval(blinkTimer);

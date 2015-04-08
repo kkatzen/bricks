@@ -44,9 +44,8 @@
 
 <script src="/js/admin.js"></script>
 <style>
-  #sortable { list-style-type: none; margin: 0; padding: 0; width: 100%; cursor: move;}
-  #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; width: 100%;}
-  #sortable li span { position: absolute; margin-left: -1.3em; }
+  #sortable { list-style-type: none; margin: 0; padding: 0; width: 100%;}
+  .sortableGrip { cursor: move; };
 
 #navigationPanel {
 	margin-top: 20px;
@@ -99,18 +98,13 @@ form > button {
     <button id="sortFolders" type="button" class="btn btn-default">Sort Folders</button>
     <button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add</button>
     <p>
+    <div id="addFolder">
+    <div class='input-group'><input type='text' id='newFolder' class='form-control' placeholder='Add folder...'></input><span class='input-group-btn'><button type='submit' id='newFolderBtn' class='btn btn-default'><span class='glyphicon glyphicon-plus' style='color:green;''></span></button></span></div><div id='newFolderError'></div>
+    </div>
     <ul id="folderBar" >
          <!-- folder dropdowns inserted here -->
     </ul>
-  <div class="panel-group" id="folderAccordion">
-  </div>
-     <div class="input-group">
-         <input type="text" id="newFolder" class="form-control" placeholder="Add folder..."></input>
-         <span class="input-group-btn">
-             <button type="submit" id="newFolderBtn" class="btn btn-default"><span class="glyphicon glyphicon-plus" style="color:green;"></span></button>
-         </span>
-     </div>
-     <div id="newFolderError"></div>
+    <div class="panel-group" id="folderAccordion"></div>
   </div>
   <!--Navigation ends-->
   <!--Content starts-->
@@ -340,18 +334,28 @@ form > button {
     <h1 id="individualName"></h1>
 
     <!--Progress Bar sub-section starts-->
-    <div id="individualProgessBar" class="col-md-12" style="background:green;">
-    test
-    </div>     
+    <div id="individualProgessBar" class="col-md-12">
+    </div>
+    green = earned points <br />
+    yellow = attempted but not earned points
     <!--Progress Bar sub-section ends-->
 
     <!--View Problems sub-section starts-->
-    <div id="individualSubmissionList" style="background:red;">
+    <div id="individualSubmissionList">
     </div>     
     <!--View Problems sub-section ends-->
 
   </div>
 <!--individual section ends-->
+
+
+<!--Submission section starts-->
+  <div class="tab-pane" id="submission">
+    <h1 id="submissionTitle"></h1>
+    Created At: <span id="submissionCreatedAt"></span>
+  </div>
+<!--submission section ends-->
+
 
 <!--Progress section starts-->
   <div class="tab-pane" id="progress">
