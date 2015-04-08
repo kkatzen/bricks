@@ -228,7 +228,7 @@ var pnut = (function () {
 //      that get used in a program
 //------------------------------------------------------------------------  
   function numUndecVars() {
-    // console.log("numUndecVars: " + dicts.listUndecVars.length);
+    console.log("numUndecVars: " + dicts.listUndecVars.length);
     return dicts.listUndecVars.length;
   } 
 
@@ -261,7 +261,7 @@ var pnut = (function () {
 //          var f2 = bar;
 //------------------------------------------------------------------------
   function isAnyFuncVar() {
-    // console.log("isAnyFuncVar: " + (dicts.listFuncVars.length>0));
+    console.log("isAnyFuncVar: " + (dicts.listFuncVars.length>0));
     return dicts.listFuncVars.length>0;
   }
 
@@ -339,7 +339,6 @@ var pnut = (function () {
               }
 
               if(add==1 && map.getItem(decs[n].id.name)==undefined) {
-                console.log("var: " + decs[n].id.name);
                 map.setItem(decs[n].id.name, [ast.start, ast.end]);
               }
             }
@@ -420,8 +419,8 @@ var pnut = (function () {
 
 
   function privateListUndecVars(ast) {
-    var decVars  = dicts.listDecVars;
-    var usedVars = dicts.listVarsUsed;
+    var decVars  = privateListDecVars(ast);
+    var usedVars = privateListVarsUsed(ast);
     var map      = new HashMap();
     var arr      = [];
 
@@ -628,7 +627,7 @@ var pnut = (function () {
 //          var c = new Array();
 //------------------------------------------------------------------------  
   function numDecArrs() {
-    // console.log("numDecArrs: " + listDecArrs(ast).length);
+    console.log("numDecArrs: " + dicts.listDecArrs.length);
     return dicts.listDecArrs.length;
   } 
 
@@ -655,8 +654,8 @@ var pnut = (function () {
 //        (undeclared c) c = [];
 //------------------------------------------------------------------------  
   function numUndecArrs() {
-    // console.log("numUndecArrs: " + listUndecArrs(ast).length);
-    return dicts.listUndecArrs.length
+    console.log("numUndecArrs: " + dicts.listUndecArrs.length);
+    return dicts.listUndecArrs.length;
   } 
 
 
@@ -686,7 +685,7 @@ var pnut = (function () {
     var arr      = new Set();
 
     for(m in usedArrs) { arr.add(usedArrs[m]); }
-    // console.log("numArrsUsed: " + arr.size);
+    console.log("numArrsUsed: " + arr.size);
     return arr.size;
   } 
 
@@ -796,8 +795,8 @@ var pnut = (function () {
 
 
   function privateListUndecArrs(ast) {
-    var decArrs  = dicts.listDecArrs;
-    var usedArrs = dicts.listArrsUsed;
+    var decArrs  = privateListDecArrs(ast);
+    var usedArrs = privateListArrsUsed(ast);
     var map      = new HashMap();
     var arr      = [];
 
@@ -904,7 +903,7 @@ var pnut = (function () {
 //          var z = new Boolean(); 
 //------------------------------------------------------------------------  
   function numDecObjs() {
-    // console.log("numDecObjs: "+ listDecObjs(ast).length);
+    console.log("numDecObjs: "+ dicts.dictDecObjs);
     return dicts.dictDecObjs;
   } 
 
@@ -921,7 +920,7 @@ var pnut = (function () {
 //          var z = new Boolean(); 
 //------------------------------------------------------------------------  
   function listDecObjs() {
-    // console.log("listDecObjs: "+ dictDecObjs(ast).keys());
+    console.log("listDecObjs: "+ dicts.dictDecObjs.keys());
     return dicts.dictDecObjs.keys();
   } 
 
@@ -933,7 +932,7 @@ var pnut = (function () {
 //        (undeclared a)   a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function numUndecObjs() {
-    // console.log("numUndecObjs: "+ listUndecObjs(ast).length);
+    console.log("numUndecObjs: "+ listUndecObjs.length);
     return listUndecObjs.length;
   } 
 
@@ -973,6 +972,7 @@ var pnut = (function () {
 //        a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function numObjsUsed() {
+    console.log("numObjsUsed: " +dicts.dictUsedObjs.length);
     return dicts.dictUsedObjs.length;
   } 
 
@@ -1275,6 +1275,7 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numWhileLoopsInGloLev() {
+    console.log("numWhileLoopsInGloLev: " +dicts.whileloopObj.wlgl);
     return dicts.whileloopObj.wlgl;
   }
 
@@ -1297,6 +1298,7 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedWhileLoopsInGloLev() {
+    console.log("numNestedWhileLoopsInGloLev: " +dicts.whileloopObj.nwlgl);
     return dicts.whileloopObj.nwlgl;
   }
 
@@ -1320,6 +1322,7 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numWhileLoopsInFuncs() {
+    console.log("numWhileLoopsInFuncs: " +dicts.whileloopObj.wlf);
     return dicts.whileloopObj.wlf;
   }
 
@@ -1328,6 +1331,7 @@ var pnut = (function () {
 // 4-d. calculate total number of nested while loops in functions (local)
 //------------------------------------------------------------------------  
   function numNestedWhileLoopsInFuncs() {
+    console.log("numNestedWhileLoopsInFuncs: " +dicts.whileloopObj.nwlf);
     return dicts.whileloopObj.nwlf;
   }
 
@@ -1336,6 +1340,7 @@ var pnut = (function () {
 // 4-e. calculate total number of while loops in a program
 //------------------------------------------------------------------------  
   function numWhileLoopsInAProgram() {
+    console.log("numWhileLoopsInAProgram: " +(dicts.whileloopObj.wlgl+dicts.whileloopObj.wlf));
     return (dicts.whileloopObj.wlgl+dicts.whileloopObj.wlf);
   }
 
@@ -1403,6 +1408,7 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numForLoopsInGloLev(ast) {
+    console.log("numForLoopsInGloLev: " +dicts.forloopObj.flgl);
     return dicts.forloopObj.flgl;
   }
 
@@ -1423,6 +1429,7 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInGloLev(ast) {
+    console.log("numNestedForLoopsInGloLev: " +dicts.forloopObj.nflgl);
     return dicts.forloopObj.nflgl;
   }
 
@@ -1444,6 +1451,7 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numForLoopsInFuncs(ast) {
+    console.log("numForLoopsInFuncs: " +dicts.forloopObj.flf);
     return dicts.forloopObj.flf;
   }
 
@@ -1464,6 +1472,7 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInFuncs(ast) {
+    console.log("numNestedForLoopsInFuncs: " +dicts.forloopObj.nflf);
     return dicts.forloopObj.nflf;
   }
 
@@ -1471,6 +1480,7 @@ var pnut = (function () {
 // 5-e. calculate total number of for loops in a program
 //------------------------------------------------------------------------  
   function numForLoopsInAProgram(ast) {
+    console.log("numForLoopsInAProgram: " +(dicts.forloopObj.flgl+dicts.forloopObj.flf));
     return (dicts.forloopObj.flgl+dicts.forloopObj.flf);
   }
 
@@ -1534,6 +1544,7 @@ var pnut = (function () {
 //        var a = function() {}
 //------------------------------------------------------------------------
   function numDecFuncs() {
+    console.log("numDecFuncs: "+dicts.dictDecFuncs.length);
     return dicts.dictDecFuncs.length;
   }
 
@@ -1561,7 +1572,7 @@ var pnut = (function () {
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
   function areCallExpsAllValid() {
-    // console.log("areCallExpsAllValid: " + (listInvalidFuncCallExps(ast).length==0));
+    console.log("areCallExpsAllValid: " + (listInvalidFuncCallExps().length==0));
     return listInvalidFuncCallExps().length==0;
   }
 
@@ -1590,7 +1601,6 @@ var pnut = (function () {
         list.push(exps[m]);
       }
     }
-    // console.log("listInvalidFuncCallExps: " + list);
     return list;
   }
 
@@ -1608,11 +1618,11 @@ var pnut = (function () {
 
     for(m in nums) {
       if(nums[m]==0) {
-        // console.log("areDecFuncsCalled: " + false);
+        console.log("areDecFuncsCalled: " + false);
         return false;
       }
     }
-    // console.log("areDecFuncsCalled: " + true);
+    console.log("areDecFuncsCalled: " + true);
     return true;
   }
 
@@ -1630,11 +1640,11 @@ var pnut = (function () {
 
     for(m in nums) {
       if(nums[m]!=1) {
-        // console.log("areDecFuncsCalledOnce: " + false);
+        console.log("areDecFuncsCalledOnce: " + false);
         return false;
       }
     }
-    // console.log("areDecFuncsCalledOnce: " + true);
+    console.log("areDecFuncsCalledOnce: " + true);
     return true;
   }
 
@@ -1651,11 +1661,11 @@ var pnut = (function () {
       nd = ast.body[m];
       if(nd.type=="FunctionDeclaration" &&
         nd.params.length>0) {
-        // console.log("isADecFuncPassedByRef: " + false);
+        console.log("isADecFuncPassedByRef: " + true);
         return true;
       }
     }
-    // console.log("isADecFuncPassedByRef: " + true);
+    console.log("isADecFuncPassedByRef: " + false);
     return false;
   }
 
@@ -1686,13 +1696,13 @@ var pnut = (function () {
               var set = setObjsInAFunc(nd.body);
 
               if(set.has(rtn.argument.name)) {
-                // console.log("isAnyFuncReturnObj: " + true);
+                console.log("isAnyFuncReturnObj: " + true);
                 return true;
               }
               break;
             case "ObjectExpression":
                 if(rtn.properties.length>0) {
-                  // console.log("isAnyFuncReturnObj: " + true);
+                  console.log("isAnyFuncReturnObj: " + true);
                   return true;
                 }
               break;
@@ -1700,7 +1710,7 @@ var pnut = (function () {
         }
       }
     }
-    // console.log("isAnyFuncReturnObj: " + false);
+    console.log("isAnyFuncReturnObj: " + false);
     return false;
   } 
 
@@ -1905,7 +1915,7 @@ var pnut = (function () {
         }
       }
     }
-    // console.log("Recursion: " + false);
+    console.log("Recursion: " + false);
     return false;
   }
 
