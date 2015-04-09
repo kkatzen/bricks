@@ -86,6 +86,12 @@ function addProblemToAccordian(problem,folderName){
 					results.correct || (submission.value.correct == problem.value.correct);
 				results.style = results.style || (submission.value.style == problem.value.style);
 				if (results.correct && results.style) { return true; } 
+
+				if($("#panel-" + folderName).hasClass("panel-danger")){
+					$("#panel-" + folderName).removeClass("panel-danger");
+					$("#panel-" + folderName).addClass("panel-warning");
+				}
+
 			});
 			studScore += maxScore;
 			if (maxScore < probMax) {
@@ -109,6 +115,8 @@ function addProblemToAccordian(problem,folderName){
 			if(availablePoints == currentEarned){
 				console.log("check is yes");
 				$(checkDiv).append(correct("8px"));
+				$("#panel-" + folderName).removeClass("panel-warning");
+				$("#panel-" + folderName).addClass("panel-success");
 			}
 
 		}
@@ -160,10 +168,9 @@ function addFolder (folder) {
 	var accordianFolderName = "accoridanFolder" + folder.id;
 	var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
 	
-	var accordian = "<div class='panel panel-default'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
+	var accordian = "<div id='panel-" + accordianFolderName  + "' class='panel panel-danger'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
 	//why style is mesing up below not up
 	//var accordian = "<div class='panel panel-default'>" + '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + "<div class='panel-heading'><h4 class='panel-title'>" + folder.name + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div></a></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
-
 	$("#folderAccordion").append(accordian);
 	var accordianFolderBody = '';
 	$("#" + accordianFolderName).append(accordianFolderBody);
