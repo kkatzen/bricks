@@ -144,7 +144,8 @@ function getIndividual(user) {
         var totalAttempted = 0;
         numFolders = folders.length;
         folders.forEach(function (folder) {
-            $("#individualSubmissionList").append("<h4>" + folder.name + "</h4><ul id ='ISL" + folder.id + "'></ul>");
+            var toggleLabel = '<h4><a data-toggle="collapse" data-parent="#accordion" href="#ISL'+ folder.id + '">' + folder.name + '</a></h4>';
+            $("#individualSubmissionList").append(toggleLabel + "<ul id ='ISL" + folder.id + "' class='panel-collapse collapse'></ul>");
             $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
                 problems.forEach( function (problem) {
                     var availableStylePoints = problem.value.style;
@@ -154,7 +155,7 @@ function getIndividual(user) {
                     var attemptedStylePoints = parseInt(0);
                     var attemptedFuncPoints = parseInt(0);
                     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
-                        $("#ISL" + folder.id).append("<li>" + problem.name + "<span id='ISLP" + problem.id + "'></span><ul id='ISL" + problem.id + "'></ul></li>");
+                        $("#ISL" + folder.id).append("<li>" + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
                         submissions.forEach( function (submission) {
                             var a = $("<li></li>")
                             .html("<a href='#submission' data-toggle='pill'>" + submission.createdAt + "</a>")
@@ -180,12 +181,13 @@ function getIndividual(user) {
                         if(submissions.length > 0){
                             totalAttempted += parseInt(availableStylePoints) - parseInt(earnedStylePoints);
                             totalAttempted += parseInt(availableFuncPoints) - parseInt(earnedFuncPoints);
+                            $("#ipCount" + problem.id).append("<br />" + submissions.length + "submissons");
                         }
                         var percent = parseInt(totalAttempted) / parseInt(492) * parseInt(100);
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
                         console.log("attempted" + percent);
-                        $("#ISLP" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
+                        $("#ipPoints" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
                     });
                 });
             });
