@@ -31,145 +31,83 @@ var pnut = (function () {
 //   - data object will be sent to the server for analysis/grading
 //------------------------------------------------------------------------
 
-  //------------------------------------------------------------------------------
-  // global dictionary object: collects valuable facts of 
-  // vars, arrs, objs, loops, and funcs 
-  //------------------------------------------------------------------------------
-  dicts = {}; 
-
   function collectStructureStyleFacts(ast) {
 
-  
-    /* 1. Style Grading for Declaration and Use of Variable           */
-    dicts.listDecVars              = privateListDecVars(ast);
-    dicts.listUndecVars            = privateListUndecVars(ast);
-    dicts.listVarsUsed             = privateListVarsUsed(ast);
-    dicts.listFuncVars             = privateListFuncVars(ast);
-
-    /* 2. Style Grading for Declaration and Use of Array              */
-    dicts.listDecArrs              = privateListDecArrs(ast);
-    dicts.listUndecArrs            = privateListUndecArrs(ast);
-    dicts.listArrsUsed             = privateListArrsUsed(ast);
-
-    /* 3. Style Grading for Declaration and Use of Object             */
-    dicts.dictDecObjs              = dictDecObjs(ast);
-    dicts.dictUsedObjs             = dictUsedObjs(ast);
-
-    /* 4. Style Grading for Use of While Loop                         */
-    dicts.whileloopObj             = numWhileLoops(ast);
-
-    /* 5. Style Grading for Use of For Loop                           */
-    dicts.forloopObj               = numForLoops(ast);
-
-
-    /* 6. Style Grading for Declaration and Use of Function           */
-    dicts.dictDecFuncs             = dictDecFuncs(ast);
-    dicts.dictFuncCalls            = dictFuncCalls(ast);
-    dicts.dictDecFuncsAndDecRtnObj = dictDecFuncsAndDecRtnObj(ast);
-    dicts.dictDecFuncsAndCallNum   = dictDecFuncsAndCallNum(ast);
-
-
-
-
     var dObj  = {
+
     /******************************************************************/
     /* 1. Style Grading for Declaration and Use of Variable           */
-    /*    a. numDecVars()      ==> integer >= 0                       */
-    /*    b. listDecVars()     ==> [ string ]                         */
-    /*    c. numUndecVars()    ==> integer >= 0                       */
-    /*    d. listUndecVars()   ==> [ string ]                         */
-    /*    e. listVarsUsed()    ==> [ string ]                         */
-    /*    f. isAnyFuncVar()    ==> boolean ? true:false               */
-    /*    g. listFuncVars()    ==> [ string]                          */
+    /*    a. numDecVars(ast)      ==> integer >= 0                    */
+    /*    b. numUndecVars(ast)    ==> integer >= 0                    */
+    /*    c. isAnyFuncVar(ast)    ==> boolean ? true:false            */
     /******************************************************************/
-      nDV      : numDecVars(),
-      lDV      : listDecVars(),
-      nUDV     : numUndecVars(),
-      lUDV     : listUndecVars(),
-      lVU      : listVarsUsed(),
-      isFV     : isAnyFuncVar(),
-      lFV      : listFuncVars(),
+      nDV      : numDecVars(ast),
+      nUDV     : numUndecVars(ast),
+      isFV     : isAnyFuncVar(ast),
 
     /******************************************************************/
     /* 2. Style Grading for Declaration and Use of Array              */
-    /*    a. numDecArrs()      ==> integer >= 0                       */
-    /*    b. listDecArrs()     ==> [ string ]                         */
-    /*    c. numUndecArrs()    ==> integer >= 0                       */
-    /*    d. listUndecArrs()   ==> [ string ]                         */
-    /*    e. numArrsUsed()     ==> integer >= 0                       */
-    /*    f. listArrsUsed()    ==> [ string ]                         */
+    /*    a. numDecArrs(ast)      ==> integer >= 0                    */
+    /*    b. numUndecArrs(ast)    ==> integer >= 0                    */
+    /*    c. numArrsUsed(ast)     ==> integer >= 0                    */
     /******************************************************************/
-      nDA      : numDecArrs(),
-      lDA      : listDecArrs(),
-      nUDA     : numUndecArrs(),
-      lUDA     : listUndecArrs(),
-      nAU      : numArrsUsed(),
-      lAU      : listArrsUsed(),
+      nDA      : numDecArrs(ast),
+      nUDA     : numUndecArrs(ast),
+      nAU      : numArrsUsed(ast),
 
     /******************************************************************/
     /* 3. Style Grading for Declaration and Use of Object             */
-    /*    a. numDecObjs()                    ==> integer >= 0         */
-    /*    b. listDecObjs()                   ==> [ string ]           */
-    /*    c. numUndecObjs()                  ==> integer >= 0         */
-    /*    d. listUndecObjs()                 ==> [ string ]           */
-    /*    e. numObjsUsed()                   ==> integer >= 0         */
-    /*    f. listObjsUsed()                  ==> [ string ]           */
-    /*    g. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
+    /*    a. numDecObjs(ast)                    ==> integer >= 0      */
+    /*    b. numUndecObjs(ast)                  ==> integer >= 0      */
+    /*    c. numObjsUsed(ast)                   ==> integer >= 0      */
+    /*    d. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
     /******************************************************************/    
-      nDO      : numDecObjs(),
-      lDO      : listDecObjs(),
-      nUDO     : numUndecObjs(),
-      lUDO     : listUndecObjs(),
-      nOU      : numObjsUsed(),
-      lOU      : listObjsUsed(),
+      nDO      : numDecObjs(ast),
+      nUDO     : numUndecObjs(ast),
+      nOU      : numObjsUsed(ast),
       isFBAFRO : isAnyFuncBoundToAFuncRtnObj(ast),
 
     /******************************************************************/
     /* 4. Style Grading for Use of While Loop                         */
-    /*    a. numWhileLoopsInGloLev()       ==> integer >= 0           */
-    /*    b. numNestedWhileLoopsInGloLev() ==> integer >= 0           */
-    /*    c. numWhileLoopsInFuncs()        ==> integer >= 0           */
-    /*    d. numNestedWhileLoopsInFuncs()  ==> integer >= 0           */
-    /*    e. numWhileLoopsInAProgram()     ==> integer >= 0           */
+    /*    a. numWhileLoopsInGloLev(ast)       ==> integer >= 0        */
+    /*    b. numNestedWhileLoopsInGloLev(ast) ==> integer >= 0        */
+    /*    c. numWhileLoopsInFuncs(ast)        ==> integer >= 0        */
+    /*    d. numNestedWhileLoopsInFuncs(ast)  ==> integer >= 0        */
+    /*    e. numWhileLoopsInAProgram(ast)     ==> integer >= 0        */
     /******************************************************************/  
-      nWLGL    : numWhileLoopsInGloLev(),
-      nNWLGL   : numNestedWhileLoopsInGloLev(),
-      nWLF     : numWhileLoopsInFuncs(),
-      nNWLF    : numNestedWhileLoopsInFuncs(),
-      nWLAP    : numWhileLoopsInAProgram(),
-
+      nWLGL    : numWhileLoopsInGloLev(ast),
+      nNWLGL   : numNestedWhileLoopsInGloLev(ast),
+      nWLF     : numWhileLoopsInFuncs(ast),
+      nNWLF    : numNestedWhileLoopsInFuncs(ast),
+      nWLAP    : numWhileLoopsInAProgram(ast),
 
     /******************************************************************/
     /* 5. Style Grading for Use of For Loop                           */
-    /*    a. numForLoopsInGloLev()            ==> integer >= 0        */
-    /*    b. numNestedForLoopsInGloLev()      ==> integer >= 0        */
-    /*    c. numForLoopsInFuncs()             ==> integer >= 0        */
-    /*    d. numNestedForLoopsInFuncs()       ==> integer >= 0        */
-    /*    e. numForLoopsInAProgram()          ==> integer >= 0        */
+    /*    a. numForLoopsInGloLev(ast)            ==> integer >= 0     */
+    /*    b. numNestedForLoopsInGloLev(ast)      ==> integer >= 0     */
+    /*    c. numForLoopsInFuncs(ast)             ==> integer >= 0     */
+    /*    d. numNestedForLoopsInFuncs(ast)       ==> integer >= 0     */
+    /*    e. numForLoopsInAProgram(ast)          ==> integer >= 0     */
     /******************************************************************/   
-      nFLGL    : numForLoopsInGloLev(),
-      nNFLGL   : numNestedForLoopsInGloLev(),
-      nFLF     : numForLoopsInFuncs(),
-      nNFLF    : numNestedForLoopsInFuncs(),
-      nFLAP    : numForLoopsInAProgram(),
+      nFLGL    : numForLoopsInGloLev(ast),
+      nNFLGL   : numNestedForLoopsInGloLev(ast),
+      nFLF     : numForLoopsInFuncs(ast),
+      nNFLF    : numNestedForLoopsInFuncs(ast),
+      nFLAP    : numForLoopsInAProgram(ast),
 
     /******************************************************************/
     /* 6. Style Grading for Declaration and Use of Function           */
-    /*    a. numDecFuncs()                  ==> integer >= 0          */
-    /*    b. listDecFuncs()                 ==> [ string ]            */
-    /*    c. areCallExpsAllValid()          ==> integer >= 0          */
-    /*    d. listInvalidFuncCallExps()      ==> [ string ]            */
-    /*    e. areDecFuncsCalled()            ==> boolean ? true:false  */
-    /*    f. areDecFuncsCalledOnce()        ==> boolean ? true:false  */
-    /*    g. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
-    /*    h. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
+    /*    a. numDecFuncs(ast)               ==> integer >= 0          */
+    /*    b. areCallExpsAllValid(ast)       ==> integer >= 0          */
+    /*    c. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
+    /*    d. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
+    /*    e. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
+    /*    f. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
     /******************************************************************/
-      nDF      : numDecFuncs(),
-      lDF      : listDecFuncs(),
-      areCEAV  : areCallExpsAllValid(),
-      lIFCE    : listInvalidFuncCallExps(),
-      areDFC   : areDecFuncsCalled(),
-      areDFCO  : areDecFuncsCalledOnce(),
+      nDF      : numDecFuncs(ast),
+      areCEAV  : areCallExpsAllValid(ast),
+      areDFC   : areDecFuncsCalled(ast),
+      areDFCO  : areDecFuncsCalledOnce(ast),
       isADFPBR : isAnyDecFuncPassedByRef(ast),
       isAFRO   : isAnyFuncReturnObj(ast),
 
@@ -184,15 +122,12 @@ var pnut = (function () {
   }
 
 
+
 /******************************************************************/
 /* 1. Style Grading for Declaration and Use of Variable           */
 /*    a. numDecVars(ast)      ==> integer >= 0                    */
-/*    b. listDecVars(ast)     ==> [ string ]                      */
-/*    c. numUndecVars(ast)    ==> integer >= 0                    */
-/*    d. listUndecVars(ast)   ==> [ string ]                      */
-/*    e. listVarsUsed(ast)    ==> [ string ]                      */
-/*    f. isAnyFuncVar(ast)    ==> boolean ? true:false            */
-/*    g. listFuncVars(ast)    ==> [ string]                       */
+/*    b. numUndecVars(ast)    ==> integer >= 0                    */
+/*    c. isAnyFuncVar(ast)    ==> boolean ? true:false            */
 /******************************************************************/
 
 //------------------------------------------------------------------------
@@ -207,73 +142,29 @@ var pnut = (function () {
 //            }
 //          }
 //------------------------------------------------------------------------  
-  function numDecVars() {
-    console.log("numDecVars: "+dicts.listDecVars.length);
-    return dicts.listDecVars.length;
+  function numDecVars(ast) {
+    console.log("numDecVars: "+listDecVars(ast).length);
+    return listDecVars(ast).length;
   }
 
-
 //------------------------------------------------------------------------
-// 1-b. list all declared variables in a program:      
-//      * dynamically scope variables
-//------------------------------------------------------------------------  
-  function listDecVars(){
-    // console.log("listDecVars: "+dicts.listDecVars);
-    return dicts.listDecVars;
-  }
-
-
-//------------------------------------------------------------------------
-// 1-c. calculate total number of undeclared variables 
+// 1-b. calculate total number of undeclared variables 
 //      that get used in a program
 //------------------------------------------------------------------------  
-  function numUndecVars() {
-    console.log("numUndecVars: " + dicts.listUndecVars.length);
-    return dicts.listUndecVars.length;
+  function numUndecVars(ast) {
+    console.log("numUndecVars: " + listUndecVars(ast).length);
+    return listUndecVars(ast).length;
   } 
 
 
 //------------------------------------------------------------------------
-// 1-d. list all undeclacred variables that get used in a program
-//------------------------------------------------------------------------ 
-  function listUndecVars() {
-    // console.log("listUndecVars: " + dicts.listUndecVars);
-    return dicts.listUndecVars;
-  }
-
-
-//------------------------------------------------------------------------
-// 1-e. list all variables that are used in a program
-//      ex. (array) arr.push(val)
-//          alert(val)
-//          var num = val + 1
-//          num = val + 1
-//------------------------------------------------------------------------ 
-  function listVarsUsed() {
-    // console.log("listVarsUsed: " + dicts.listVarsUsed);
-    return dicts.listVarsUsed;
-  }
-
-
-//------------------------------------------------------------------------
-// 1-f. exam if any function gets assigned to a variable in global level
+// 1-c. exam if any function gets assigned to a variable in global level
 //      ex: function bar() { }
 //          var f2 = bar;
 //------------------------------------------------------------------------
-  function isAnyFuncVar() {
-    console.log("isAnyFuncVar: " + (dicts.listFuncVars.length>0));
-    return dicts.listFuncVars.length>0;
-  }
-
-
-//------------------------------------------------------------------------
-// 1-g. list global variables in which directly points to a function
-//      ex: function bar() { }
-//          var f2 = bar;
-//------------------------------------------------------------------------
-  function listFuncVars() {
-    // console.log("listFuncVars: " + dicts.listFuncVars);
-    return dicts.listFuncVars;
+  function isAnyFuncVar(ast) {
+    console.log("isAnyFuncVar: " + (listFuncVars(ast).length>0));
+    return listFuncVars(ast).length>0;
   }
 
 
@@ -301,9 +192,10 @@ var pnut = (function () {
 
 
 //------------------------------------------------------------------------
-// private functions      
+// private function:
+// list all declared variables in a program
 //------------------------------------------------------------------------ 
-  function privateListDecVars(ast, decVars) {
+  function listDecVars(ast, decVars) {
     var map, nd, m, n, decs;
     var arr = [];
 
@@ -375,7 +267,7 @@ var pnut = (function () {
 
           // check var in loop body
           if(nd.body.body.length > 0) { 
-            var obj     = privateListDecVars(nd.body, map);
+            var obj     = listDecVars(nd.body, map);
             var lpVars  = obj.arr;
             map         = obj.map;
 
@@ -386,7 +278,7 @@ var pnut = (function () {
           var wloop = "while loop";
 
           if(nd.body.body.length > 0) { 
-            var obj    = privateListDecVars(nd.body, map);
+            var obj    = listDecVars(nd.body, map);
             var wpVars = obj.arr;
             map        = obj.map;
 
@@ -396,7 +288,7 @@ var pnut = (function () {
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName  = nd.id.name;
-            var obj     = privateListDecVars(nd.body, map);
+            var obj     = listDecVars(nd.body, map);
             var ndVars  = obj.arr;
             map         = obj.map;
 
@@ -408,19 +300,22 @@ var pnut = (function () {
 
     /* function overlading */
     switch(arguments.length) {
-      case 1: // privateListDecVars(ast)
+      case 1: // do listDecVars(ast)
         // console.log("ListDecVars(ast): "+ arr);
         return arr;  
-      case 2: // do privateListDecVars(ast, map)
+      case 2: // do listDecVars(ast, map)
         // console.log("ListDecVars(ast, map): "+ {arr: arr, map: map});
         return {arr: arr, map: map};
     }
   }
 
-
-  function privateListUndecVars(ast) {
-    var decVars  = privateListDecVars(ast);
-    var usedVars = privateListVarsUsed(ast);
+//------------------------------------------------------------------------
+// private function:
+// list all undeclacred variables that get used in a program
+//------------------------------------------------------------------------ 
+  function listUndecVars(ast) {
+    var decVars  = listDecVars(ast);
+    var usedVars = listVarsUsed(ast);
     var map      = new HashMap();
     var arr      = [];
 
@@ -438,8 +333,15 @@ var pnut = (function () {
     return arr;
   } 
 
-
-  function privateListVarsUsed(ast) {
+//------------------------------------------------------------------------
+// private function:
+// list all variables that are used in a program
+//      ex. (array) arr.push(val)
+//          alert(val)
+//          var num = val + 1
+//          num = val + 1
+//------------------------------------------------------------------------ 
+  function listVarsUsed(ast) {
     var count      = 0;
     var usedVars = [];
     var nd, m, args, cal;
@@ -562,8 +464,13 @@ var pnut = (function () {
     return usedVars;
   } 
 
-
-  function privateListFuncVars(ast) {
+//------------------------------------------------------------------------
+// private function:
+// list global variables in which directly points to a function
+//      ex: function bar() { }
+//          var f2 = bar;
+//------------------------------------------------------------------------ 
+  function listFuncVars(ast) {
     var node;
     var func = new Set();
     var used = new Set();
@@ -611,12 +518,9 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 2. Style Grading for Declaration and Use of Array              */
-/*    a. numDecArrs()      ==> integer >= 0                       */
-/*    b. listDecArrs()     ==> [ string ]                         */
-/*    c. numUndecArrs()    ==> integer >= 0                       */
-/*    d. listUndecArrs()   ==> [ string ]                         */
-/*    e. numArrsUsed()     ==> integer >= 0                       */
-/*    f. listArrsUsed()    ==> [ string ]                         */
+/*    a. numDecArrs(ast)      ==> integer >= 0                    */
+/*    b. numUndecArrs(ast)    ==> integer >= 0                    */
+/*    c. numArrsUsed(ast)     ==> integer >= 0                    */
 /******************************************************************/
 
 //------------------------------------------------------------------------
@@ -626,26 +530,14 @@ var pnut = (function () {
 //          var b = [one, two, three];
 //          var c = new Array();
 //------------------------------------------------------------------------  
-  function numDecArrs() {
-    console.log("numDecArrs: " + dicts.listDecArrs.length);
-    return dicts.listDecArrs.length;
+  function numDecArrs(ast) {
+    console.log("numDecArrs: " + listDecArrs(ast).length);
+    return listDecArrs(ast).length;
   } 
 
 
 //------------------------------------------------------------------------
-// 2-b. list declared arrays in a program
-//      ex: 
-//          var a, e=[], f="empty";
-//          var b = [one, two, three];
-//          var c = new Array();
-//------------------------------------------------------------------------ 
-  function listDecArrs() {
-    return dicts.listDecArrs;
-  } 
-
-
-//------------------------------------------------------------------------
-// 2-c. calculate total number of undeclared arrays 
+// 2-b. calculate total number of undeclared arrays 
 //      that get used in a program
 //      ex:
 //        (undeclared p) p.push("p");
@@ -653,35 +545,23 @@ var pnut = (function () {
 //        (undeclared b) b = new Array({});
 //        (undeclared c) c = [];
 //------------------------------------------------------------------------  
-  function numUndecArrs() {
-    console.log("numUndecArrs: " + dicts.listUndecArrs.length);
-    return dicts.listUndecArrs.length;
+  function numUndecArrs(ast) {
+    console.log("numUndecArrs: " + listUndecArrs(ast).length);
+    return listUndecArrs(ast).length;
   } 
 
 
-//------------------------------------------------------------------------
-// 2-d. list all undeclared arrays that get used in a program
-//      ex:
-//        (undeclared p) p.push("p");
-//        (undeclared a) a = [one, two, three];
-//        (undeclared b) b = new Array({});
-//        (undeclared c) c = [];
-//------------------------------------------------------------------------  
-  function listUndecArrs() {
-    return dicts.listUndecArrs;
-  }
-
 
 //------------------------------------------------------------------------
-// 2-e. calculate total number of arrays that are used in a program
+// 2-c. calculate total number of arrays that are used in a program
 //      ex:
 //        p.push("p"), p.sort(), p.shift()...
 //        a = [one, two, three];
 //        b = new Array({});
 //        c = [];
 //------------------------------------------------------------------------  
-  function numArrsUsed() {
-    var usedArrs = dicts.listArrsUsed;
+  function numArrsUsed(ast) {
+    var usedArrs = listArrsUsed(ast);
     var arr      = new Set();
 
     for(m in usedArrs) { arr.add(usedArrs[m]); }
@@ -689,22 +569,17 @@ var pnut = (function () {
     return arr.size;
   } 
 
-//------------------------------------------------------------------------
-// 2-f. list all arrays that are used in a program 
-//      ex:
-//        p.push("p"), p.sort(), p.shift()...
-//        a = [one, two, three];
-//        b = new Array({});
-//        c = [];
-//------------------------------------------------------------------------  
-  function listArrsUsed() {
-    return dicts.listArrsUsed;
-  }
+
 
 //------------------------------------------------------------------------
-// private functions
-//------------------------------------------------------------------------  
-  function privateListDecArrs(ast, decArrs) {
+// private function:
+// list declared arrays in a program
+//      ex: 
+//          var a, e=[], f="empty";
+//          var b = [one, two, three];
+//          var c = new Array();
+//------------------------------------------------------------------------ 
+  function listDecArrs(ast, decArrs) {
     var map, nd, m, n;
     var arr = [];
 
@@ -753,7 +628,7 @@ var pnut = (function () {
           // check var in loop body
           if(nd.body.body.length > 0) {
             var floop   = "for loop";
-            var obj     = privateListDecArrs(nd.body, map);
+            var obj     = listDecArrs(nd.body, map);
             var lpArrs  = obj.arr;
             map         = obj.map;
 
@@ -763,7 +638,7 @@ var pnut = (function () {
         case "WhileStatement":
           if(nd.body.body.length > 0) { 
             var wloop  = "while loop";
-            var obj    = privateListDecArrs(nd.body, map);
+            var obj    = listDecArrs(nd.body, map);
             var wpArrs = obj.arr;
             map        = obj.map;
 
@@ -773,7 +648,7 @@ var pnut = (function () {
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName  = nd.id.name;
-            var obj     = privateListDecArrs(nd.body, map);
+            var obj     = listDecArrs(nd.body, map);
             var ndArrs  = obj.arr;
             map         = obj.map;
 
@@ -794,9 +669,18 @@ var pnut = (function () {
   } 
 
 
-  function privateListUndecArrs(ast) {
-    var decArrs  = privateListDecArrs(ast);
-    var usedArrs = privateListArrsUsed(ast);
+//------------------------------------------------------------------------
+// private function:
+// list all undeclared arrays that get used in a program
+//      ex:
+//        (undeclared p) p.push("p");
+//        (undeclared a) a = [one, two, three];
+//        (undeclared b) b = new Array({});
+//        (undeclared c) c = [];
+//------------------------------------------------------------------------ 
+  function listUndecArrs(ast) {
+    var decArrs  = listDecArrs(ast);
+    var usedArrs = listArrsUsed(ast);
     var map      = new HashMap();
     var arr      = [];
 
@@ -816,7 +700,16 @@ var pnut = (function () {
   } 
 
 
-  function privateListArrsUsed(ast) {
+//------------------------------------------------------------------------
+// private function:
+// list all arrays that are used in a program 
+//      ex:
+//        p.push("p"), p.sort(), p.shift()...
+//        a = [one, two, three];
+//        b = new Array({});
+//        c = [];
+//------------------------------------------------------------------------  
+  function listArrsUsed(ast) {
     var count    = 0;
     var usedArrs = [];
     var nd, m, exp, func;
@@ -851,7 +744,7 @@ var pnut = (function () {
           var floop = "for loop";
           // check vars in loop body
           if(nd.body.body.length > 0) { 
-            var lpArrs = privateListArrsUsed(nd.body);
+            var lpArrs = listArrsUsed(nd.body);
             for(n in lpArrs) { usedArrs.push(lpArrs[n] + " <= " + floop); }
           }
           break;
@@ -861,14 +754,14 @@ var pnut = (function () {
           // check vars in loop body
           var wloop = "while loop";
           if(nd.body.body.length > 0) { 
-            var wpArrs = privateListArrsUsed(nd.body);
+            var wpArrs = listArrsUsed(nd.body);
             for(n in wpArrs) { usedArrs.push(wpArrs[n] + " <= " + wloop); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName = nd.id.name;
-            var ndArrs = privateListArrsUsed(nd.body);
+            var ndArrs = listArrsUsed(nd.body);
             for(n in ndArrs) { usedArrs.push(ndArrs[n] + " <= Function " + ndName + "()"); }
           }
           break;
@@ -882,14 +775,11 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 3. Style Grading for Declaration and Use of Object             */
-/*    a. numDecObjs()                    ==> integer >= 0         */
-/*    b. listDecObjs()                   ==> [ string ]           */
-/*    c. numUndecObjs()                  ==> integer >= 0         */
-/*    d. listUndecObjs()                 ==> [ string ]           */
-/*    e. numObjsUsed()                   ==> integer >= 0         */
-/*    f. listObjsUsed()                  ==> [ string ]           */
-/*    g. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
-/******************************************************************/
+/*    a. numDecObjs(ast)                 ==> integer >= 0         */
+/*    b. numUndecObjs(ast)               ==> integer >= 0         */
+/*    c. numObjsUsed(ast)                ==> integer >= 0         */
+/*    d. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
+/******************************************************************/    
 
 //------------------------------------------------------------------------
 // 3-a. calculate total number of declared objects in a program
@@ -902,91 +792,38 @@ var pnut = (function () {
 //          var y = new Number();    
 //          var z = new Boolean(); 
 //------------------------------------------------------------------------  
-  function numDecObjs() {
-    console.log("numDecObjs: "+ dicts.dictDecObjs);
-    return dicts.dictDecObjs;
-  } 
-
-
-//------------------------------------------------------------------------
-// 3-b. list all declared objects in a program
-//      ex: 
-//          var car = {name:"Tom", age:20};
-//          var obj = new Object();
-//          
-//      the followings do not count as objects:
-//          var x = new String();       
-//          var y = new Number();    
-//          var z = new Boolean(); 
-//------------------------------------------------------------------------  
-  function listDecObjs() {
-    console.log("listDecObjs: "+ dicts.dictDecObjs.keys());
-    return dicts.dictDecObjs.keys();
+  function numDecObjs(ast) {
+    console.log("numDecObjs: "+ dictDecObjs(ast).keys().length);
+    return dictDecObjs(ast).keys().length;
   } 
 
 //------------------------------------------------------------------------
-// 3-c. calculate total number of undeclared objects 
+// 3-b. calculate total number of undeclared objects 
 //      that get used in a program
 //      ex:
 //        (undeclared obj) objName.methodName() ==> car.name() 
 //        (undeclared a)   a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
-  function numUndecObjs() {
-    console.log("numUndecObjs: "+ listUndecObjs.length);
-    return listUndecObjs.length;
+  function numUndecObjs(ast) {
+    console.log("numUndecObjs: "+ listUndecObjs(ast).length);
+    return listUndecObjs(ast).length;
   } 
 
-//------------------------------------------------------------------------
-// 3-d. list all undeclared objects that get used in a program
-//      that get used in a program
-//      ex:
-//        (undeclared obj) objName.methodName() ==> car.name() 
-//        (undeclared a)   a = { name: "A", age:20 }
-//------------------------------------------------------------------------  
-  function listUndecObjs() {
-    var decObjs  = dicts.dictDecObjs;
-    var usedObjs = dicts.dictUsedObjs;
-    var dict     = new HashMap();
-    var keys     = usedObjs.keys();
-    var dec, use;
-
-    for(m in keys) {
-      dec = decObjs.getItem(keys[m]);
-      use = usedObjs.getItem(keys[m]);
-
-      if(dec==undefined) {
-        dict.setItem(keys[m], usedObjs.getItem(keys[m]));
-      }
-      else if(dec[0]<use[0] && dec[1]>use[1]) {
-        dict.setItem(keys[m], usedObjs.getItem(keys[m]));
-      }
-    }
-    // console.log("listUndecObjs: "+ dict.keys());
-    return dict.keys();
-  } 
 
 //------------------------------------------------------------------------
-// 3-e. calculate total number of objects that are used in a program
+// 3-c. calculate total number of objects that are used in a program
 //      ex:
 //        objName.methodName() ==> car.name() 
 //        a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
-  function numObjsUsed() {
-    console.log("numObjsUsed: " +dicts.dictUsedObjs.length);
-    return dicts.dictUsedObjs.length;
+  function numObjsUsed(ast) {
+    console.log("numObjsUsed: " +dictUsedObjs(ast).keys().length);
+    return dictUsedObjs(ast).keys().length;
   } 
 
-//------------------------------------------------------------------------
-// 3-f. list all objecs that are used in a program
-//      ex:
-//        a = { name: "A", age:20 }
-//------------------------------------------------------------------------  
-  function listObjsUsed() {
-    return dicts.dictUsedObjs.keys();
-  } 
 
 //------------------------------------------------------------------------
-// 3-g. identify if any function return object is bound to a function
+// 3-d. identify if any function return object is bound to a function
 //      ex:
 //        function foo() {
 //          var ob = {
@@ -1064,6 +901,14 @@ var pnut = (function () {
 // private function:
 // create a dictionary that maps all declared objects 
 // with their occurance orders  
+//      ex: 
+//          var car = {name:"Tom", age:20};
+//          var obj = new Object();
+//          
+//      the followings do not count as objects:
+//          var x = new String();       
+//          var y = new Number();    
+//          var z = new Boolean(); 
 //------------------------------------------------------------------------  
   function dictDecObjs(ast, decObjs) {
     var dict, nd, m, n, name, keys;
@@ -1129,6 +974,8 @@ var pnut = (function () {
 //------------------------------------------------------------------------
 // private function:
 // create a dictionary that maps all used objects with occurance orders
+//      ex:
+//        a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
   function dictUsedObjs(ast) {
     var usedObjs = new HashMap();
@@ -1205,6 +1052,37 @@ var pnut = (function () {
 
 //------------------------------------------------------------------------
 // private function:
+// list all undeclared objects that get used in a program
+//      that get used in a program
+//      ex:
+//        (undeclared obj) objName.methodName() ==> car.name() 
+//        (undeclared a)   a = { name: "A", age:20 }
+//------------------------------------------------------------------------  
+  function listUndecObjs(ast) {
+    var decObjs  = dictDecObjs(ast);
+    var usedObjs = dictUsedObjs(ast);
+    var dict     = new HashMap();
+    var keys     = usedObjs.keys();
+    var dec, use;
+
+    for(m in keys) {
+      dec = decObjs.getItem(keys[m]);
+      use = usedObjs.getItem(keys[m]);
+
+      if(dec==undefined) {
+        dict.setItem(keys[m], usedObjs.getItem(keys[m]));
+      }
+      else if(dec[0]<use[0] && dec[1]>use[1]) {
+        dict.setItem(keys[m], usedObjs.getItem(keys[m]));
+      }
+    }
+    // console.log("listUndecObjs: "+ dict.keys());
+    return dict.keys();
+  } 
+
+
+//------------------------------------------------------------------------
+// private function:
 // list all declared functions in a function   
 //------------------------------------------------------------------------  
   function setFuncsInAFunc(nd) {
@@ -1250,11 +1128,11 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 4. Style Grading for Use of While Loop                         */
-/*    a. numWhileLoopsInGloLev()       ==> integer >= 0           */
-/*    b. numNestedWhileLoopsInGloLev() ==> integer >= 0           */
-/*    c. numWhileLoopsInFuncs()        ==> integer >= 0           */
-/*    d. numNestedWhileLoopsInFuncs()  ==> integer >= 0           */
-/*    e. numWhileLoopsInAProgram()     ==> integer >= 0           */
+/*    a. numWhileLoopsInGloLev(ast)       ==> integer >= 0        */
+/*    b. numNestedWhileLoopsInGloLev(ast) ==> integer >= 0        */
+/*    c. numWhileLoopsInFuncs(ast)        ==> integer >= 0        */
+/*    d. numNestedWhileLoopsInFuncs(ast)  ==> integer >= 0        */
+/*    e. numWhileLoopsInAProgram(ast)     ==> integer >= 0        */
 /******************************************************************/    
 
 //------------------------------------------------------------------------
@@ -1274,9 +1152,9 @@ var pnut = (function () {
 //           a++;
 //        }
 //------------------------------------------------------------------------  
-  function numWhileLoopsInGloLev() {
-    console.log("numWhileLoopsInGloLev: " +dicts.whileloopObj.wlgl);
-    return dicts.whileloopObj.wlgl;
+  function numWhileLoopsInGloLev(ast) {
+    console.log("numWhileLoopsInGloLev: " +numWhileLoops(ast).wlgl);
+    return numWhileLoops(ast).wlgl;
   }
 
 
@@ -1297,9 +1175,9 @@ var pnut = (function () {
 //           a++;
 //        }
 //------------------------------------------------------------------------  
-  function numNestedWhileLoopsInGloLev() {
-    console.log("numNestedWhileLoopsInGloLev: " +dicts.whileloopObj.nwlgl);
-    return dicts.whileloopObj.nwlgl;
+  function numNestedWhileLoopsInGloLev(ast) {
+    console.log("numNestedWhileLoopsInGloLev: " +numWhileLoops(ast).nwlgl);
+    return numWhileLoops(ast).nwlgl;
   }
 
 
@@ -1321,27 +1199,27 @@ var pnut = (function () {
 //            }
 //          }
 //------------------------------------------------------------------------  
-  function numWhileLoopsInFuncs() {
-    console.log("numWhileLoopsInFuncs: " +dicts.whileloopObj.wlf);
-    return dicts.whileloopObj.wlf;
+  function numWhileLoopsInFuncs(ast) {
+    console.log("numWhileLoopsInFuncs: " +numWhileLoops(ast).wlf);
+    return numWhileLoops(ast).wlf;
   }
 
 
 //------------------------------------------------------------------------
 // 4-d. calculate total number of nested while loops in functions (local)
 //------------------------------------------------------------------------  
-  function numNestedWhileLoopsInFuncs() {
-    console.log("numNestedWhileLoopsInFuncs: " +dicts.whileloopObj.nwlf);
-    return dicts.whileloopObj.nwlf;
+  function numNestedWhileLoopsInFuncs(ast) {
+    console.log("numNestedWhileLoopsInFuncs: " +numWhileLoops(ast).nwlf);
+    return numWhileLoops(ast).nwlf;
   }
 
 
 //------------------------------------------------------------------------
 // 4-e. calculate total number of while loops in a program
 //------------------------------------------------------------------------  
-  function numWhileLoopsInAProgram() {
-    console.log("numWhileLoopsInAProgram: " +(dicts.whileloopObj.wlgl+dicts.whileloopObj.wlf));
-    return (dicts.whileloopObj.wlgl+dicts.whileloopObj.wlf);
+  function numWhileLoopsInAProgram(ast) {
+    console.log("numWhileLoopsInAProgram: " +(numWhileLoops(ast).wlgl+numWhileLoops(ast).wlf));
+    return (numWhileLoops(ast).wlgl+numWhileLoops(ast).wlf);
   }
 
 
@@ -1385,11 +1263,11 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 5. Style Grading for Use of For Loop                           */
-/*    a. numForLoopsInGloLev()            ==> integer >= 0        */
-/*    b. numNestedForLoopsInGloLev()      ==> integer >= 0        */
-/*    c. numForLoopsInFuncs()             ==> integer >= 0        */
-/*    d. numNestedForLoopsInFuncs()       ==> integer >= 0        */
-/*    e. numForLoopsInAProgram()          ==> integer >= 0        */
+/*    a. numForLoopsInGloLev(ast)            ==> integer >= 0     */
+/*    b. numNestedForLoopsInGloLev(ast)      ==> integer >= 0     */
+/*    c. numForLoopsInFuncs(ast)             ==> integer >= 0     */
+/*    d. numNestedForLoopsInFuncs(ast)       ==> integer >= 0     */
+/*    e. numForLoopsInAProgram(ast)          ==> integer >= 0     */
 /******************************************************************/ 
 
 //------------------------------------------------------------------------
@@ -1408,8 +1286,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numForLoopsInGloLev(ast) {
-    console.log("numForLoopsInGloLev: " +dicts.forloopObj.flgl);
-    return dicts.forloopObj.flgl;
+    console.log("numForLoopsInGloLev: " +numForLoops(ast).flgl);
+    return numForLoops(ast).flgl;
   }
 
 
@@ -1429,8 +1307,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInGloLev(ast) {
-    console.log("numNestedForLoopsInGloLev: " +dicts.forloopObj.nflgl);
-    return dicts.forloopObj.nflgl;
+    console.log("numNestedForLoopsInGloLev: " +numForLoops(ast).nflgl);
+    return numForLoops(ast).nflgl;
   }
 
 
@@ -1451,8 +1329,8 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numForLoopsInFuncs(ast) {
-    console.log("numForLoopsInFuncs: " +dicts.forloopObj.flf);
-    return dicts.forloopObj.flf;
+    console.log("numForLoopsInFuncs: " +numForLoops(ast).flf);
+    return numForLoops(ast).flf;
   }
 
 //------------------------------------------------------------------------
@@ -1472,16 +1350,16 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInFuncs(ast) {
-    console.log("numNestedForLoopsInFuncs: " +dicts.forloopObj.nflf);
-    return dicts.forloopObj.nflf;
+    console.log("numNestedForLoopsInFuncs: " +numForLoops(ast).nflf);
+    return numForLoops(ast).nflf;
   }
 
 //------------------------------------------------------------------------
 // 5-e. calculate total number of for loops in a program
 //------------------------------------------------------------------------  
   function numForLoopsInAProgram(ast) {
-    console.log("numForLoopsInAProgram: " +(dicts.forloopObj.flgl+dicts.forloopObj.flf));
-    return (dicts.forloopObj.flgl+dicts.forloopObj.flf);
+    console.log("numForLoopsInAProgram: " +(numForLoops(ast).flgl+numForLoops(ast).flf));
+    return (numForLoops(ast).flgl+numForLoops(ast).flf);
   }
 
 //------------------------------------------------------------------------
@@ -1527,14 +1405,12 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 6. Style Grading for Declaration and Use of Function           */
-/*    a. numDecFuncs()                  ==> integer >= 0          */
-/*    b. listDecFuncs()                 ==> [ string ]            */
-/*    c. areCallExpsAllValid()          ==> integer >= 0          */
-/*    d. listInvalidFuncCallExps()      ==> [ string ]            */
-/*    e. areDecFuncsCalled()            ==> boolean ? true:false  */
-/*    f. areDecFuncsCalledOnce()        ==> boolean ? true:false  */
-/*    g. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
-/*    h. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
+/*    a. numDecFuncs(ast)               ==> integer >= 0          */
+/*    b. areCallExpsAllValid(ast)       ==> integer >= 0          */
+/*    c. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
+/*    d. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
+/*    e. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
+/*    f. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
 /******************************************************************/
 
 //------------------------------------------------------------------------
@@ -1543,25 +1419,14 @@ var pnut = (function () {
 //        function a() {}
 //        var a = function() {}
 //------------------------------------------------------------------------
-  function numDecFuncs() {
-    console.log("numDecFuncs: "+dicts.dictDecFuncs.length);
-    return dicts.dictDecFuncs.length;
+  function numDecFuncs(ast) {
+    console.log("numDecFuncs: "+dictDecFuncs(ast).keys().length);
+    return dictDecFuncs(ast).keys().length;
   }
 
-//------------------------------------------------------------------------
-// 6-b. list all declared functions in global level with occuring number:
-//      ex:
-//        function a() {}
-//        function b(x) {}
-//        function b(x, y) {}
-//        var a = function() {}
-//------------------------------------------------------------------------
-  function listDecFuncs() {
-    return dicts.dictDecFuncs.keys();
-  }
 
 //------------------------------------------------------------------------
-// 6-c. exam call expressions that all call declared functions in which 
+// 6-b. exam call expressions that all call declared functions in which 
 //      functions are declared on the top of call expressions.
 //      ex:
 //        CORRECT: function myMain() { return 5; }
@@ -1571,50 +1436,23 @@ var pnut = (function () {
 //                 2. foo();
 //                    function foo() { return 5; }
 //------------------------------------------------------------------------
-  function areCallExpsAllValid() {
-    console.log("areCallExpsAllValid: " + (listInvalidFuncCallExps().length==0));
-    return listInvalidFuncCallExps().length==0;
+  function areCallExpsAllValid(ast) {
+    console.log("areCallExpsAllValid: " + (listInvalidFuncCallExps(ast).length==0));
+    return listInvalidFuncCallExps(ast).length==0;
   }
 
-//------------------------------------------------------------------------
-// 6-d. list invalid function call expressions in which a call expression calls 
-//      an undeclared function
-//      ex:
-//        CORRECT: function myMain() { return 5; }
-//                 myMain();
-//        WRONG:   1. function myMain() { return 5; }
-//                    foo();
-//                 2. foo();
-//                    function foo() { return 5; }
-//------------------------------------------------------------------------
-  function listInvalidFuncCallExps() {
-    var decs  = dicts.dictDecFuncs; 
-    var calls = dicts.dictFuncCalls; 
-    var exps  = decs.keys();
-    var list  = [];
 
-    for(m in exps) {
-      if(decs.getItem(exps[m])==undefined) {
-        list.push(exps[m]);
-      } 
-      else if(decs.getItem(exps[m])>calls.getItem(exps[m])){
-        list.push(exps[m]);
-      }
-    }
-    return list;
-  }
 
 //------------------------------------------------------------------------
-// 6-e. exam all declared functions get called in a program
+// 6-c. exam all declared functions get called in a program
 //      * the number that a function gets called is regardless
 //      ex: function bar() { return 5; }
 //          function foo() { return 5; }
 //          bar(); bar();
 //          foo(); foo();
 //------------------------------------------------------------------------
-  function areDecFuncsCalled() {
-    var dict = dicts.dictDecFuncsAndCallNum;
-    var nums = dict.values(); // num of each function gets called
+  function areDecFuncsCalled(ast) {
+    var nums = dictDecFuncsAndCallNum(ast).values(); // num of each function gets called
 
     for(m in nums) {
       if(nums[m]==0) {
@@ -1628,15 +1466,14 @@ var pnut = (function () {
 
 
 //------------------------------------------------------------------------
-// 6-f. exam all declared functions get called exactly once in a program
+// 6-d. exam all declared functions get called exactly once in a program
 //      ex: function bar() { return 5; }
 //          function foo() { return 5; }
 //          bar();
 //          foo();
 //------------------------------------------------------------------------
-  function areDecFuncsCalledOnce() {
-    var dict = dicts.dictDecFuncsAndCallNum;
-    var nums = dict.values(); // num of each function gets called
+  function areDecFuncsCalledOnce(ast) {
+    var nums = dictDecFuncsAndCallNum(ast).values(); // num of each function gets called
 
     for(m in nums) {
       if(nums[m]!=1) {
@@ -1650,7 +1487,7 @@ var pnut = (function () {
 
 
 //------------------------------------------------------------------------
-// 6-g. exam if any function is a pass-by-reference function or not
+// 6-e. exam if any function is a pass-by-reference function or not
 //      ex: CORRECT: function bar(x) { return x; }
 //          WRONG:   funciton bar()  { return 5; }
 //------------------------------------------------------------------------
@@ -1669,8 +1506,9 @@ var pnut = (function () {
     return false;
   }
 
+
 //------------------------------------------------------------------------
-// 6-h. identify if any function returns an object in a program
+// 6-f. identify if any function returns an object in a program
 //      ex:
 //        function foo() {
 //          var ob = { a:3, b:5 };
@@ -1717,13 +1555,21 @@ var pnut = (function () {
 
 //------------------------------------------------------------------------
 // private function:
-// create a dictionary to map funcionts with their occurrence order.
+// create a dictionary to map declared funcionts with 
+// their occurrence order.
+//      ex:
+//        function a() {}
+//        function b(x) {}
+//        function b(x, y) {}
+//        var a = function() {}
 //------------------------------------------------------------------------
   function dictDecFuncs(ast) {
     var dict  = new HashMap();
     var nd, name;
+
     for(m in ast.body) {
       nd = ast.body[m];
+
       switch(nd.type) {
         case "FunctionDeclaration":
           if(nd.params.length<2) {
@@ -1816,8 +1662,8 @@ var pnut = (function () {
 // how many times they get called in a program.
 //------------------------------------------------------------------------
   function dictDecFuncsAndCallNum (ast) {
-    var funcs = dicts.dictDecFuncs.keys();
-    var calls = dicts.dictFuncCalls.keys(); 
+    var funcs = dictDecFuncs(ast).keys();
+    var calls = dictFuncCalls(ast).keys(); 
     var dict  = new HashMap();
     var exp;
 
@@ -1832,9 +1678,39 @@ var pnut = (function () {
         dict.setItem(exp, dict.getItem(exp)+1);
       }
     }
-
     return dict;
   }
+
+
+//------------------------------------------------------------------------
+// private function:
+// list invalid function call expressions in which a call expression calls 
+// an undeclared function
+//      ex:
+//        CORRECT: function myMain() { return 5; }
+//                 myMain();
+//        WRONG:   1. function myMain() { return 5; }
+//                    foo();
+//                 2. foo();
+//                    function foo() { return 5; }
+//------------------------------------------------------------------------
+  function listInvalidFuncCallExps(ast) {
+    var decs  = dictDecFuncs(ast); 
+    var calls = dictFuncCalls(ast); 
+    var exps  = decs.keys();
+    var list  = [];
+
+    for(m in exps) {
+      if(decs.getItem(exps[m])==undefined) {
+        list.push(exps[m]);
+      } 
+      else if(decs.getItem(exps[m])>calls.getItem(exps[m])){
+        list.push(exps[m]);
+      }
+    }
+    return list;
+  }
+
 
 //------------------------------------------------------------------------
 // private function:
@@ -1897,17 +1773,15 @@ var pnut = (function () {
 //                   myMain();
 //------------------------------------------------------------------------------
   function isRecuriveFunction(ast) { 
-    var numTopLevelNode = ast.body.length;
-    var funcList = dicts.listDecFuncs;
-    var numFuncNode;
-    var func;
+    var func, nds;
 
-    for(var m=0; m<numTopLevelNode; m++) {
+    for(m in ast.body) {
       func = ast.body[m];
       if(func.type == "FunctionDeclaration") {
-        numFuncNode = func.body.body.length;
-        for(var n=0; n<numFuncNode; n++) {
-          var block = func.body.body[n];
+        nds = func.body.body;
+
+        for(n in nds) {
+          var block = nds[n];
           if(block.type == "ReturnStatement" && recursionDetector(block.argument, func.id.name)) {
             console.log("Recursion: " + true);
             return true;
@@ -2017,28 +1891,18 @@ var pnut = (function () {
 
     /* 1. Style Grading for Declaration and Use of Variable   */
     numDecVars                 : numDecVars,
-    listDecVars                : listDecVars,
     numUndecVars               : numUndecVars,
-    listUndecVars              : listUndecVars,
-    listVarsUsed               : listVarsUsed,
     isAnyFuncVar               : isAnyFuncVar,
-    listFuncVars               : listFuncVars,
 
     /* 2. Style Grading for Declaration and Use of Array      */
     numDecArrs                 : numDecArrs,
-    listDecArrs                : listDecArrs,
     numUndecArrs               : numUndecArrs,
-    listUndecArrs              : listUndecArrs,
     numArrsUsed                : numArrsUsed,
-    listArrsUsed               : listArrsUsed,
 
     /* 3. Style Grading for Declaration and Use of Object     */
     numDecObjs                 : numDecObjs,
-    listDecObjs                : listDecObjs,
     numUndecObjs               : numUndecObjs,
-    listUndecObjs              : listUndecObjs,
     numObjsUsed                : numObjsUsed,
-    listObjsUsed               : listObjsUsed,
     isAnyFuncBoundToAFuncRtnObj: isAnyFuncBoundToAFuncRtnObj,
 
     /* 4. Style Grading for Use of While Loop                 */
@@ -2057,9 +1921,7 @@ var pnut = (function () {
 
     /* 6. Style Grading for Declaration and Use of Function   */
     numDecFuncs                : numDecFuncs,
-    listDecFuncs               : listDecFuncs,
     areCallExpsAllValid        : areCallExpsAllValid,
-    listInvalidFuncCallExps    : listInvalidFuncCallExps,
     areDecFuncsCalled          : areDecFuncsCalled,
     areDecFuncsCalledOnce      : areDecFuncsCalledOnce,
     isAnyDecFuncPassedByRef    : isAnyDecFuncPassedByRef,
