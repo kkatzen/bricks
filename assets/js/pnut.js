@@ -1229,29 +1229,36 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function numWhileLoops(ast) {
     var counts = {wlgl:0, nwlgl:0, wlf:0, nwlf:0};
-    var nd, snd;
+    var nd, snd, lowLevLoops;
 
     for(m in ast.body) {
       nd = ast.body[m];
 
       switch(nd.type) {
         case "WhileStatement":
+          lowLevLoops = numWhileLoops(nd.body);
+
           // numWhileLoopsInGloLev
-          counts.wlgl = counts.wlgl + numWhileLoops(nd.body).wlgl + 1;
+          counts.wlgl = counts.wlgl + 1 + lowLevLoops.wlgl;
 
           // numNestedWhileLoopsInGloLev
-          counts.nwlgl = (numWhileLoops(nd.body)>0) ? counts.nwlgl+1:counts.nwlgl;
+          counts.nwlgl = (lowLevLoops.wlgl>0) ? counts.nwlgl+1:counts.nwlgl;
+
+          // keep examming if there has a multiple level nested loop
+          counts.nwlgl = (lowLevLoops.nwlgl>0) ? counts.nwlgl+lowLevLoops.nwlgl:counts.nwlgl;
           break;
         case "FunctionDeclaration":
-          // numWhileLoopsInFuncs
-          counts.wlf = counts.wlf + numWhileLoops(nd.body).wlf + 1;
-
-          // numNestedWhileLoopsInFuncs
           for(n in nd.body.body) {
             snd = nd.body.body[n];
 
-            if(snd.type=="WhileStatement" && numWhileLoops(snd.body)>0) {
-              counts.nwlf = counts.nwlf + 1;
+            if(snd.type=="WhileStatement") {
+              lowLevLoops = numWhileLoops(nd.body);
+
+              // numForLoopsInFuncs
+              counts.wlf = lowLevLoops.wlgl;
+
+              // numNestedForLoopsInFuncs
+              counts.nwlf = (lowLevLoops.nwlgl>0) ? lowLevLoops.nwlgl:counts.nwlf;
             }
           }
           break;
@@ -1375,22 +1382,29 @@ var pnut = (function () {
 
       switch(nd.type) {
         case "ForStatement":
+          lowLevLoops = numForLoops(nd.body);
+
           // numForLoopsInGloLev
-          counts.flgl = counts.flgl + numForLoops(nd.body).flgl + 1;
+          counts.flgl = counts.flgl + 1 + lowLevLoops.flgl;
 
           // numNestedForLoopsInGloLev
-          counts.nflgl = (numForLoops(nd.body)>0) ? counts.nflgl+1:counts.nflgl;
+          counts.nflgl = (lowLevLoops.flgl>0) ? counts.nflgl+1:counts.nflgl;
+
+          // keep examming if there has a multiple level nested loop
+          counts.nflgl = (lowLevLoops.nflgl>0) ? counts.nflgl+lowLevLoops.nflgl:counts.nflgl;
           break;
         case "FunctionDeclaration":
-          // numForLoopsInFuncs
-          counts.flf = counts.flf + numForLoops(nd.body).flf + 1;
-
-          // numNestedForLoopsInFuncs
           for(n in nd.body.body) {
             snd = nd.body.body[n];
 
-            if(snd.type=="ForStatement" && numForLoops(snd.body)>0) {
-              counts.nflf = counts.nflf + 1;
+            if(snd.type=="ForStatement") {
+              lowLevLoops = numForLoops(nd.body);
+
+              // numForLoopsInFuncs
+              counts.flf  = lowLevLoops.flgl;
+
+              // numNestedForLoopsInFuncs
+              counts.nflf = (lowLevLoops.nflgl>0) ? lowLevLoops.nflgl:counts.nflf;
             }
           }
           break;
