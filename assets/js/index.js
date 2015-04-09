@@ -167,10 +167,8 @@ function addFolder (folder) {
 	*/
 	var accordianFolderName = "accoridanFolder" + folder.id;
 	var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
-	
-	var accordian = "<div id='panel-" + accordianFolderName  + "' class='panel panel-danger'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
-	//why style is mesing up below not up
-	//var accordian = "<div class='panel panel-default'>" + '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + "<div class='panel-heading'><h4 class='panel-title'>" + folder.name + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div></a></div><div id = 'accoridanFolder" + folder.id + "' class='panel-collapse collapse folderCollapse'></div></div>";
+	var accordian = "<div id='panel-" + accordianFolderName  + "' class='panel panel-danger'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div><ul id = '" + accordianFolderName + "' class='panel-collapse collapse folderCollapse'></ul></div></div>";
+
 	$("#folderAccordion").append(accordian);
 	var accordianFolderBody = '';
 	$("#" + accordianFolderName).append(accordianFolderBody);
