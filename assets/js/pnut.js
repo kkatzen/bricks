@@ -37,13 +37,15 @@ var pnut = (function () {
 
     /******************************************************************/
     /* 1. Style Grading for Declaration and Use of Variable           */
-    /*    a. numDecVars(ast)      ==> integer >= 0                    */
-    /*    b. numUndecVars(ast)    ==> integer >= 0                    */
-    /*    c. isAnyFuncVar(ast)    ==> boolean ? true:false            */
+    /*    a. numDecVars(ast)            ==> integer >= 0              */
+    /*    b. numUndecVars(ast)          ==> integer >= 0              */
+    /*    c. isAnyFuncVar(ast)          ==> boolean ? true:false      */
+    /*    d. isAnyGloVarUsedInFuns(ast) ==> boolean ? true:false      */
     /******************************************************************/
       nDV      : numDecVars(ast),
       nUDV     : numUndecVars(ast),
       isFV     : isAnyFuncVar(ast),
+      isGVF    : isAnyGloVarUsedInFuns(ast),
 
     /******************************************************************/
     /* 2. Style Grading for Declaration and Use of Array              */
@@ -57,9 +59,9 @@ var pnut = (function () {
 
     /******************************************************************/
     /* 3. Style Grading for Declaration and Use of Object             */
-    /*    a. numDecObjs(ast)                    ==> integer >= 0      */
-    /*    b. numUndecObjs(ast)                  ==> integer >= 0      */
-    /*    c. numObjsUsed(ast)                   ==> integer >= 0      */
+    /*    a. numDecObjs(ast)                 ==> integer >= 0         */
+    /*    b. numUndecObjs(ast)               ==> integer >= 0         */
+    /*    c. numObjsUsed(ast)                ==> integer >= 0         */
     /*    d. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
     /******************************************************************/    
       nDO      : numDecObjs(ast),
@@ -125,9 +127,10 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 1. Style Grading for Declaration and Use of Variable           */
-/*    a. numDecVars(ast)      ==> integer >= 0                    */
-/*    b. numUndecVars(ast)    ==> integer >= 0                    */
-/*    c. isAnyFuncVar(ast)    ==> boolean ? true:false            */
+/*    a. numDecVars(ast)            ==> integer >= 0              */
+/*    b. numUndecVars(ast)          ==> integer >= 0              */
+/*    c. isAnyFuncVar(ast)          ==> boolean ? true:false      */
+/*    d. isAnyGloVarUsedInFuns(ast) ==> boolean ? true:false      */
 /******************************************************************/
 
 //------------------------------------------------------------------------
@@ -165,6 +168,20 @@ var pnut = (function () {
   function isAnyFuncVar(ast) {
     console.log("isAnyFuncVar: " + (listFuncVars(ast).length>0));
     return listFuncVars(ast).length>0;
+  }
+
+//------------------------------------------------------------------------
+// 1-d. exam if any variable declared in global level gets used
+//      in functions
+//      ex: 
+//          var globj = {name: "xxx", age:20};
+//          function bar() {
+//            var num = globj;
+//            alert(globj.name);
+//          }
+//------------------------------------------------------------------------
+  function isAnyGloVarUsedInFuns(ast) {
+    return null;
   }
 
 
@@ -297,6 +314,7 @@ var pnut = (function () {
           break;
       }
     }
+
 
     /* function overlading */
     switch(arguments.length) {
@@ -1907,6 +1925,7 @@ var pnut = (function () {
     numDecVars                 : numDecVars,
     numUndecVars               : numUndecVars,
     isAnyFuncVar               : isAnyFuncVar,
+    isAnyGloVarUsedInFuns      : isAnyGloVarUsedInFuns,
 
     /* 2. Style Grading for Declaration and Use of Array      */
     numDecArrs                 : numDecArrs,
