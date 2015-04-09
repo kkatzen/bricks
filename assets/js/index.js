@@ -266,9 +266,9 @@ function addSubmission(submission) {
     link.append(grade);
     //make the problem link produce the submission code on click
 	$("a", link).click(function() {
-		alert("hi");
-
-		alert(submission.code);
+		if (confirm('Put the following into the console? \n' + submission.code)) {
+			editor.setValue(submission.code);
+		}
 	});
     //attach the link to the submission
 	$("#subs").prepend(link);
@@ -287,7 +287,7 @@ function foldersReload() {
         addProbInfo(curProblem);
     }
 }
-
+var editor;
 window.onload = function () {
 	(function () {
 		var u = document.URL.split("/");
@@ -311,7 +311,7 @@ window.onload = function () {
 			addFolder(folder);
 		});
 	});
-	var editor = CodeMirror.fromTextArea(codemirror, {
+	editor = CodeMirror.fromTextArea(codemirror, {
 		mode: "javascript",
 		styleActiveLine: true,
 		lineNumbers: true,
