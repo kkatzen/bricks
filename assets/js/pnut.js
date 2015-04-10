@@ -45,7 +45,7 @@ var pnut = (function () {
       nDV      : numDecVars(ast),
       nUDV     : numUndecVars(ast),
       isFV     : isAnyFuncVar(ast),
-      isGVF    : isAnyGloVarUsedInFuns(ast),
+      isGVUF   : isAnyGloVarUsedInFuns(ast),
 
     /******************************************************************/
     /* 2. Style Grading for Declaration and Use of Array              */
@@ -146,8 +146,8 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numDecVars(ast) {
-    console.log("numDecVars: "+listDecVars(ast).length);
-    return listDecVars(ast).length;
+    console.log("numDecVars: "+listDecVars(ast).list.length);
+    return listDecVars(ast).list.length;
   }
 
 //------------------------------------------------------------------------
@@ -190,21 +190,21 @@ var pnut = (function () {
 // list all operator variables (right-hand side variables)
 //------------------------------------------------------------------------ 
   function listOperatorVars(nd) {
-    var arr = [];
+    var list = [];
     switch(nd.type) {
       case "Identifier":
-        arr.push(nd.name);
+        list.push(nd.name);
         break;
       case "BinaryExpression":
-        arr = arr.concat(listOperatorVars(nd.left));
-        arr = arr.concat(listOperatorVars(nd.right));
+        list = list.concat(listOperatorVars(nd.left));
+        list = list.concat(listOperatorVars(nd.right));
         break;
       case "Literal":
         break;
       case "CallExpression":
         break;
     }
-    return arr;
+    return list;
   }
 
 
@@ -214,7 +214,7 @@ var pnut = (function () {
 //------------------------------------------------------------------------ 
   function listDecVars(ast, decVars) {
     var map, nd, m, n, decs;
-    var arr = [];
+    var list = [];
 
     if(arguments.length!=1) { 
       map = decVars; 
@@ -238,12 +238,12 @@ var pnut = (function () {
                 var pos = map.getItem(decs[n].init.name);
 
                 if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
-                  arr.push("var " + decs[n].id.name); 
+                  list.push("var " + decs[n].id.name); 
                   add = 1;
                 }
               } 
               else if(decs[n].init.type=="Literal") {// check for variable initialization    
-                arr.push("var " + decs[n].id.name);
+                list.push("var " + decs[n].id.name);
                 add = 1;
               }
 
@@ -264,7 +264,7 @@ var pnut = (function () {
             var add = 0;
 
             if(dec.init.type=="Literal") {
-              arr.push(dec.id.name + " <= " + floop);
+              list.push(dec.id.name + " <= " + floop);
               add = 1;
             }
             else if(dec.init.type=="Identifier") {
@@ -272,7 +272,7 @@ var pnut = (function () {
 
               // exam if a declared var is in a calling scope or not
               if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
-                arr.push(dec.id.name + " <= " + floop);
+                list.push(dec.id.name + " <= " + floop);
                 add = 1;
               }
             }
@@ -285,10 +285,10 @@ var pnut = (function () {
           // check var in loop body
           if(nd.body.body.length > 0) { 
             var obj     = listDecVars(nd.body, map);
-            var lpVars  = obj.arr;
+            var lpVars  = obj.list;
             map         = obj.map;
 
-            for(n in lpVars) { arr.push(lpVars[n] + " <= " + floop); }
+            for(n in lpVars) { list.push(lpVars[n] + " <= " + floop); }
           }
           break;
         case "WhileStatement":
@@ -296,35 +296,27 @@ var pnut = (function () {
 
           if(nd.body.body.length > 0) { 
             var obj    = listDecVars(nd.body, map);
-            var wpVars = obj.arr;
+            var wpVars = obj.list;
             map        = obj.map;
 
-            for(n in wpVars) { arr.push(wpVars[n] + " <= " + wloop); }
+            for(n in wpVars) { list.push(wpVars[n] + " <= " + wloop); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName  = nd.id.name;
             var obj     = listDecVars(nd.body, map);
-            var ndVars  = obj.arr;
+            var ndVars  = obj.list;
             map         = obj.map;
 
-            for(n in ndVars) { arr.push(ndVars[n] + " <= Function " + ndName + "()"); }
+            for(n in ndVars) { list.push(ndVars[n] + " <= Function " + ndName + "()"); }
           }
           break;
       }
     }
 
 
-    /* function overlading */
-    switch(arguments.length) {
-      case 1: // do listDecVars(ast)
-        // console.log("ListDecVars(ast): "+ arr);
-        return arr;  
-      case 2: // do listDecVars(ast, map)
-        // console.log("ListDecVars(ast, map): "+ {arr: arr, map: map});
-        return {arr: arr, map: map};
-    }
+    return {list: list, map: map};
   }
 
 //------------------------------------------------------------------------
@@ -332,23 +324,26 @@ var pnut = (function () {
 // list all undeclacred variables that get used in a program
 //------------------------------------------------------------------------ 
   function listUndecVars(ast) {
-    var decVars  = listDecVars(ast);
+    var decVars  = listDecVars(ast).map;
     var usedVars = listVarsUsed(ast);
-    var map      = new HashMap();
-    var arr      = [];
-
-    // store all declared vars in a hashmap
-    for(m in decVars) { map.setItem(decVars[m], 0); }
+    var list     = [];
 
     // check for the use of undelcared vars
-    for(m in usedVars) { 
-      if(map.getItem(usedVars[m]) == undefined) {
-        arr.push(usedVars[m]);
+    for(m in usedVars.list) { 
+      var scopeDecVar  = decVars.getItem(usedVars[m]);
+      var scopeUsedVar = usedVars.map.getItem(usedVars[m]);
+
+      if(scopeDecVar == undefined) {
+        list.push(usedVars[m]);
+      } 
+      else if(scopeUsedVar[0]<scopeDecVar[0] || scopeUsedVar[0]>scopeDecVar[1] ||
+       (scopeUsedVar[0]>scopeDecVar[0] && scopeUsedVar[1]>scopeDecVar[1])) {
+        list.push(usedVars[m]);
       }
     }
 
-    // console.log("ListUndecVars: "+arr);
-    return arr;
+    console.log("ListUndecVars: "+list);
+    return list;
   } 
 
 //------------------------------------------------------------------------
@@ -356,8 +351,8 @@ var pnut = (function () {
 // list all variables that are used in a program
 //      ex. (array) arr.push(val)
 //          alert(val)
-//          var num = val + 1
-//          num = val + 1
+//          var num = val + 1 (val gets used)
+//          num = val + 1 (num and val both get used)
 //------------------------------------------------------------------------ 
   function listVarsUsed(ast) {
     var count      = 0;
@@ -492,7 +487,7 @@ var pnut = (function () {
     var node;
     var func = new Set();
     var used = new Set();
-    var arr  = [];
+    var list  = [];
 
     for(m in ast.body) {
       node = ast.body[m];
@@ -508,7 +503,7 @@ var pnut = (function () {
             if(subnode[n].init!=null && subnode[n].init.type=="Identifier") {
               if(!func.has(subnode[n].init.name) && !used.has(subnode[n].init.name)){
                 used.add(subnode[n].id.name);
-                arr.push(subnode[n].id.name);
+                list.push(subnode[n].id.name);
               }
             } 
           }
@@ -521,14 +516,14 @@ var pnut = (function () {
             exp.left.type=="Identifier" && exp.right.type=="Identifier") {
             if(!func.has(exp.right.name) && !used.has(exp.left.name)) { 
               used.add(exp.left.name);
-              arr.push(exp.left.name);
+              list.push(exp.left.name);
             }                    
           }
           break;
       }
     }
     // console.log("ListFuncVars: " +arr);
-    return arr;
+    return list;
   }
 
 
