@@ -501,7 +501,7 @@ var pnut = (function () {
       }
     }
     // console.log("ListVarsUsed:" +usedVars);
-    return {list:list, map:map}};
+    return {list:list, map:map};
   } 
 
 //------------------------------------------------------------------------
