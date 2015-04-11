@@ -180,7 +180,7 @@ QUnit.test( "Test New Pnut Methods", function( assert ) {
                "nerp = [one, two, three]; "+
             "} "+
           "} "+
-         "var c = new Array(); ";
+         "var c = new Array(); "; 
 
   AST  = acorn.parse(code);
   assert.ok( ( 2 == pnut.numDecArrs(AST)), "2.a case 3");
