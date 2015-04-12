@@ -86,7 +86,7 @@ var pnut = (function () {
       nNWLF    : numNestedWhileLoopsInFuncs(ast),
       nWLAP    : numWhileLoopsInAProgram(ast),
 
-    ****************************************************************
+    /******************************************************************/
     /* 5. Style Grading for Use of For Loop                           */
     /*    a. numForLoopsInGloLev(ast)            ==> integer >= 0     */
     /*    b. numNestedForLoopsInGloLev(ast)      ==> integer >= 0     */
@@ -209,9 +209,10 @@ var pnut = (function () {
   function listDecVars(ast, decVars) {
     var map, nd, m, n, decs;
     var list    = [];
-    var floop   = "for { }";
-    var wloop   = "while { }";
-    var ifblock = "if { }";
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
 
     if(arguments.length==2) { 
       map = decVars; 
@@ -249,7 +250,7 @@ var pnut = (function () {
             }
 
             if(add==1 && map.getItem(decs[n].id.name)==undefined) {
-              map.setItem(decs[n].id.name, [nd.start, nd.end]);
+              map.setItem(decs[n].id.name, [ast.start, ast.end]);
             }
           }
           break;
@@ -271,23 +272,24 @@ var pnut = (function () {
 
               // exam if a declared var is in a calling scope or not
               if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
-                list.push(dec.id.name + " <= " + floop);
+                list.push(dec.id.name + floop);
                 add = 1;
               }
             }
 
             if(add==1 && map.getItem(dec.id.name)==undefined) { 
-              map.setItem(dec.id.name, [ast.start, ast.end]);
+              // a var declaration has a wider scoping range than a var usage
+              map.setItem(dec.id.name, [ast.start, ast.end]); 
             }
           }
 
           // check vars in loop body
           if(nd.body.body.length > 0) { 
-            var obj     = listDecVars(nd.body, map);
-            var lpVars  = obj.list;
-            map         = obj.map;
+            var obj    = listDecVars(nd.body, map);
+            var lpVars = obj.list;
+            map        = obj.map;
 
-            for(n in lpVars) { list.push(lpVars[n] + " <= " + floop); }
+            for(n in lpVars) { list.push(lpVars[n] + floop); }
           }
           break;
         case "WhileStatement":
@@ -296,26 +298,26 @@ var pnut = (function () {
             var wpVars = obj.list;
             map        = obj.map;
 
-            for(n in wpVars) { list.push(wpVars[n] + " <= " + wloop); }
+            for(n in wpVars) { list.push(wpVars[n] + wloop); }
           }
           break;
         case "IfStatement":
           if(nd.consequent.body.length > 0) {
-            var obj     = listDecVars(nd.consequent, map);
-            var ifVars  = obj.list;
-            map         = obj.map;
+            var obj    = listDecVars(nd.consequent, map);
+            var ifVars = obj.list;
+            map        = obj.map;
 
-            for(n in ifVars) { list.push(ifVars[n] + " <= " + ifblock); }
+            for(n in ifVars) { list.push(ifVars[n] + ifblock); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
-            var ndName  = nd.id.name;
-            var obj     = listDecVars(nd.body, map);
-            var ndVars  = obj.list;
-            map         = obj.map;
+            var ndName = nd.id.name;
+            var obj    = listDecVars(nd.body, map);
+            var ndVars = obj.list;
+            map        = obj.map;
 
-            for(n in ndVars) { list.push(ndVars[n] + " <= Function " + ndName + "()"); }
+            for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
           }
           break;
       }
@@ -406,9 +408,10 @@ var pnut = (function () {
   function listVarsUsed(ast, varUsed) {
     var list    = [];
     var nd, args, cal, add, left, right, lList, rList, map;
-    var floop   = "for { }";
-    var wloop   = "while { }";
-    var ifblock = "if { }";
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
 
     if(arguments.length==2) { 
       map = varUsed; 
@@ -520,8 +523,8 @@ var pnut = (function () {
             lList  = left.list;
             rList  = rMap.list;
 
-            for(n in lList) { list.push(lList[n] + " <= " + floop); }
-            for(n in rList) { list.push(rList[n] + " <= " + floop); }
+            for(n in lList) { list.push(lList[n] + floop); }
+            for(n in rList) { list.push(rList[n] + floop); }
           }
           else if(nd.init != null && nd.init.type=="VariableDeclaration") { 
 
@@ -539,8 +542,8 @@ var pnut = (function () {
               lList  = left.list;
               rList  = rMap.list;
 
-              for(n in lList) { list.push(lList[n] + " <= " + floop); }
-              for(n in rList) { list.push(rList[n] + " <= " + floop); }
+              for(n in lList) { list.push(lList[n] + floop); }
+              for(n in rList) { list.push(rList[n] + floop); }
             }
           } else {
             // check vars in loop body
@@ -549,7 +552,7 @@ var pnut = (function () {
               var lpVars  = obj.list;
               map         = obj.map;
 
-              for(n in lpVars) { list.push(lpVars[n] + " <= " + floop); }
+              for(n in lpVars) { list.push(lpVars[n] + floop); }
             }
           }
           break;
@@ -562,7 +565,7 @@ var pnut = (function () {
             var wpVars = obj.list;
             map        = obj.map;
 
-            for(n in wpVars) { list.push(wpVars[n] + " <= " + wloop); }
+            for(n in wpVars) { list.push(wpVars[n] + wloop); }
           }
 
           break;
@@ -572,7 +575,7 @@ var pnut = (function () {
             var ifVars = obj.list;
             map        = obj.map;
 
-            for(n in ifVars) { list.push(ifVars[n] + " <= " + ifblock); }
+            for(n in ifVars) { list.push(ifVars[n] + ifblock); }
           }
           break;
         case "FunctionDeclaration":
@@ -582,7 +585,7 @@ var pnut = (function () {
             var ndVars  = obj.list;
             map         = obj.map;
 
-            for(n in ndVars) { list.push(ndVars[n] + " <= Function " + ndName + "()"); }
+            for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
           }
           break;
       }
@@ -668,17 +671,17 @@ var pnut = (function () {
 
               if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end &&
                 map.getItem(decs[n].id.name)==undefined) {
-                map.setItem(decs[n].id.name, [nd.start, nd.end]);
+                map.setItem(decs[n].id.name, [ast.start, ast.end]);
               }
             } 
             else if(decs[n].init.type=="Literal" &&
               map.getItem(decs[n].id.name)==undefined) {// check for variable initialization    
-              map.setItem(decs[n].id.name, [nd.start, nd.end]);
+              map.setItem(decs[n].id.name, [ast.start, ast.end]);
             }
           }
           else if(decs[n].id.type=="Identifier" && 
             map.getItem(decs[n].id.name)==undefined){
-            map.setItem(decs[n].id.name, [nd.start, nd.end]);
+            map.setItem(decs[n].id.name, [ast.start, ast.end]);
           }
         }
       }
@@ -697,10 +700,11 @@ var pnut = (function () {
 //------------------------------------------------------------------------ 
   function listVarsInFuncsUseGloVars(ast, gloVars) {
     var mapGloVars, nd, m, n, decs;
-    var list    = [];
-    var floop   = "for { }";
-    var wloop   = "while { }";
-    var ifblock = "if { }";
+    var list     = [];
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
 
     if(arguments.length==2) { 
       mapGloVars = gloVars; 
@@ -735,7 +739,7 @@ var pnut = (function () {
 
                 // exam if a declared var is in a calling scope or not
                 if(pos!=undefined && pos[0]<nd.start) {
-                  list.push(dec.id.name + " <= " + floop);
+                  list.push(dec.id.name + floop);
                 }
               }
             }
@@ -744,21 +748,21 @@ var pnut = (function () {
             if(nd.body.body.length > 0) { 
               var lpList = list.concat(listVarsInFuncsUseGloVars(nd.body, mapGloVars));
 
-              for(n in lpList) { list.push(lpList[n] + " <= " + floop); }
+              for(n in lpList) { list.push(lpList[n] + floop); }
             }
             break;
           case "WhileStatement":
             if(nd.body.body.length > 0) { 
               var wlList = list.concat(listVarsInFuncsUseGloVars(nd.body, mapGloVars));
 
-              for(n in list) { list.push(wlList[n] + " <= " + wloop); }
+              for(n in list) { list.push(wlList[n] + wloop); }
             }
             break;
           case "IfStatement":
             if(nd.consequent.body.length > 0) {
               var ifList = list.concat(listVarsInFuncsUseGloVars(nd.body, mapGloVars));
 
-              for(n in ifList) { list.push(ifList[n] + " <= " + ifblock); }
+              for(n in ifList) { list.push(ifList[n] + ifblock); }
             }
             break;
         }
@@ -795,8 +799,8 @@ var pnut = (function () {
 //          var c = new Array();
 //------------------------------------------------------------------------  
   function numDecArrs(ast) {
-    console.log("numDecArrs: " + listDecArrs(ast).length);
-    return listDecArrs(ast).length;
+    console.log("numDecArrs: " + listDecArrs(ast).arr.length);
+    return listDecArrs(ast).arr.length;
   } 
 
 
@@ -825,12 +829,8 @@ var pnut = (function () {
 //        c = [];
 //------------------------------------------------------------------------  
   function numArrsUsed(ast) {
-    var usedArrs = listArrsUsed(ast);
-    var arr      = new Set();
-
-    for(m in usedArrs) { arr.add(usedArrs[m]); }
-    console.log("numArrsUsed: " + arr.size);
-    return arr.size;
+    console.log("numArrsUsed: " + listArrsUsed(ast).arr.length);
+    return listArrsUsed(ast).arr.length;
   } 
 
 
@@ -845,9 +845,13 @@ var pnut = (function () {
 //------------------------------------------------------------------------ 
   function listDecArrs(ast, decArrs) {
     var map, nd, m, n;
-    var arr = [];
+    var arr      = [];
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
 
-    if(arguments.length!=1) { 
+    if(arguments.length==2) { 
       map = decArrs; 
     }
     else {
@@ -863,50 +867,56 @@ var pnut = (function () {
           for(n in decs) {
             if(decs[n].init != null) {
               var add = 0;
-              if(decs[n].init.type == "ArrayExpression") { 
+              if(decs[n].init.type=="ArrayExpression") {
+                arr.push(decs[n].id.name);
                 add = 1;
               }
-              else if(decs[n].init.type == "NewExpression" && 
-                decs[n].init.callee.name == "Array") {
+              else if(decs[n].init.type=="NewExpression" && 
+                decs[n].init.callee.name=="Array") {
+                arr.push(decs[n].id.name);
                 add = 1;
               }
               else if(decs[n].init.type=="Identifier") {
                 var pos = map.getItem(decs[n].init.name);
 
                 if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+                  arr.push(decs[n].id.name);
                   add = 1;
                 }
               }
 
-              if(add==1) {
-                arr.push(decs[n].id.name);
-
-                if(map.getItem(decs[n].id.name)==undefined) {
-                  map.setItem(decs[n].id.name, [ast.start, ast.end]);
-                }
+              if(add==1 && map.getItem(decs[n].id.name)==undefined) {
+                map.setItem(decs[n].id.name, [ast.start, ast.end]);
               }
             }
-          } 
+          }
           break;
         case "ForStatement":
           // check var in loop body
           if(nd.body.body.length > 0) {
-            var floop   = "for loop";
             var obj     = listDecArrs(nd.body, map);
             var lpArrs  = obj.arr;
             map         = obj.map;
 
-            for(n in lpArrs) { arr.push(lpArrs[n] + " <= " + floop); }
+            for(n in lpArrs) { arr.push(lpArrs[n] + floop); }
           }
           break;
         case "WhileStatement":
           if(nd.body.body.length > 0) { 
-            var wloop  = "while loop";
             var obj    = listDecArrs(nd.body, map);
             var wpArrs = obj.arr;
             map        = obj.map;
 
-            for(n in wpArrs) { arr.push(wpArrs[n] + " <= " + wloop); }
+            for(n in wpArrs) { arr.push(wpArrs[n] + wloop); }
+          }
+          break;
+        case "IfStatement":
+          if(nd.consequent.body.length > 0) {
+            var obj     = listDecArrs(nd.consequent, map);
+            var ifVars  = obj.arr;
+            map         = obj.map;
+
+            for(n in ifVars) { arr.push(ifVars[n] + ifblock); }
           }
           break;
         case "FunctionDeclaration":
@@ -916,20 +926,13 @@ var pnut = (function () {
             var ndArrs  = obj.arr;
             map         = obj.map;
 
-            for(n in ndArrs) { arr.push(ndArrs[n] + " <= Function " + ndName + "()"); }
+            for(n in ndArrs) { arr.push(ndArrs[n] + funblock + ndName + "()"); }
           }
           break;
       }
     }
 
-    /* function overlading */
-    switch(arguments.length) {
-      case 1: // listDecArrs(ast)
-        // console.log("listDecArrs: " + arr);
-        return arr;  
-      case 2: // do listDecArrs(ast, map)
-        return {arr: arr, map: map};
-    }
+    return {arr: arr, map: map};
   } 
 
 
@@ -943,24 +946,27 @@ var pnut = (function () {
 //        (undeclared c) c = [];
 //------------------------------------------------------------------------ 
   function listUndecArrs(ast) {
-    var decArrs  = listDecArrs(ast);
-    var usedArrs = listArrsUsed(ast);
-    var map      = new HashMap();
-    var arr      = [];
+    var decArrs  = listDecArrs(ast).map;
+    var usedArrs = listArrsUsed(ast).map;
+    var keys     = usedArrs.keys();
+    var list     = [];
 
-    // store all declared vars in a hashmap
-    for(m in decArrs) { 
-      map.setItem(decArrs[m], 0); 
-    }
-
-    // check for the use of undelcared vars
-    for(m in usedArrs) { 
-      if(map.getItem(usedArrs[m]) == undefined) {
-        arr.push(usedArrs[m]);
+    // check for the use of undelcared arrs
+    for(m in keys) { 
+      var scopeDecArr  = decArrs.getItem(keys[m]);
+      var scopeUsedArr = usedArrs.getItem(keys[m]);
+      
+      if(scopeDecArr == undefined) {
+        list.push(keys[m]);
+      } 
+      else if(scopeUsedArr[0]<scopeDecArr[0] || scopeUsedArr[0]>scopeDecArr[1] ||
+       (scopeUsedArr[0]>scopeDecArr[0] && scopeUsedArr[1]>scopeDecArr[1])) {
+        list.push(keys[m]);
       }
     }
-    // console.log("listUndecArrs: " + arr);
-    return arr;
+
+    // console.log("listUndecArrs: " + list);
+    return list;
   } 
 
 
@@ -973,24 +979,40 @@ var pnut = (function () {
 //        b = new Array({});
 //        c = [];
 //------------------------------------------------------------------------  
-  function listArrsUsed(ast) {
-    var count    = 0;
-    var usedArrs = [];
-    var nd, m, exp, func;
+  function listArrsUsed(ast, usedArrs) {
+    var count = 0;
+    var arr   = [];
+    var nd, m, exp, func, map, add;
+
+    if(arguments.length==2) { 
+      map = usedArrs; 
+    }
+    else {
+      map = new HashMap(); 
+    }
+
     for(m in ast.body) {
       nd = ast.body[m];
 
       switch(nd.type) {
         case "ExpressionStatement":
           exp = nd.expression;
+
           switch(exp.type) {
             case "AssignmentExpression":
+              add = 0;
               if(exp.right.type=="ArrayExpression") { 
-                usedArrs.push(exp.left.name); 
+                arr.push(exp.left.name); 
+                add = 1;
               }
               else if(exp.right.type=="NewExpression" && exp.right.callee.name=="Array") {
-                usedArrs.push(exp.left.name);
+                arr.push(exp.left.name);
+                add = 1;
               }              
+
+              if(add==1 && map.getItem(exp.left.name)==undefined) {
+                map.setItem(exp.left.name, [nd.start, nd.end]);
+              }
               break;
             case "CallExpression":
               if(exp.callee.type=="MemberExpression") {
@@ -998,7 +1020,11 @@ var pnut = (function () {
 
                 if(method=="push" || method=="sort"  || method=="join" || method=="valueOf" ||
                    method=="pop"  || method=="shift" || method=="unshift") {
-                  usedArrs.push(exp.callee.object.name);
+                  arr.push(exp.callee.object.name);
+              
+                  if(map.getItem(exp.callee.object.name)==undefined) {
+                    map.setItem(exp.callee.object.name, [nd.start, nd.end]);
+                  }
                 } 
               }
               break;
@@ -1008,8 +1034,11 @@ var pnut = (function () {
           var floop = "for loop";
           // check vars in loop body
           if(nd.body.body.length > 0) { 
-            var lpArrs = listArrsUsed(nd.body);
-            for(n in lpArrs) { usedArrs.push(lpArrs[n] + " <= " + floop); }
+            var obj    = listArrsUsed(nd.body, map);
+            var lpArrs = obj.arr
+            map        = obj.map;
+
+            for(n in lpArrs) { arr.push(lpArrs[n] + " <= " + floop); }
           }
           break;
         case "WhileStatement":
@@ -1018,21 +1047,35 @@ var pnut = (function () {
           // check vars in loop body
           var wloop = "while loop";
           if(nd.body.body.length > 0) { 
-            var wpArrs = listArrsUsed(nd.body);
-            for(n in wpArrs) { usedArrs.push(wpArrs[n] + " <= " + wloop); }
+            var obj    = listArrsUsed(nd.body, map);
+            var wpArrs = obj.arr;
+            map        = obj.map;
+
+            for(n in wpArrs) { arr.push(wpArrs[n] + " <= " + wloop); }
+          }
+          break;
+        case "IfStatement":
+          if(nd.consequent.body.length > 0) {
+            var obj    = listArrsUsed(nd.consequent, map);
+            var ifVars = obj.arr;
+            map        = obj.map;
+
+            for(n in ifVars) { arr.push(ifVars[n] + ifblock); }
           }
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length > 0) {
             var ndName = nd.id.name;
-            var ndArrs = listArrsUsed(nd.body);
-            for(n in ndArrs) { usedArrs.push(ndArrs[n] + " <= Function " + ndName + "()"); }
+            var obj    = listArrsUsed(nd.body, map);
+            var ndArrs = obj.arr;
+            map        = obj.map;
+            for(n in ndArrs) { arr.push(ndArrs[n] + funblock + ndName + "()"); }
           }
           break;
       }
     }
-    // console.log("listArrsUsed: " + usedArrs);
-    return usedArrs;
+    // console.log("listArrsUsed: " + arr);
+    return {arr:arr, map:map};
   } 
 
 
