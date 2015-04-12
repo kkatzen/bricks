@@ -594,6 +594,7 @@ var pnut = (function () {
     return {list:list, map:map};
   } 
 
+
 //------------------------------------------------------------------------
 // private function:
 // list global variables in which directly points to a function
