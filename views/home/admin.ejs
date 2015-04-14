@@ -81,6 +81,14 @@ form > button {
   padding: 20px;
 
 }
+#pointbreakdown {
+  border: 2px solid gray;
+  float:right; 
+  width:233px; 
+  margin-left:5px;
+  padding:5px;
+}
+
 </style>
 <nav style="margin-bottom: 0" class="navbar navbar-inverse" role="navigation">
   <div class="container-fluid">
@@ -189,74 +197,113 @@ form > button {
 
 <!--Edit a question sub-section starts-->
 <div class="col-md-12">
+
   <div class="panel panel-default">
     <div class="panel-heading">
-      Edit a question
+       <h4 class="panel-title" id="problemDisplayName">
+          Choose a Problem
+      </h4>
     </div>
     <div class="panel-body">
-      <p id="editPlaceholder">Select a question from the above menus to edit it</p>
-      <form id="edit" class="form hidden">
-        <div class="row">
-          <div class="form-group">
-            <div class="col-md-3">
-              <label class="control-label" for="editType">Type</label>
-              <select id="editType" name="editType" class="form-control">
-                <option value="twit">twit</option>
-                <option value="diy">diy</option>
-                <option value="wall">wall</option>
-                <option value="exam">exam</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="control-label" for="editPhase">Phase</label>
-              <select id="editPhase" name="editPhase" class="form-control">
-                <option value="0">Past</option>
-                <option value="1">Present</option>
-                <option value="2">Future</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="control-label">Function Points</label>
-              <input id="editCorrectPoints" class="form-control">
-            </div>
-            <div class="col-md-3">
-              <label class="control-label">Style Points</label>
-              <input id="editStylePoints" class="form-control">
-            </div>
-            <div class="col-md-3">
-              <label class="control-label" for="editProblemLanguage">Language</label>
-              <select name="editLanguage" id="editLanguageDropdown" class="form-control">
-                <option value="javascript">JavaScript</option>
-                <option value="java">Java</option>
-              </select>
-            </div>
-          </div>
+        <div id="pointbreakdown" class="hidden" >
+          Point Breakdown:<br/>
+          Style- <span id="availablePtStyle"></span>
+          <br />
+          Func- <span id="availablePtCorrect"></span>
+          <br />
         </div>
-        <div class="row">
-          <div class="form-group">
-            <div class="col-md-6">
-              <label class="control-label" for="editProblemName">Name</label>
-              <input id="editProblemName" name="editName" type="text" class="form-control"></input>
-            </div>
-            <div class="col-md-6">
-              <label name="editFolder" class="control-label" for="folder">Folder</label>
-              <select id="editfolderDropdown" class="form-control">  </select>
-            </div>
-          </div>
+        <div id="problemDisplayBody" >
+          Select a problem to run and submit.
         </div>
-
-
-        <label class="control-label" for="editDescription">Description</label>
-        <textarea name="editDescription" id="editDescription" class="form-control"></textarea>
-        <label class="control-label" for="editOnSubmit">Function to run on submission</label>
-        <textarea name="editOnSubmit" id="editOnSubmit" class="form-control" 
-             style="font-family:Consolas, monospace">
-        </textarea>
-        <button class="btn btn-default form-control" id="editProblem">Update Problem</button>
-        <div id="editProblemError"></div>
-      </form>
     </div>
   </div>
+
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+       <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#editQuestionCollapse" aria-expanded="true" >Edit</a>
+        </h4>
+    </div>
+    <div class="panel-collapse collapse" id="editQuestionCollapse">
+      <div class="panel-body">
+        <p id="editPlaceholder">Select a question from the above menus to edit it</p>
+        <form id="edit" class="form hidden">
+          <div class="row">
+            <div class="form-group">
+              <div class="col-md-3">
+                <label class="control-label" for="editType">Type</label>
+                <select id="editType" name="editType" class="form-control">
+                  <option value="twit">twit</option>
+                  <option value="diy">diy</option>
+                  <option value="wall">wall</option>
+                  <option value="exam">exam</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="control-label" for="editPhase">Phase</label>
+                <select id="editPhase" name="editPhase" class="form-control">
+                  <option value="0">Past</option>
+                  <option value="1">Present</option>
+                  <option value="2">Future</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="control-label">Function Points</label>
+                <input id="editCorrectPoints" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label class="control-label">Style Points</label>
+                <input id="editStylePoints" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label class="control-label" for="editProblemLanguage">Language</label>
+                <select name="editLanguage" id="editLanguageDropdown" class="form-control">
+                  <option value="javascript">JavaScript</option>
+                  <option value="java">Java</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <div class="col-md-6">
+                <label class="control-label" for="editProblemName">Name</label>
+                <input id="editProblemName" name="editName" type="text" class="form-control"></input>
+              </div>
+              <div class="col-md-6">
+                <label name="editFolder" class="control-label" for="folder">Folder</label>
+                <select id="editfolderDropdown" class="form-control">  </select>
+              </div>
+            </div>
+          </div>
+
+
+
+          <label class="control-label" for="editDescription">Description</label>
+          <textarea name="editDescription" id="editDescription" class="form-control"></textarea>
+          <label class="control-label" for="editOnSubmit">Function to run on submission</label>
+          <textarea name="editOnSubmit" id="editOnSubmit" class="form-control" 
+               style="font-family:Consolas, monospace">
+          </textarea>
+          <button class="btn btn-default form-control" id="editProblem">Update Problem</button>
+          <div id="editProblemError"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Student Progress  <span id="function" class="label label-info" >0%</span><span id="style" class="label label-success">0%</span>
+      <button class="btn btn-primary btn-sm pull-right" id="refreshData">Refresh</button>
+    </div>
+    <div id="studentResultsTable">
+      <div class="panel-body">
+        Select a problem to view student progress
+      </div>
+    </div>
+  </div>
+
 </div>
 <!--Update a question sub-section ends-->
 
@@ -412,17 +459,10 @@ form > button {
              </div>
         </div>
         <div class="tab-pane" id="students">
-            <p>View student progress here</p>
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Student Progress  <span id="function" class="label label-info" >0%</span><span id="style" class="label label-success">0%</span>
-                    <button class="btn btn-primary btn-sm pull-right" id="refreshData">Refresh</button>
+                    Students
                 </div>
-                <!--<div id="studentResultsTable">
-                    <div class="panel-body">
-                        Select a problem to view student progress
-                    </div>
-                </div>-->
                 <div id="studentTable">
                     <div class="panel-body">
                         Loading students...

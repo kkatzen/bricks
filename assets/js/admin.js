@@ -40,6 +40,13 @@ function fillForm(problem) {
 
 	// TODO - Finish inserting form data
 }
+function fillProblemDisplay(problem) {
+    $("#pointbreakdown").removeClass("hidden");
+    $("#problemDisplayName").empty().append(problem.name);
+    $("#problemDisplayBody").empty().append(problem.text);
+    $("#availablePtStyle").empty().append(problem.value.style);
+    $("#availablePtCorrect").empty().append(problem.value.correct);
+}
 
 function getStudentResults(problem) {
     if(curProblem == null) {
@@ -53,7 +60,6 @@ function getStudentResults(problem) {
     $.post("/user/read/", {}, function(users){
         total = users.length;
         users.forEach(function (user) {
-            console.log("a user");
             var a = $("<td></td>")
                 .html("<a href='#individual' data-toggle='pill'>" + user.displayName + "</a>")
                 .click(function (event) {
@@ -63,7 +69,6 @@ function getStudentResults(problem) {
                             alert("No user with that id found");
                             return;
                         }
-                        console.log("help ive been clicked");
                         getIndividual(user);
                     });
                 });
@@ -75,14 +80,12 @@ function getStudentResults(problem) {
 }
 
 function getStudents() {
-    console.log("getStudents();");
     $("#studentTable").empty();
     var tbl = $("<table class='table'><thead><tr><th>Name</th></tr></thead><tbody id='studentsTableBody'></tbody></table>");
     $("#studentTable").append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
         users.forEach(function (user) {
-            console.log("a user");
             var a = $("<td></td>")
                 .html("<a href='#individual' data-toggle='pill'>" + user.displayName + "</a>")
                 .click(function (event) {
@@ -94,7 +97,6 @@ function getStudents() {
                             alert("No user with that id found");
                             return;
                         }
-                        console.log("help ive been clicked");
                         getIndividual(user);
                     });
                 });            
@@ -118,7 +120,6 @@ function getSubmission(submission,user,problem) {
                     alert("No user with that id found");
                     return;
                 }
-                console.log("help ive been clicked");
                 getIndividual(user);
             });
         });
@@ -176,7 +177,6 @@ function getIndividual(user) {
                             var percent = parseInt(totalEarned) / parseInt(492) * parseInt(100);
                             percent = percent + "%";
                             $("#pbgreen").css("width",percent);
-                            console.log(percent);
                         });
                         if(submissions.length > 0){
                             totalAttempted += parseInt(availableStylePoints) - parseInt(earnedStylePoints);
@@ -186,7 +186,6 @@ function getIndividual(user) {
                         var percent = parseInt(totalAttempted) / parseInt(492) * parseInt(100);
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
-                        console.log("attempted" + percent);
                         $("#ipPoints" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
                     });
                 });
@@ -279,6 +278,7 @@ var folderActions = {
 						}
                         curProblem = problem;
 						fillForm(curProblem);
+                        fillProblemDisplay(curProblem);
                         getStudentResults(curProblem);
 					});
 				});
@@ -550,6 +550,8 @@ function addProblemToAccordian(problem,folderName){
     link.click(function () { 
         curProblem = problem;
         fillForm(curProblem);
+        fillProblemDisplay(curProblem);
+        getStudentResults(curProblem);
     });
     return link;
 }
