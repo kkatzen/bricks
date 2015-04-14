@@ -54,6 +54,8 @@ function getStudentResults(problem) {
     }
     numfunct = 0;
     numstyle = 0;
+    numattempted = 0;
+    numearned = 0;
     $("#studentResultsTable").empty();
     var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Result</th></tr></thead><tbody id='studentResults'></tbody></table>");
     $("#studentResultsTable").append(tbl);
@@ -136,6 +138,10 @@ function getIndividual(user) {
     if(curStudent == user){
         return;
     }
+    $("#pbp-yellow").css("width","0%");
+    $("#pbp-green").css("width","0%");
+    $("#pbp-red").css("width","0%");
+
     curStudent = user;
     $("#individualName").html(user.displayName + " " + user.username);
     $("#individualSubmissionList").empty();
@@ -215,6 +221,7 @@ function problemCorrect(user, problem, student, totalStudents){
             });
         }
         if(results.tried) {
+            numattempted++;
             if(results.correct) {
                 numfunct++;
                 rsection.append(correct());
@@ -226,12 +233,19 @@ function problemCorrect(user, problem, student, totalStudents){
             } else {
                 rsection.append(wrong());
             }
+            if(results.correct && results.style){
+                numearned++;
+            }
         }
         student.append(rsection);
         $("#studentResults").append(student);
         //update quickview progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
         $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
+
+        $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
+        $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+
     });
 }
 
@@ -722,6 +736,9 @@ window.onload = function () {
     numFolders = 0;
     numfunct = 0; //num solutions with correct functionality
     numstyle = 0; //num solutions with correct style
+    numattempted = 0; //num students submitted anything
+    numearned = 0; //num students earned full points
+
 	loadFolders();
     loadUsers();
     getStudents();
@@ -854,4 +871,6 @@ window.onload = function () {
             reloadFolders();
         }
     });
+      $('[data-toggle="tooltip"]').tooltip()
+
 };

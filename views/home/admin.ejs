@@ -200,11 +200,12 @@ form > button {
 
   <div class="panel panel-default">
     <div class="panel-heading">
-       <h4 class="panel-title" id="problemDisplayName">
-          Choose a Problem
-      </h4>
+         <h4 class="panel-title" >
+            <a data-toggle="collapse" data-parent="#accordion" href="#displayQuestionCollapse" aria-expanded="true" id="problemDisplayName"> Choose a Problem</a>
+        </h4>
     </div>
-    <div class="panel-body">
+    <div class="collapse" id="displayQuestionCollapse">
+      <div class="panel-body">
         <div id="pointbreakdown" class="hidden" >
           Point Breakdown:<br/>
           Style- <span id="availablePtStyle"></span>
@@ -213,8 +214,9 @@ form > button {
           <br />
         </div>
         <div id="problemDisplayBody" >
-          Select a problem to run and submit.
+          Select a problem from the left to view more information.
         </div>
+      </div>
     </div>
   </div>
 
@@ -227,7 +229,7 @@ form > button {
     </div>
     <div class="panel-collapse collapse" id="editQuestionCollapse">
       <div class="panel-body">
-        <p id="editPlaceholder">Select a question from the above menus to edit it</p>
+        <p id="editPlaceholder">Select a problem from the left to edit it</p>
         <form id="edit" class="form hidden">
           <div class="row">
             <div class="form-group">
@@ -292,6 +294,18 @@ form > button {
       </div>
     </div>
   </div>
+
+<div class="progress">
+  <div class="progress-bar progress-bar-success" style="width: 0%" id="pbp-green" data-toggle="tooltip" data-placement="top" title="Students who earned full points">
+    <span class="sr-only">35% Complete (success)</span>
+  </div>
+  <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 0%" id="pbp-yellow" data-toggle="tooltip" data-placement="top" title="Students who submitted but did not earn full points">
+    <span class="sr-only">20% Complete (warning)</span>
+  </div>
+  <div class="progress-bar progress-bar-danger" style="width: 0%" id="pbp-red">
+    <span class="sr-only">10% Complete (danger)</span>
+  </div>
+</div>
   <div class="panel panel-default">
     <div class="panel-heading">
       Student Progress  <span id="function" class="label label-info" >0%</span><span id="style" class="label label-success">0%</span>
