@@ -180,7 +180,7 @@ function getIndividual(user) {
                                 earnedFuncPoints = parseInt(submission.value.correct);
                                 totalEarned += parseInt(earnedFuncPoints);
                             }
-                            var percent = parseInt(totalEarned) / parseInt(492) * parseInt(100);
+                            var percent = parseInt(totalEarned) / parseInt(numpoints) * parseInt(100);
                             percent = percent + "%";
                             $("#pbgreen").css("width",percent);
                         });
@@ -189,7 +189,7 @@ function getIndividual(user) {
                             totalAttempted += parseInt(availableFuncPoints) - parseInt(earnedFuncPoints);
                             $("#ipCount" + problem.id).append("<br />" + submissions.length + "submissons");
                         }
-                        var percent = parseInt(totalAttempted) / parseInt(492) * parseInt(100);
+                        var percent = parseInt(totalAttempted) / parseInt(numpoints) * parseInt(100);
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
                         $("#ipPoints" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
@@ -320,6 +320,7 @@ var problemActions = {
 };
 
 function addProblems() {
+
     $.post("/problem/read/", {folder: curFolder}, function (problems) {
         $("#problems").empty();
         if(problems.length == 0) {
@@ -393,7 +394,9 @@ function addProblems() {
             //add label to folder ui lists
             $("#problems").append(label);
         });
+
     });
+
 };
 
 function reorderFolders() {
@@ -519,12 +522,14 @@ function addFolder(folder) {
     //var fObj = { domNode : dropdown, data : folder };
     //fObj.__proto__ = fProto;
     //allFolders[folder.id] = fObj;
+    numpoints = 0;
     $("#" + accordianFolderName).empty();
     $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
         problems.forEach( function (problem) {
             //fObj.addProblem(problem);
             var link = addProblemToAccordian(problem, accordianFolderName);
             folderScore += parseInt(problem.value.style) + parseInt(problem.value.correct);
+            numpoints += parseInt(problem.value.style) + parseInt(problem.value.correct);
             $("#" + accordianFolderName).append(link);
         });
     });
@@ -738,6 +743,7 @@ window.onload = function () {
     numstyle = 0; //num solutions with correct style
     numattempted = 0; //num students submitted anything
     numearned = 0; //num students earned full points
+    numpoints = 0; 
 
 	loadFolders();
     loadUsers();
