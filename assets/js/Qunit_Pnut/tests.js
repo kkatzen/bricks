@@ -37,26 +37,7 @@ QUnit.test( "Test New Pnut Methods", function( assert ) {
 //------------------------------------------------------------------------
 // 1-b. list all declared variables in a program
 //------------------------------------------------------------------------  
-// Case 1: Not testing lists :) 
-  // var codeDecVars = "var v;"
-  //         "function bar() { "+
-  //           "var d = 0; "+
-  //           "for(var i=0; i<10; i++) { "+
-  //             "while(d==0) { "+
-  //               "var n = 1; "+
-  //             "} "+
-  //           "} "+
-  //         "} ";
-  // var sol = ["var v", "var d", "var n", "var i"]
-  // AST  = acorn.parse(codeDecVars);
-  // var ret= pnut.listDecVars(AST)
-  // var flag = true
-  // for(i in sol){ 
-  //   if(ret.indexOf(i) < 0)
-  //     flag = false
-  // }
-  // //if(!flag) assert.ok( true, "1.b case 1 expected: "+sol+" got "+ret);
-  // assert.ok( flag, "1.b case 1 ");
+
 
 //------------------------------------------------------------------------
 // 1-c. calculate total number of undeclared variables 
@@ -1179,6 +1160,7 @@ var code =
 
 //------------------------------------------------------------------------
 // 6-g. exam if any function is a pass-by-reference function or not
+//      I don't understand what this means...
 //      ex: CORRECT: function bar(x) { return x; }
 //          WRONG:   funciton bar()  { return 5; }
 //------------------------------------------------------------------------
@@ -1245,5 +1227,39 @@ var code =
   AST  = acorn.parse(codeRec);
   assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 3");
   
+  //case 4
+  codeRec = 
+                  "function rec(x) {"+
+                    "if(true){"+
+                        "return rec(x);"+
+                    "}else{"+
+                        "return 1;"+
+                    "}"+
+                  "}";
+
+  AST  = acorn.parse(codeRec);
+  assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 4");
+
+  //case 5
+  codeRec = 
+                  "function rec(x) {"+
+                    "if(true){"+
+                        "return 1;"+
+                    "}else{"+
+                        "return rec(x);"+
+                    "}"+
+                  "}";
+
+  AST  = acorn.parse(codeRec);
+  assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 5");
+
+  //case 6
+  codeRec = 
+                  "function rec(x) {}"+
+                  "function rec()  { return rec(x); }";
+
+  AST  = acorn.parse(codeRec);
+  assert.ok( ( false == pnut.isRecuriveFunction(AST)), "7.a case 6");
+
 
 });
