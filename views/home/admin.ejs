@@ -125,10 +125,7 @@ form > button {
 		<button id="sortFolders" type="button" class="btn btn-default">Edit Folders</button>
 		<button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add</button>
 		<p>
-		<!-- EDITABLE FOLDERS -->
-		<ul id="folderBar" ></ul>
-		<!-- NAVIGABLE FOLDERS -->
-		<div class="panel-group" id="folderAccordion"></div>
+		<div class="panel-group" id="leftSideFolders"></div>
 	</div>
 	<!-- END SIDE BAR -->
 
@@ -226,7 +223,7 @@ form > button {
 									</div>
 									<div class="col-md-6">
 										<label name="editFolder" class="control-label" for="folder">Folder</label>
-										<select id="editfolderDropdown" class="form-control">  </select>
+										<select id="editFolderDropdown" class="form-control">  </select>
 									</div>
 								</div>
 							</div>
@@ -264,7 +261,7 @@ form > button {
 					Student Progress  <span id="function" class="label label-info" >0%</span><span id="style" class="label label-success">0%</span>
 					<button class="btn btn-primary btn-sm pull-right" id="refreshData">Refresh</button>
 				</div>
-				<div id="studentResultsTable">
+				<div id="allStudents1ProblemTable">
 					<div class="panel-body">
 						Select a problem to view student progress
 					</div>
@@ -395,21 +392,21 @@ form > button {
 		</div>
 		<!-- ADMIN SECTION ENDS -->
 
-		<!-- STUDENTS SECTION -->
+		<!-- LIST STUDENTS SECTION -->
 		<div class="tab-pane" id="students">
 			<div class="panel panel-default">
 				<div class="panel-heading">Students</div>
-				<div id="studentTable">
+				<div id="viewStudentsList">
 					<div class="panel-body">
-							Loading students...
+						Loading students...
 					</div>
 				</div>
 			</div>
 		</div>
-		<!-- STUDENTS SECTION ENDS -->
+		<!-- LIST STUDENTS SECTION ENDS -->
 
-		<!-- STUDENT SECTION -->
-		<div class="tab-pane" id="individual">
+		<!-- INDIVIDUAL STUDENT SECTION -->
+		<div class="tab-pane" id="individualStudent">
 			<h1 id="individualName"></h1>
 
 			<!-- PROGRESS BAR-->
@@ -419,7 +416,7 @@ form > button {
 			<div id="individualSubmissionList"></div>
 
 		</div>
-		<!-- STUDENT SECTION ENDS -->
+		<!-- INDIVIDUAL STUDENT SECTION ENDS -->
 
 	</div>
 	<!-- BODY ENDS -->
