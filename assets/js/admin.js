@@ -568,6 +568,29 @@ function loadFolders() {
 function loadSortableFolders() {
     $("#folderBar").empty();
     $("#folderAccordion").empty();
+    
+    var addFolder = $('<div></div>')
+    .attr("id","addFolder")
+    .append("<div class='input-group'><input type='text' id='newFolder' class='form-control' placeholder='Add folder...'></input><span class='input-group-btn'><button type='submit' id='newFolderBtn' class='btn btn-default'><span class='glyphicon glyphicon-plus' style='color:green;''></span></button></span></div><div id='newFolderError'></div>");
+    
+    $("#folderBar").append(addFolder)
+
+    $("#newFolderBtn").click(function () {
+            $("#newFolderError").empty();
+            if($("#newFolder").val()==""){
+                var noNameError = $("<div class='alert alert-danger' role='alert'>Please enter a folder name</div>");
+                $("#newFolderError").append(noNameError);
+            } else {
+                $.post("/folder/create", {name: $("#newFolder").val()}, function (folder) {
+                    if(blinkTimer > 0){
+                        loadSortableFolders();
+                    }else {
+                       reloadFolders();
+                    }
+                    $("#newFolder").val("");
+                });
+            }
+        });
 
     $.post("/folder/read", null, function (folders) {
 
@@ -655,7 +678,7 @@ function loadSortableFolders() {
             }
         });
         $( "#sortable" ).disableSelection();
-        
+
     });
 
 }
@@ -719,23 +742,7 @@ window.onload = function () {
     $("#questionDisplay").click(function () {
         $(".questionContent").toggle("hidden");
     });
-    //create a new folder
-	$("#newFolderBtn").click(function () {
-		$("#newFolderError").empty();
-		if($("#newFolder").val()==""){
-			var noNameError = $("<div class='alert alert-danger' role='alert'>Please enter a folder name</div>");
-			$("#newFolderError").append(noNameError);
-		} else {
-			$.post("/folder/create", {name: $("#newFolder").val()}, function (folder) {
-                if(blinkTimer > 0){
-                    loadSortableFolders();
-                }else {
-                   reloadFolders();
-                }
-				$("#newFolder").val("");
-			});
-		}
-	});
+
     //read problems from specified folder
     $("#showProblems").click(function(event) {
 		event.preventDefault();
