@@ -44,8 +44,15 @@
 
 <script src="/js/admin.js"></script>
 <style>
-  #sortable { list-style-type: none; margin: 0; padding: 0; width: 100%;}
-  .sortableGrip { cursor: move; };
+
+  #sortable { list-style-type: none; margin-top: 4px; padding: 0; width: 100%;}
+  #sortable ul { list-style-type: none; margin-top: 4px; padding: 0; width: 100%;}
+  #sortable ul > li { background: none; border: 0px solid white; margin-left: 5px;}
+
+  .sortableGrip2 { cursor: move; float: left; };
+  .sortableFolder {margin-top: 5px; padding-left: 0px; padding-right: 0px;}
+  .sortableGrip { cursor: move; float: left; };
+
 
 #navigationPanel {
 	margin-top: 20px;
@@ -102,7 +109,7 @@ form > button {
 <% if (req.isAuthenticated() && req.user.admin) {%>
     <!--Navigation starts-->
 	<div id="navigationPanel" class="panel panel-default col-md-2  ">
-    <button id="sortFolders" type="button" class="btn btn-default">Sort Folders</button>
+    <button id="sortFolders" type="button" class="btn btn-default">Edit Folders</button>
     <button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add</button>
     <p>
     <div id="addFolder">
@@ -149,6 +156,7 @@ form > button {
                          </div>
                      </div>
                  </div> -->
+                 <!--
                      <div class="col-md-6">
                          <div class="panel panel-default">
                              <div class="panel-heading">
@@ -166,13 +174,13 @@ form > button {
                                 </form>
                             </div>
                              <ul id="problems" class="list-group questionContent">
-                                <!-- problem names inserted here -->
+                                problem names inserted here 
                                 <li class="list-group-item">
                                     Select a folder to see the problems it contains
                                 </li>
                              </ul>
                          </div>
-                     </div>
+                     </div>-->
                  </div>
              </div>
                  <!--Edit folders sub-section ends-->

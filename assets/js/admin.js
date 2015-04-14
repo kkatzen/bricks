@@ -515,7 +515,6 @@ function addFolder(folder) {
         });
     });
 
-
     var dropdown = $("<li></li>").addClass("dropdown");
     var toggle = $("<a></a>")
         .attr("href","#")
@@ -576,26 +575,67 @@ function loadSortableFolders() {
 
         numFolders = folders.length;
         folders.forEach(function (folder) {
+
             var removeButton = $("<a href='#'></a>")
             .css("color","red")
             .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
             .click(function () {
-                $.post("/folder/destroy", {id: folder.id}, function () {
-                    loadSortableFolders();
-                    //reloadFolders();
-                });
-               //allFolders[folder.id].remove();
+                if (confirm('Are you sure you wish to delete this folder ?')) {
+                    $.post("/folder/destroy", {id: folder.id}, function () {
+                        loadSortableFolders();
+                    });
+                }
             });
-            var sortableItem = $("<li></li>")
-            .attr("class","ui-state-default sortableItem")
-            .attr("id",folder.id);
-            sortableItem.append('<span class="sortableGrip ui-icon ui-icon-arrowthick-2-n-s"></span>');
-            sortableItem.append(folder.name);
-            sortableItem.append(removeButton);
 
-           // var myAppend = '<li class="ui-state-default" id="' + folder.id + '"><span class="sortableGrip ui-icon ui-icon-arrowthick-2-n-s"></span>'+ folder.name + '</li>';
-            //ADD REMOVE BUTTON TO THE DIV SOMEHOW
+            var expandButton = $("<a href='#accoridanFolder" + folder.id + "'></a>")
+            .attr("data-parent","#accordion")
+            .attr("data-toggle","collapse")
+            .html("<span class='glyphicon glyphicon-folder-open'></span>");
+
+            var heading = $("<h4></h4>")
+            .addClass("panel-title")
+            .html('<span class="sortableGrip ui-icon ui-icon-arrowthick-2-n-s"></span>' + folder.name + "</h4>")
+            .append(removeButton).append(expandButton);
+
+            var expandableFolder = $("<div></div>")
+            .attr("id","accoridanFolder" + folder.id)
+            .attr("class","panel-collapse collapse folderCollapse")
+            .html("<ul id='sortableFolder" + folder.id + "' class='sortable2' ></ul>");
+
+            var sortableItem = $("<li></li>")
+            .attr("class","ui-state-default sortableFolder panel-heading")
+            .attr("id",folder.id);
+            sortableItem.append(heading);
+            sortableItem.append(expandableFolder);
+
+            $.post("/problem/read", {folder: folder.id}, function (problems) {
+                problems.forEach( function (problem) {
+                    var sortableProblem = $("<li></li>")
+                    .attr("class","ui-state-default")
+                    .attr("id",problem.id)
+                    .append('<span class="sortableGrip2 ui-icon ui-icon-arrowthick-2-n-s"></span>' + problem.name);
+                    $("#sortableFolder" + folder.id).append(sortableProblem);
+                });
+            });
+
             $("#sortable").append(sortableItem);
+
+            $( "#sortableFolder" + folder.id ).sortable({
+                handle: ".sortableGrip2",
+                start: function(e, ui) {
+                    // creates a temporary attribute on the element with the old index
+                    $(this).attr('data-previndex', ui.item.index());
+                },
+                update : function (e, ui) {
+                    var newIndex = ui.item.index();
+                    var oldIndex = $(this).attr('data-previndex');
+                    var id = ui.item.attr('id');
+                    var difference = oldIndex - newIndex;
+                    $.post("/problem/update", {id: id, folder: folder, num: oldIndex, dir: difference}, function (problem) {
+                    });
+                }
+            });
+            $( "#sortableFolder" + folder.id ).disableSelection();
 
         });
 
@@ -610,13 +650,12 @@ function loadSortableFolders() {
                 var oldIndex = $(this).attr('data-previndex');
                 var id = ui.item.attr('id');
                 var difference = oldIndex - newIndex;
-
                 $.post("/folder/update", {id: id, num: oldIndex, dir: difference}, function (folder) {
                 });
-
             }
         });
         $( "#sortable" ).disableSelection();
+        
     });
 
 }
@@ -629,9 +668,11 @@ function loadUsers() {
             .css("color","red")
             .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
             .click(function () {
-                $.post("/user/removeAdmin", {id: admin.id}, function () {
-                    loadUsers();
-                });
+                if (confirm('Are you sure you wish to delete ?')) {
+                    $.post("/user/removeAdmin", {id: admin.id}, function () {
+                        loadUsers();
+                    });
+                }
              });
             var label = $("<li></li>").attr("class","list-group-item").append(removeButton).append(admin.displayName);
             $("#admins").append(label);
@@ -794,13 +835,13 @@ window.onload = function () {
         });
     });
     $('#sortFolders').on('click', function() {
-        if($(this).text() == 'Sort Folders') {
+        if($(this).text() == 'Edit Folders') {
             blinking($("#sortFolders"));
             $(this).text('Done');
             loadSortableFolders();
         } else {
             clearInterval(blinkTimer);
-            $(this).text('Sort Folders');
+            $(this).text('Edit Folders');
             reloadFolders();
         }
     });
