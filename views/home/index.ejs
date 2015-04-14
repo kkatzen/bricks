@@ -5,6 +5,9 @@
     html, body, .container-fluid, .col-md-9, #codemirror, .CodeMirror {
         height: 95%;
     }
+    .scrollableAccordian {
+	    overflow: scroll;
+	}
     .CodeMirror-scroll {
         overflow-y: auto;
         overflow-x: auto;
@@ -26,6 +29,7 @@
     	margin-left:5px;
     	padding:5px;
     }
+	
 </style>
 <script src="lib/codemirror.js"></script>
 <script src="../mode/javascript/javascript.js"></script>
@@ -123,7 +127,7 @@ User.find({admin: true}).exec(function(err, users) {
       		<div>
       			<button type="button" id="accShow" class="btn btn-default" aria-label="Left Align" >
       			Show All</button>
-      		    <div class="panel-group" id="folderAccordion">
+      		    <div class="panel-group scrollableAccordian" id="folderAccordion" >
 
 			    </div>
       			<!--Folder Nav-->

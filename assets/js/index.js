@@ -377,5 +377,18 @@ window.onload = function () {
 	    }
 	    return false;
 	});
+
+    var window_height = $(window).height(),
+       content_height = window_height;
+    $('.scrollableAccordian').height(content_height);
+
+	$( window ).resize(function() {
+	    var window_height = $(window).height(),
+	       content_height = window_height;
+	    $('.scrollableAccordian').height(content_height);
+	});
+
 };
+
+
 
