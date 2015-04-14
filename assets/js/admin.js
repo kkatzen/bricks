@@ -145,7 +145,12 @@ function getIndividual(user) {
     curStudent = user;
     $("#individualName").html(user.displayName + " " + user.username);
     $("#individualSubmissionList").empty();
-    $("#individualProgessBar").empty().append('<div class="progress"><div id="pbgreen" class="progress-bar progress-bar-success" style="width: 0%;"><span class="sr-only">35% Complete (success)</span></div> <div id="pbyellow" class="progress-bar progress-bar-warning progress-bar-striped" style="width: 0%"><span class="sr-only">20% Complete (warning)</span></div><div id="pbred" class="progress-bar progress-bar-danger" style="width: 0%"><span class="sr-only">10% Complete (danger)</span></div></div>');
+    var tooltipGreen = "Problems for which full points were earned";
+    var tooltipYellow = "Attempted problems that did not recieve full credit";
+    $("#individualProgessBar").empty().append('<div class="progress"><div id="pbgreen" class="progress-bar progress-bar-success" style="width: 0%;" data-toggle="tooltip" data-placement="top" title="' + tooltipGreen + '"><span class="sr-only">35% Complete (success)</span></div> <div id="pbyellow" class="progress-bar progress-bar-warning progress-bar-striped" style="width: 0%" data-toggle="tooltip" data-placement="top" title="' + tooltipYellow + '"><span class="sr-only">20% Complete (warning)</span></div><div id="pbred" class="progress-bar progress-bar-danger" style="width: 0%"><span class="sr-only">10% Complete (danger)</span></div></div>');
+    //must enable tooltips
+    $('[data-toggle="tooltip"]').tooltip()
+
     $.post("/folder/read", null, function (folders) {
         var totalEarned = 0;
         var totalAttempted = 0;
