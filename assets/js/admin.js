@@ -168,7 +168,9 @@ function getIndividual(user) {
     $("#pbp-yellow").css("width","0%");
     $("#pbp-green").css("width","0%");
     $("#pbp-red").css("width","0%");
-    $("#individualSubmissionList").empty();
+    $("#individualProgessBar").removeClass("hidden");
+    $("#pbp-red").css("width","0%");
+
 
     $("#individualName").html(user.displayName + " " + user.username);
 
@@ -229,6 +231,18 @@ function getIndividual(user) {
             });
         });
     });
+}
+
+function getIndividualNone(onyen) {
+
+    $("#pbp-yellow").css("width","0%");
+    $("#pbp-green").css("width","0%");
+    $("#pbp-red").css("width","0%");
+    $("#individualSubmissionList").empty();
+    $("#individualProgessBar").addClass("hidden");
+
+    $("#individualName").html("No user with found with onyen <i>\"" + onyen + "\"</i>");
+
 }
 
 function reloadFolders() {
@@ -561,15 +575,14 @@ window.onload = function () {
         var onyenValue = $("#onyen").val();
         console.log("onyen " + onyenValue);
         if(onyenValue == ""){
-            alert("No onyen entered");
+            getIndividualNone("null");
             return;
         }
         $.post("/user/read", {onyen: onyenValue}, function (user) {
             if (!user) {
-                alert("No user with that onyen found");
+                getIndividualNone(onyenValue);
             }else {
                 $("#individual").tab('show');
-                alert(user.displayName);
                 getIndividual(user);
             }
         });
