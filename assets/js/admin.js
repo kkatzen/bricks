@@ -169,8 +169,7 @@ function getIndividual(user) {
     $("#pbp-green").css("width","0%");
     $("#pbp-red").css("width","0%");
     $("#individualProgessBar").removeClass("hidden");
-    $("#pbp-red").css("width","0%");
-
+    $("#individualSubmissionList").empty();
 
     $("#individualName").html(user.displayName + " " + user.username);
 
