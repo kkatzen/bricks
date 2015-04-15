@@ -18,9 +18,21 @@ module.exports = {
     },
     read: function (req, res) {
         var id = req.param("id") || null;
+        var onyen = req.param("onyen") || null;
+
         if(id){
             console.log("has id");
                 User.findOne({id:id}).exec(function (err, user) {
+                if (err) {
+                    res.send(500, {error: "DB error finding user"});
+                    return;
+                } else {
+                    res.send(user);
+                }
+            });
+        }else if(onyen){
+            console.log("has onyen");
+                User.findOne({username:onyen}).exec(function (err, user) {
                 if (err) {
                     res.send(500, {error: "DB error finding user"});
                     return;

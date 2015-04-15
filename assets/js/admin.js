@@ -556,6 +556,26 @@ window.onload = function () {
             reloadFolders();
         }
     });
+
+    $('#onyenSearchButton').on('click', function( event ) {
+        var onyenValue = $("#onyen").val();
+        console.log("onyen " + onyenValue);
+        if(onyenValue == ""){
+            alert("No onyen entered");
+            return;
+        }
+        $.post("/user/read", {onyen: onyenValue}, function (user) {
+            if (!user) {
+                alert("No user with that onyen found");
+            }else {
+                $("#individual").tab('show');
+                alert(user.displayName);
+                getIndividual(user);
+            }
+        });
+
+    });
+
     //enable tooltips
     $('[data-toggle="tooltip"]').tooltip()
 };
