@@ -138,6 +138,7 @@ function getStudentList() {
 function getSubmission(submission,user,problem) {
     //Generate page for particular submission    
     $("#submissionCreatedAt").html(submission.createdAt);
+    var currentId = submission.id;
     var a = $("<td></td>")
         .html("<a href='#individualStudent' data-toggle='pill'>" + user.displayName + "</a>")
         .click(function (event) {
@@ -151,11 +152,35 @@ function getSubmission(submission,user,problem) {
             });
         });
     $("#submissionCreatedBy").empty().append(a);
+    $("#relatedSubmissions").empty();
     $("#submissionProblem").html(problem.name);
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
     $("#submissionCodebox").html(submission.code);
     $("#submissionMessage").html(submission.message);
     $("#submissionTitle").html("heres a submission");
+
+    $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
+        submissions.forEach( function (submission) {
+            if(currentId == submission.id){
+                var a = $("<li></li>")
+                .html(submission.createdAt + "<br /> -c" + submission.value.correct + " -s " + submission.value.style)
+                .click(function (event) {
+                    event.preventDefault();
+                        getSubmission(submission,user,problem);
+                });
+            }else {
+                var a = $("<li></li>")
+                .html("<a href='#submission' data-toggle='pill'>" + submission.createdAt + "</a><br /> -c" + submission.value.correct + " -s " + submission.value.style)
+                .click(function (event) {
+                    event.preventDefault();
+                        getSubmission(submission,user,problem);
+                });
+            }
+            $("#relatedSubmissions").append(a);
+        });
+    });
+
+
 }
 
 function getIndividual(user) {
