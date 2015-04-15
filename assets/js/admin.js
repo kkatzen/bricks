@@ -155,7 +155,7 @@ function getSubmission(submission,user,problem) {
     $("#relatedSubmissions").empty();
     $("#submissionProblem").html(problem.name);
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
-    $("#submissionCodebox").html(submission.code);
+    editor.setValue(submission.code);
     $("#submissionMessage").html(submission.message);
     $("#submissionTitle").html("heres a submission");
 
@@ -472,6 +472,7 @@ function blinking(elm) {
     }
 } 
 
+var editor;
 window.onload = function () {
     curProblem = null;
     curStudent = null;
@@ -492,6 +493,28 @@ window.onload = function () {
         },
         30000 /* 30000 ms = 30 sec */
     );
+
+    editor = CodeMirror.fromTextArea(codemirror, {
+        mode: "javascript",
+        styleActiveLine: true,
+        lineNumbers: true,
+        lineWrapping: true,
+        readOnly: true,
+        theme: "mbo",
+        extraKeys: {
+            "F11": function (cm) {
+                if (cm.setOption("fullScreen", !cm.getOption("fullScreen"))) {
+                    $(".CodeMirror").css("font-size", "150%");
+                } else {
+                    $(".CodeMirror").css("font-size", "115%");
+                }
+            },
+            "Esc": function (cm) {
+                if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                $(".CodeMirror").css("font-size", "100%");
+            }
+        }
+    });
 
     //reset student data
     $("#refreshData").click(function() {

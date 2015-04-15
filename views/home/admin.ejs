@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="lib/codemirror.css">
+<link rel="stylesheet" href="theme/mbo.css">
+<link rel="stylesheet" href="addon/display/fullscreen.css">
 <script>
 		<%
 		User.find({admin: true}).exec(function(err, users) {
@@ -74,13 +77,6 @@ form > button {
 		margin-top: 10px;
 		margin-bottom: 0;
 }
-#submissionCodebox {
-	background: black;
-	color: white;
-	font-family: consolas;
-	padding: 20px;
-
-}
 #pointbreakdown {
 	border: 2px solid gray;
 	float:right; 
@@ -90,7 +86,10 @@ form > button {
 }
 
 </style>
-
+<script src="lib/codemirror.js"></script>
+<script src="../mode/javascript/javascript.js"></script>
+<script src="../addon/selection/active-line.js"></script>
+<script src="../addon/display/fullscreen.js"></script>
 
 <nav style="margin-bottom: 0" class="navbar navbar-inverse" role="navigation">
 	<div class="container-fluid">
@@ -366,7 +365,7 @@ form > button {
 			Problem: <span id="submissionProblem"></span>
 			Points: <span id="submissionPoints"></span>
 			<div class="alert alert-warning" id="submissionMessage"></div>
-			<div id="submissionCodebox"></div>
+			<textarea id="codemirror"></textarea>
 		</div>
 		<!-- SUBMISSION SECTION ENDS -->
 
