@@ -1,5 +1,3 @@
-
-
 //------------------------------------------------------------------------
 //
 //  This JavaScript code implements an API for AST analysis
@@ -212,7 +210,7 @@ var pnut = (function () {
     var floop    = " <= for { }";
     var wloop    = " <= while { }";
     var ifblock  = " <= if { }";
-    var funblock = " <= Function ";
+    var funcblock = " <= Function ";
 
     if(arguments.length==2) { 
       map = decVars; 
@@ -317,7 +315,7 @@ var pnut = (function () {
             var ndVars = obj.list;
             map        = obj.map;
 
-            for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
+            for(n in ndVars) { list.push(ndVars[n] + funcblock + ndName + "()"); }
           }
           break;
       }
@@ -593,7 +591,6 @@ var pnut = (function () {
 
     return {list:list, map:map};
   } 
-
 
 //------------------------------------------------------------------------
 // private function:
@@ -984,6 +981,10 @@ var pnut = (function () {
     var count = 0;
     var arr   = [];
     var nd, m, exp, func, map, add;
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
 
     if(arguments.length==2) { 
       map = usedArrs; 

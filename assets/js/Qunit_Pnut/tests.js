@@ -74,18 +74,42 @@ QUnit.test( "Test New Pnut Methods", function( assert ) {
 
 
 // Case 4:
-  var code = "function bar() { "+
+  var code = 
             "d = 0; "+
             "for(var i=0; i<10; i++) { "+
               "while(d==0) { "+
                 "a =1; "+
               "} "+
-            "} "+
-          "} ";
+            "} ";
 
   AST  = acorn.parse(code);
   assert.ok( true, "1.c case 4 expected: "+2+" got "+pnut.numUndecVars(AST));  
   assert.ok( (2 == pnut.numUndecVars(AST)), "1.c Case 4");
+
+// Case 5:
+  var code = 
+            "d = 0; "+
+            "for(var i=0; i<10; i++) { "+
+                "a =1; "+
+            "} ";
+
+  AST  = acorn.parse(code);
+  assert.ok( true, "1.c case 3 expected: "+2+" got "+pnut.numUndecVars(AST));
+  assert.ok( (2 == pnut.numUndecVars(AST)), "1.c Case 5");
+
+
+// Case 6:
+  var code = 
+            "d = 0; "+
+            "for(var i=0; i<10; i++) { "+
+              "while(d==0) { "+
+                "a =1; "+
+              "} "+
+            "} ";
+
+  AST  = acorn.parse(code);
+  assert.ok( true, "1.c case 4 expected: "+2+" got "+pnut.numUndecVars(AST));  
+  assert.ok( (2 == pnut.numUndecVars(AST)), "1.c Case 6");
 
 
 //------------------------------------------------------------------------
@@ -372,7 +396,7 @@ var code =
       
   AST  = acorn.parse(code);
   assert.ok( ( 1 == pnut.numObjsUsed(AST)), "3.e Case 1");
-  // assert.ok( true, " 3.e Case 1 expecting 1 got: "+pnut.numObjsUsed(AST));
+  assert.ok( true, " 3.e Case 1 expecting 1 got: "+pnut.numObjsUsed(AST));
 
   // Case 2
 var code = 
@@ -527,7 +551,7 @@ var code =
         "}";
 
   AST  = acorn.parse(code);
-  assert.ok( ( 2 == pnut.numNestedWhileLoopsInGloLev(AST)), "4.b Case 4");
+  assert.ok( ( 1 == pnut.numNestedWhileLoopsInGloLev(AST)), "4.b Case 4");
   //assert.ok( true, " 4.b Case 4 expecting 2 got: "+pnut.numNestedWhileLoopsInGloLev(AST));
 
     // Case 5
@@ -1139,23 +1163,23 @@ var code =
 
 
   //Case 4.
-   codeCall1 = 
+   code = 
                   "function foo() { return 5; }"+
                   "function bar() { foo(); }"+
                   "bar();"+
                   "foo();";
 
-  AST  = acorn.parse(codeCall1);
+  AST  = acorn.parse(code);
   assert.ok( ( false == pnut.areDecFuncsCalledOnce(AST)), "6.f case 4");
 
 
    //Case5.
-   codeCall1 = 
+   code = 
                   "function bar() { return 5; }"+
                   "function foo() { bar(); }"+
                   "foo();";
 
-  AST  = acorn.parse(codeCall1);
+  AST  = acorn.parse(code);
   assert.ok( ( true == pnut.areDecFuncsCalledOnce(AST)), "6.f case 5");
 
 //------------------------------------------------------------------------
@@ -1165,29 +1189,29 @@ var code =
 //          WRONG:   funciton bar()  { return 5; }
 //------------------------------------------------------------------------
  //Case 1.
-  var codeRetObj = 
+  var code = 
                   "function foo() {"+
                      "var ob = { a:3, b:5 };"+
                      "return ob;"+
                   "}";
 
-  AST  = acorn.parse(codeRetObj);
+  AST  = acorn.parse(code);
   assert.ok( ( true == pnut.isAnyFuncReturnObj(AST)), "6.g case 1");
 
  //Case 2.
-  codeRetObj = 
+  code = 
                   "function foo(x) {"+
                      "if (x==1) return 1;"+
                      "return x*foo(x-1);"+
                   "}";
 
-  AST  = acorn.parse(codeRetObj);
+  AST  = acorn.parse(code);
   assert.ok( ( false == pnut.isAnyFuncReturnObj(AST)), "6.g case 2");
 //------------------------------------------------------------------------------
 // 7-a. exam if a function is recursive or not by checking its return statement
 //------------------------------------------------------------------------------
   //Case 1.
-  var codeRec = 
+  var code = 
                   "function myMain() {"+
                      "var x = foo(3);"+
                      "alert(x);"+
@@ -1199,10 +1223,10 @@ var code =
                   "}"+
                   "myMain();";
 
-  AST  = acorn.parse(codeRec);
+  AST  = acorn.parse(code);
   assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 1");
   // Case 2
-  codeRec = 
+  code = 
                   "function myMain() {"+
                      "var x = foo(3);"+
                      "alert(x);"+
@@ -1215,20 +1239,20 @@ var code =
                   "}"+
                   "myMain();";
 
-  AST  = acorn.parse(codeRec);
+  AST  = acorn.parse(code);
   assert.ok( ( false == pnut.isRecuriveFunction(AST)), "7.a case 2");
   
   //case 3
-  codeRec = 
+  code = 
                   "function rec(x) {"+
                      "return rec(x)"+
                   "}";
 
-  AST  = acorn.parse(codeRec);
+  AST  = acorn.parse(code);
   assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 3");
   
   //case 4
-  codeRec = 
+  code = 
                   "function rec(x) {"+
                     "if(true){"+
                         "return rec(x);"+
@@ -1237,11 +1261,11 @@ var code =
                     "}"+
                   "}";
 
-  AST  = acorn.parse(codeRec);
+  AST  = acorn.parse(code);
   assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 4");
 
   //case 5
-  codeRec = 
+  code = 
                   "function rec(x) {"+
                     "if(true){"+
                         "return 1;"+
@@ -1250,15 +1274,15 @@ var code =
                     "}"+
                   "}";
 
-  AST  = acorn.parse(codeRec);
+  AST  = acorn.parse(code);
   assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 5");
 
   //case 6
-  codeRec = 
+  code = 
                   "function rec(x) {}"+
                   "function rec()  { return rec(x); }";
 
-  AST  = acorn.parse(codeRec);
+  AST  = acorn.parse(code);
   assert.ok( ( false == pnut.isRecuriveFunction(AST)), "7.a case 6");
 
 
