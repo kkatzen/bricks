@@ -64,9 +64,10 @@ function problemCorrect(user, problem, student, totalStudents){
     var rsection = $("<td></td>");
     var results = {tried: false, correct: false, style: false};
     $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
-        student.append("<td>" + submissions.length + "</td>");
         if(submissions.length == 0){
+            student.append("<td>" + submissions.length + "</td>");
         } else {
+        	student.append("<td><a data-toggle='collapse' data-parent='#accordion' href='#submissionUser" + user.id + "' >" + submissions.length + "</a></td>");
             results.tried = true;
             submissions.forEach(function(submission) {
                 if(submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
@@ -98,6 +99,32 @@ function problemCorrect(user, problem, student, totalStudents){
         }
         student.append(rsection);
         $("#allStudents1ProblemResults").append(student);
+
+        var collapseBody = $("<tr class='collapse out' id='submissionUser" + user.id + "'></tr>");
+       	$("#allStudents1ProblemResults").append(collapseBody);
+
+		submissions.forEach( function (submission) {
+            var d = new Date(submission.createdAt);
+			var a = $("<a></a>")
+				.attr("href","#submission")
+				.attr("data-toggle","pill")  //save
+                .html(d.toLocaleString())
+                .click(function (event) {
+                    event.preventDefault();
+                        getSubmission(submission,user,problem);
+                });
+        	$("#submissionUser" + user.id)
+                .append($("<tr></tr>")
+                    .append($("<td></td>")
+                        .append(a))
+                    .append($("<td></td>")
+                        .append("correct=" + submission.value.correct))
+                    .append($("<td></td>")
+                        .append("style=" + submission.value.style))
+
+                );
+        });
+		console.log("collpasemf");
 
         //update progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
