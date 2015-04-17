@@ -366,11 +366,26 @@ form > button {
 					<div class="panel-body">
 						Created By: <span id="submissionCreatedBy"></span><br />
 						Created At: <span id="submissionCreatedAt"></span><br />
-						Points: <span id="submissionPoints"></span>
 					</div>
 				</div>
 			</div>		
-			<div class="alert alert-warning" id="submissionMessage"></div>
+
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion" href="#submissionFeedbackCollapse" id="submissionFeedbackTitle">
+							Feedback
+						</a>
+					</h4>
+				</div>
+				<div id="submissionFeedbackCollapse" class="panel-collapse collapse in">
+					<div class="panel-body">
+						<span id="submissionPoints"></span>
+						<div class="alert alert-warning" id="submissionMessage"></div>
+					</div>
+				</div>
+			</div>		
+
 			<textarea id="codemirror"></textarea>
 
 			<div class="panel panel-default">
