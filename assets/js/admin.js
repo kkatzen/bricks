@@ -137,10 +137,14 @@ function getStudentList() {
 
 function getSubmission(submission,user,problem) {
     //Generate page for particular submission    
-    $("#submissionCreatedAt").html(submission.createdAt);
+	var d = new Date(submission.createdAt);
+    $("#submissionCreatedAt").html(d.toLocaleString());
+
     var currentId = submission.id;
-    var a = $("<td></td>")
-        .html("<a href='#individualStudent' data-toggle='pill'>" + user.displayName + "</a>")
+    var a = $("<a></>")
+    	.attr("href","#individualStudent")
+    	.attr("data-toggle","pill")
+    	.html(user.displayName)
         .click(function (event) {
             event.preventDefault();
             $.post("/user/read/" + user.id, {}, function (user) {
@@ -153,27 +157,28 @@ function getSubmission(submission,user,problem) {
         });
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
-    $("#submissionProblem").html(problem.name);
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
     editor.setValue(submission.code);
     $("#submissionMessage").html(submission.message);
-    $("#submissionTitle").html("heres a submission");
+    $("#submissionTitle").html(problem.name);
 
     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
         submissions.forEach( function (submission) {
+        	var d = new Date(submission.createdAt);
+
             if(currentId == submission.id){
                 var a = $("<li></li>")
-                .html(submission.createdAt + "<br /> -c" + submission.value.correct + " -s " + submission.value.style)
+                .html(d.toLocaleString() + "<br /> -c" + submission.value.correct + " -s " + submission.value.style)
                 .click(function (event) {
                     event.preventDefault();
-                        getSubmission(submission,user,problem);
+                    getSubmission(submission,user,problem);
                 });
             }else {
                 var a = $("<li></li>")
-                .html("<a href='#submission' data-toggle='pill'>" + submission.createdAt + "</a><br /> -c" + submission.value.correct + " -s " + submission.value.style)
+                .html("<a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a><br /> -c" + submission.value.correct + " -s " + submission.value.style)
                 .click(function (event) {
                     event.preventDefault();
-                        getSubmission(submission,user,problem);
+                    getSubmission(submission,user,problem);
                 });
             }
             $("#relatedSubmissions").append(a);
@@ -221,8 +226,10 @@ function getIndividual(user) {
                     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
                         $("#ISL" + folder.id).append("<li>" + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
                         submissions.forEach( function (submission) {
+							var d = new Date(submission.createdAt);
+
                             var a = $("<li></li>")
-                            .html("<a href='#submission' data-toggle='pill'>" + submission.createdAt + "</a>")
+                            .html("<a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a>")
                             .click(function (event) {
                                 event.preventDefault();
                                     getSubmission(submission,user,problem);
