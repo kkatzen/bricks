@@ -155,6 +155,19 @@ function getSubmission(submission,user,problem) {
                 getIndividual(user);
             });
         });
+    var b = $("<a></>")
+    	.attr("href","#questions")
+    	.attr("data-toggle","pill")
+    	.html(problem.name)
+        .click(function (event) {
+            event.preventDefault();
+	        curProblem = problem;
+	        fillProblemEdit(curProblem);
+	        fillProblemDisplay(curProblem);
+	        getStudentResults(curProblem);
+
+        });
+    $("#submissionProblem").empty().append(b);
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
@@ -163,7 +176,7 @@ function getSubmission(submission,user,problem) {
     $("#submissionTitle").html(problem.name);
 	$.post("/folder/read/", {id: problem.folder}, function(folder){
 		console.log(folder.name);
-		$("#submissionTitle").html(problem.name + " in " + folder.name);
+		$("#submissionTitle").html(problem.name + "<i> in " + folder.name + "</i>");
 	});
 
     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
