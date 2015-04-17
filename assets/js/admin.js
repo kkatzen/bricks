@@ -185,10 +185,10 @@ function getSubmission(submission,user,problem) {
 
 function getIndividual(user) {
     //Generate page for particular individual student    
-    if(curStudent == user){
+    if(curStudent == user.id){
         return;
     }
-    curStudent = user;
+    curStudent = user.id;
 
     $("#pbp-yellow").css("width","0%");
     $("#pbp-green").css("width","0%");
