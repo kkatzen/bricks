@@ -161,6 +161,10 @@ function getSubmission(submission,user,problem) {
     editor.setValue(submission.code);
     $("#submissionMessage").html(submission.message);
     $("#submissionTitle").html(problem.name);
+	$.post("/folder/read/", {id: problem.folder}, function(folder){
+		console.log(folder.name);
+		$("#submissionTitle").html(problem.name + " in " + folder.name);
+	});
 
     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
         submissions.forEach( function (submission) {
