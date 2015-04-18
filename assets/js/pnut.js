@@ -170,7 +170,7 @@ var pnut = (function () {
 //          num = val + 1 (num and val both get used)
 //------------------------------------------------------------------------
   function numVarsUsed(ast) {
-    console.log("numVarsUsed: " + listVarsUsed(ast).list.length);
+    console.log("numVarsUsed: " + listVarsUsed(ast).list);
     return listVarsUsed(ast).list.length;
   }
 
@@ -530,7 +530,7 @@ var pnut = (function () {
 
             // left-hand side var declaration
             var varName  = nd.init.declarations[0].id.name;
-            list.push(varName + " <= " + floop);
+            list.push(varName + floop);
             if(map.getItem(varName)==undefined) { map.setItem(varName, [nd.start, nd.end]); }
 
             // right-hand side possilble var assignment
@@ -545,15 +545,15 @@ var pnut = (function () {
               for(n in lList) { list.push(lList[n] + floop); }
               for(n in rList) { list.push(rList[n] + floop); }
             }
-          } else {
-            // check vars in loop body
-            if(nd.body.body.length > 0) { 
-              var obj     = listVarsUsed(nd.body, map);
-              var lpVars  = obj.list;
-              map         = obj.map;
+          } 
 
-              for(n in lpVars) { list.push(lpVars[n] + floop); }
-            }
+          // check vars in loop body
+          if(nd.body.body.length > 0) { 
+            var obj     = listVarsUsed(nd.body, map);
+            var lpVars  = obj.list;
+            map         = obj.map;
+
+            for(n in lpVars) { list.push(lpVars[n] + floop); }
           }
           break;
         case "WhileStatement":
