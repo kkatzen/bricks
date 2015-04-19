@@ -15,8 +15,7 @@
 //   -- rewrite the code bodies
 //   -- or write adapter functions
 //
-//  David Stotts, 5/16/2014
-//  Yuxin Mo, 4/1/2015 
+//  Yuxin Mo: myx@cs.unc.edu in 4/1/2015 
 //
 //------------------------------------------------------------------------
 
@@ -118,9 +117,9 @@ var pnut = (function () {
 
     /******************************************************************/
     /* 7. Style Grading for Recursive Function                        */
-    /*    a. isRecuriveFunction(ast)  ==> boolean ? true:false        */
+    /*    a. isRecursiveFunction(ast)  ==> boolean ? true:false        */
     /******************************************************************/   
-      isRF     : isRecuriveFunction(ast)
+      isRF     : isRecursiveFunction(ast)
     };
 
     return dObj;
@@ -170,7 +169,7 @@ var pnut = (function () {
 //          num = val + 1 (num and val both get used)
 //------------------------------------------------------------------------
   function numVarsUsed(ast) {
-    console.log("numVarsUsed: " + listVarsUsed(ast).list);
+    console.log("numVarsUsed: " + listVarsUsed(ast).list.length);
     return listVarsUsed(ast).list.length;
   }
 
@@ -197,8 +196,8 @@ var pnut = (function () {
 //          var f2 = bar;
 //------------------------------------------------------------------------
   function isAnyFuncVar(ast) {
-    console.log("isAnyFuncVar: " + (listFuncVars(ast).length>0));
-    return listFuncVars(ast).length>0;
+    console.log("isAnyFuncVar: " + (dictFuncVars(ast).useds.keys().length>0));
+    return (dictFuncVars(ast).useds.keys().length>0);
   }
 
 
@@ -393,7 +392,7 @@ var pnut = (function () {
         list.push(keys[m]);
       } 
       else if(scopeUsedVar[0]<scopeDecVar[0] || scopeUsedVar[0]>scopeDecVar[1] ||
-       (scopeUsedVar[0]>scopeDecVar[0] && scopeUsedVar[1]>scopeDecVar[1])) {
+        scopeUsedVar[1]<scopeDecVar[0] || scopeUsedVar[1]>scopeDecVar[1]) {
         list.push(keys[m]);
       }
     }
@@ -601,11 +600,17 @@ var pnut = (function () {
 //      ex: function bar() { }
 //          var f2 = bar;
 //------------------------------------------------------------------------ 
-  function listFuncVars(ast) {
-    var nd;
-    var funcs = new HashMap();
-    var useds = new HashMap();
+  function dictFuncVars(ast, funcNames, funcVars) {
+    var nd, temp, obj, funcs, useds;
     var list = [];
+
+    if(arguments.length==3) { 
+      funcs = funcNames; 
+      useds = funcVars;
+    } else {
+      funcs = new HashMap(); 
+      useds = new HashMap();
+    }
 
     for(m in ast.body) {
       nd = ast.body[m];
@@ -638,11 +643,32 @@ var pnut = (function () {
             }                    
           }
           break;
+        case "WhileStatement":
+          if(nd.body.body.length>0) {
+            obj = dictFuncVars(nd.body, funcs, useds);
+            useds = obj.useds;
+            funcs = obj.funcs;
+          }
+          break;
+        case "IfStatement":
+          if(nd.consequent.body.length>0) {
+            obj = dictFuncVars(nd.consequent, funcs, useds);
+            useds = obj.useds;
+            funcs = obj.funcs;
+          }
+          break;
+        case "ForStatement":
+          if(nd.body.body.length>0) {
+            obj = dictFuncVars(nd.body, funcs, useds);
+            useds = obj.useds;
+            funcs = obj.funcs;
+          }
+          break;
       }
     }
 
     // console.log("ListFuncVars: " +arr);
-    return useds.keys();
+    return {useds: useds, funcs: funcs};
   }
 
 //------------------------------------------------------------------------
@@ -761,7 +787,7 @@ var pnut = (function () {
             break;
           case "IfStatement":
             if(nd.consequent.body.length > 0) {
-              var ifList = list.concat(listVarsInFuncsUseGloVars(nd.body, mapGloVars));
+              var ifList = list.concat(listVarsInFuncsUseGloVars(nd.consequent, mapGloVars));
 
               for(n in ifList) { list.push(ifList[n] + ifblock); }
             }
@@ -961,7 +987,7 @@ var pnut = (function () {
         list.push(keys[m]);
       } 
       else if(scopeUsedArr[0]<scopeDecArr[0] || scopeUsedArr[0]>scopeDecArr[1] ||
-       (scopeUsedArr[0]>scopeDecArr[0] && scopeUsedArr[1]>scopeDecArr[1])) {
+        scopeUsedArr[1]<scopeDecArr[0] || scopeUsedArr[1]>scopeDecArr[1]) {
         list.push(keys[m]);
       }
     }
@@ -981,8 +1007,11 @@ var pnut = (function () {
 //        c = [];
 //------------------------------------------------------------------------  
   function listArrsUsed(ast, usedArrs) {
-    var count = 0;
-    var arr   = [];
+    var arr      = [];
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
     var nd, m, exp, func, map, add;
 
     if(arguments.length==2) { 
@@ -1201,7 +1230,6 @@ var pnut = (function () {
         }
       }
     }
-    // console.log("isAnyFuncBoundToAFuncRtnObj: " + check);
     return check;
   }
 
@@ -1220,11 +1248,9 @@ var pnut = (function () {
 //------------------------------------------------------------------------  
   function dictDecObjs(ast, decObjs) {
     var dict, nd, m, n, name, keys;
-    var floop = "for loop";
-    var wloop = "while loop";
 
     // a naive way to do function overloading 
-    if(arguments.length!=1) { 
+    if(arguments.length==2) { 
       dict = decObjs; 
     }
     else {
@@ -1263,15 +1289,16 @@ var pnut = (function () {
           } 
           break;
         case "ForStatement":
-          // check objs in loop body
-          if(nd.body.body.length > 0) { dict = dictDecObjs(nd.body, dict); }
+          dict = (nd.body.body.length>0) ? dictDecObjs(nd.body, dict): dict;
           break;
         case "WhileStatement":
-          // check objs in loop body
-          if(nd.body.body.length > 0) { dict = dictDecObjs(nd.body, dict); }
+          dict = (nd.body.body.length>0) ? dictDecObjs(nd.body, dict): dict;
+          break;
+        case "IfStatement":
+          dict = (nd.consequent.body.length>0) ? dictDecObjs(nd.consequent, dict): dict;
           break;
         case "FunctionDeclaration":
-          if(nd.body.body.length > 0) { dict = dictDecObjs(nd.body, dict); }
+          dict = (nd.body.body.length>0) ? dictDecObjs(nd.body, dict): dict;
           break;
       }
     } 
@@ -1285,11 +1312,16 @@ var pnut = (function () {
 //      ex:
 //        a = { name: "A", age:20 }
 //------------------------------------------------------------------------  
-  function dictUsedObjs(ast) {
-    var usedObjs = new HashMap();
-    var floop    = "for loop";
-    var wloop    = "while loop";
-    var nd, m, n, name, keys;
+  function dictUsedObjs(ast, objs) {
+    var usedObjs, nd, name, keys, decs;
+
+    // a naive way to do function overloading 
+    if(arguments.length==2) { 
+      usedObjs = objs; 
+    }
+    else {
+      usedObjs = new HashMap(); 
+    }
 
     for(m in ast.body) {
       nd = ast.body[m];
@@ -1300,60 +1332,43 @@ var pnut = (function () {
 
           if(exp.type=="AssignmentExpression") {
             if(exp.right.type=="ObjectExpression" && exp.left.type=="Identifier"){
-              usedObjs.setItem(exp.left.name, nd.start);
+              usedObjs.setItem(exp.left.name, [nd.start, nd.end]);
             }
             else if(exp.right.type=="NewExpression" && exp.left.type=="Identifier") {
-              usedObjs.setItem(exp.left.name, nd.start);
+              usedObjs.setItem(exp.left.name, [nd.start, nd.end]);
             }
             else if(exp.left.type=="MemberExpression") {
-              usedObjs.setItem(exp.left.object.name, nd.start);
+              usedObjs.setItem(exp.left.object.name, [nd.start, nd.end]);
             }
           }
           else if(exp.type=="CallExpression" &&
             exp.callee.type=="MemberExpression") {
-            usedObjs.setItem(exp.callee.object.name, nd.start);
+            usedObjs.setItem(exp.callee.object.name, [nd.start, nd.end]);
           }
+          break;
+        case "VariableDeclaration":
+          decs = nd.declarations;
 
+          for(d in decs) {
+            if(decs[d].init!=null && decs[d].init.type=="Identifier") {
+              usedObjs.setItem(decs[d].init.name, [nd.start, nd.end]);
+            }
+          }
+          break;
+        case "IfStatement":
+            usedObjs = (nd.consequent.body.length>0) ? dictUsedObjs(nd.consequent, usedObjs):usedObjs;
           break;
         case "ForStatement":
-          // check objs in loop body
-          if(nd.body.body.length > 0) { 
-            var lpObjs = dictUsedObjs(nd.body);
-            keys       = lpObjs.keys();
-
-            for(n in keys) {
-              name = keys[n] + " <= " + floop;
-              usedObjs.setItem(name, lpObjs.getItem(keys[n]));
-            }
-          }
+            usedObjs = (nd.body.body.length>0) ? dictUsedObjs(nd.body, usedObjs):usedObjs;
           break;
         case "WhileStatement":
-          // check objs in loop body
-          if(nd.body.body.length > 0) { 
-            var wpObjs = dictUsedObjs(nd.body);
-            keys       = wpObjs.keys();
-
-            for(n in keys) {
-              name = keys[n] + " <= " + wloop;
-              usedObjs.setItem(name, wpObjs.getItem(keys[n]));
-            }
-          }
+            usedObjs = (nd.body.body.length>0) ? dictUsedObjs(nd.body, usedObjs):usedObjs;
           break;
         case "FunctionDeclaration":
-          if(nd.body.body.length > 0) {
-            var ndName = nd.id.name;
-            var ndObjs = dictUsedObjs(nd.body);
-            keys       = ndObjs.keys();
-
-            for(n in keys) {
-              name = keys[n] + " <= Function " + ndName + "()";
-              usedObjs.setItem(name, ndObjs.getItem(keys[n]));
-            }
-          }
+            usedObjs = (nd.body.body.length>0) ? dictUsedObjs(nd.body, usedObjs):usedObjs;
           break;
       }
     }
-
     return usedObjs;   
   }
 
@@ -1380,11 +1395,10 @@ var pnut = (function () {
       if(dec==undefined) {
         dict.setItem(keys[m], usedObjs.getItem(keys[m]));
       }
-      else if(dec[0]<use[0] && dec[1]>use[1]) {
+      else if(use[0]<dec[0] || dec[1]<use[1] || dec[1]<use[0] || use[1]<dec[0]) {
         dict.setItem(keys[m], usedObjs.getItem(keys[m]));
       }
     }
-    // console.log("listUndecObjs: "+ dict.keys());
     return dict.keys();
   } 
 
@@ -1461,8 +1475,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numWhileLoopsInGloLev(ast) {
-    console.log("numWhileLoopsInGloLev: " +numWhileLoops(ast).wlgl);
-    return numWhileLoops(ast).wlgl;
+    console.log("numWhileLoopsInGloLev: " +numWhileLoops(ast).wltl);
+    return numWhileLoops(ast).wltl;
   }
 
 
@@ -1484,8 +1498,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedWhileLoopsInGloLev(ast) {
-    console.log("numNestedWhileLoopsInGloLev: " +numWhileLoops(ast).nwlgl);
-    return numWhileLoops(ast).nwlgl;
+    console.log("numNestedWhileLoopsInGloLev: " +numWhileLoops(ast).nwltl);
+    return numWhileLoops(ast).nwltl;
   }
 
 
@@ -1526,8 +1540,8 @@ var pnut = (function () {
 // 4-e. calculate total number of while loops in a program
 //------------------------------------------------------------------------  
   function numWhileLoopsInAProgram(ast) {
-    console.log("numWhileLoopsInAProgram: " +(numWhileLoops(ast).wlgl+numWhileLoops(ast).wlf));
-    return (numWhileLoops(ast).wlgl+numWhileLoops(ast).wlf);
+    console.log("numWhileLoopsInAProgram: " +(numWhileLoops(ast).wltl+numWhileLoops(ast).wlf));
+    return (numWhileLoops(ast).wltl+numWhileLoops(ast).wlf);
   }
 
 
@@ -1536,7 +1550,7 @@ var pnut = (function () {
 // calculate total number of while loops in a calling scope
 //------------------------------------------------------------------------  
   function numWhileLoops(ast) {
-    var counts = {wlgl:0, nwlgl:0, wlf:0, nwlf:0};
+    var counts = {wltl:0, nwltl:0, wlf:0, nwlf:0};
     var nd, snd, lowLevLoops;
 
     for(m in ast.body) {
@@ -1546,28 +1560,30 @@ var pnut = (function () {
         case "WhileStatement":
           lowLevLoops = numWhileLoops(nd.body);
 
-          // numWhileLoopsInGloLev
-          counts.wlgl = counts.wlgl + 1 + lowLevLoops.wlgl;
+          // number of while loop in top level of a calling scope
+          counts.wltl = counts.wltl + lowLevLoops.wltl + 1;
 
-          // numNestedWhileLoopsInGloLev
-          counts.nwlgl = (lowLevLoops.wlgl>0) ? counts.nwlgl+1:counts.nwlgl;
+          // number of nested while loop in top level of a calling scope
+          counts.nwltl = (lowLevLoops.wltl>0) ? counts.nwltl+1:counts.nwltl;
 
           // keep examming if there has a multiple level nested loop
-          counts.nwlgl = (lowLevLoops.nwlgl>0) ? counts.nwlgl+lowLevLoops.nwlgl:counts.nwlgl;
+          counts.nwltl = (lowLevLoops.nwltl>0) ? counts.nwltl+lowLevLoops.nwltl:counts.nwltl;
+          break;
+        case "ForStatement":
+            counts = (nd.body.body.length>0) ? numWhileLoops(nd.body):counts;
+          break;
+        case "IfStatement":
+          counts = (nd.consequent.body.length>0) ? numWhileLoops(nd.consequent):counts;
           break;
         case "FunctionDeclaration":
-          for(n in nd.body.body) {
-            snd = nd.body.body[n];
+          if(nd.body.body.length>0) {
+            lowLevLoops = numWhileLoops(nd.body);
 
-            if(snd.type=="WhileStatement") {
-              lowLevLoops = numWhileLoops(nd.body);
+            // numWhileLoopsInFuncs
+            counts.wlf = counts.wlf + lowLevLoops.wltl;
 
-              // numForLoopsInFuncs
-              counts.wlf = lowLevLoops.wlgl;
-
-              // numNestedForLoopsInFuncs
-              counts.nwlf = (lowLevLoops.nwlgl>0) ? lowLevLoops.nwlgl:counts.nwlf;
-            }
+            // numNestedWhileLoopsInFuncs
+            counts.nwlf = (lowLevLoops.nwltl>0) ? counts.nwlf+lowLevLoops.nwltl:counts.nwlf;
           }
           break;
       }
@@ -1601,8 +1617,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numForLoopsInGloLev(ast) {
-    console.log("numForLoopsInGloLev: " +numForLoops(ast).flgl);
-    return numForLoops(ast).flgl;
+    console.log("numForLoopsInGloLev: " +numForLoops(ast).fltl);
+    return numForLoops(ast).fltl;
   }
 
 
@@ -1622,8 +1638,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInGloLev(ast) {
-    console.log("numNestedForLoopsInGloLev: " +numForLoops(ast).nflgl);
-    return numForLoops(ast).nflgl;
+    console.log("numNestedForLoopsInGloLev: " +numForLoops(ast).nfltl);
+    return numForLoops(ast).nfltl;
   }
 
 
@@ -1673,8 +1689,8 @@ var pnut = (function () {
 // 5-e. calculate total number of for loops in a program
 //------------------------------------------------------------------------  
   function numForLoopsInAProgram(ast) {
-    console.log("numForLoopsInAProgram: " +(numForLoops(ast).flgl+numForLoops(ast).flf));
-    return (numForLoops(ast).flgl+numForLoops(ast).flf);
+    console.log("numForLoopsInAProgram: " +(numForLoops(ast).fltl+numForLoops(ast).flf));
+    return (numForLoops(ast).fltl+numForLoops(ast).flf);
   }
 
 //------------------------------------------------------------------------
@@ -1682,7 +1698,7 @@ var pnut = (function () {
 // calculate total number of for loops in a calling scope
 //------------------------------------------------------------------------  
   function numForLoops(ast) {
-    var counts = {flgl:0, nflgl:0, flf:0, nflf:0};
+    var counts = {fltl:0, nfltl:0, flf:0, nflf:0};
     var nd, snd;
 
     for(m in ast.body) {
@@ -1692,28 +1708,30 @@ var pnut = (function () {
         case "ForStatement":
           lowLevLoops = numForLoops(nd.body);
 
-          // numForLoopsInGloLev
-          counts.flgl = counts.flgl + 1 + lowLevLoops.flgl;
+          // number of for loop in top level of a calling scope
+          counts.fltl = counts.fltl + lowLevLoops.fltl + 1;
 
-          // numNestedForLoopsInGloLev
-          counts.nflgl = (lowLevLoops.flgl>0) ? counts.nflgl+1:counts.nflgl;
+          // number of nested for loop in top level of a calling scope
+          counts.nfltl = (lowLevLoops.fltl>0) ? counts.nfltl+1:counts.nfltl;
 
           // keep examming if there has a multiple level nested loop
-          counts.nflgl = (lowLevLoops.nflgl>0) ? counts.nflgl+lowLevLoops.nflgl:counts.nflgl;
+          counts.nfltl = (lowLevLoops.nfltl>0) ? counts.nfltl+lowLevLoops.nfltl:counts.nfltl;
+          break;
+        case "WhileStatement":
+            counts = (nd.body.body.length>0) ? numForLoops(nd.body):counts;
+          break;
+        case "IfStatement":
+          counts = (nd.consequent.body.length>0) ? numForLoops(nd.consequent):counts;
           break;
         case "FunctionDeclaration":
-          for(n in nd.body.body) {
-            snd = nd.body.body[n];
+          if(nd.body.body.length>0) {
+            lowLevLoops = numForLoops(nd.body);
 
-            if(snd.type=="ForStatement") {
-              lowLevLoops = numForLoops(nd.body);
+            // numForLoopsInFuncs
+            counts.flf  = counts.flf + lowLevLoops.fltl;
 
-              // numForLoopsInFuncs
-              counts.flf  = lowLevLoops.flgl;
-
-              // numNestedForLoopsInFuncs
-              counts.nflf = (lowLevLoops.nflgl>0) ? lowLevLoops.nflgl:counts.nflf;
-            }
+            // numNestedForLoopsInFuncs
+            counts.nflf = (lowLevLoops.nfltl>0) ? counts.nflf+lowLevLoops.nfltl:counts.nflf;
           }
           break;
       }
@@ -1795,15 +1813,16 @@ var pnut = (function () {
 //          foo();
 //------------------------------------------------------------------------
   function areDecFuncsCalledOnce(ast) {
-    var nums = dictDecFuncsAndCallNum(ast).values(); // num of each function gets called
+    var nums  = dictDecFuncsAndCallNum(ast).values(); // num of each function gets called
 
     for(m in nums) {
-      if(nums[m]!=1) {
-        console.log("areDecFuncsCalledOnce: " + false);
-        return false;
+      if(nums[m]!=1) { 
+        console.log("areDecFuncsCalledOnce: "+false);
+        return false; 
       }
     }
-    console.log("areDecFuncsCalledOnce: " + true);
+
+    console.log("areDecFuncsCalledOnce: "+true);
     return true;
   }
 
@@ -1850,27 +1869,18 @@ var pnut = (function () {
         var rtn  = nd.body.body[nd.body.body.length-1];
 
         if(rtn.type=="ReturnStatement") {
-
           switch(rtn.argument.type) {
             case "Identifier":
               var set = setObjsInAFunc(nd.body);
-
-              if(set.has(rtn.argument.name)) {
-                console.log("isAnyFuncReturnObj: " + true);
-                return true;
-              }
+              if(set.has(rtn.argument.name)) { return true; }
               break;
             case "ObjectExpression":
-                if(rtn.properties.length>0) {
-                  console.log("isAnyFuncReturnObj: " + true);
-                  return true;
-                }
+              if(rtn.properties.length>0) { return true; }
               break;
           }
         }
       }
     }
-    console.log("isAnyFuncReturnObj: " + false);
     return false;
   } 
 
@@ -1885,40 +1895,41 @@ var pnut = (function () {
 //        function b(x, y) {}
 //        var a = function() {}
 //------------------------------------------------------------------------
-  function dictDecFuncs(ast) {
-    var dict  = new HashMap();
-    var nd, name;
+  function dictDecFuncs(ast, funcs) {
+    var dict, nd, name;
+
+    if(arguments.length==2) { 
+      dict = funcs; 
+    }
+    else {
+      dict = new HashMap(); 
+    }
 
     for(m in ast.body) {
       nd = ast.body[m];
 
       switch(nd.type) {
         case "FunctionDeclaration":
-          if(nd.params.length<2) {
-            name = "Function " + nd.id.name + " ("+ nd.params.length+" param)";
-          } else {
-            name = "Function " + nd.id.name + " ("+ nd.params.length+" params)";
-          }
+          name = nd.id.name + "("+ nd.params.length+" params)";
 
           if(dict.getItem(name)==undefined) {
-            dict.setItem(name, nd.start);
+            dict.setItem(name, [nd.start, nd.end]);
           }
           break;
         case "VariableDeclaration":
           var decs = nd.declarations;
           for(n in decs) {
             if(decs[n].init!=null && decs[n].init.type=="FunctionExpression") {
-              if(decs[n].init.params.length<2) {
-                name = "Function " + decs[n].id.name + " ("+ decs[n].init.params.length +" param)";
-              } else {
-                name = "Function " + decs[n].id.name + " ("+ decs[n].init.params.length +" params)";
-              }
+              name = decs[n].id.name + "("+ decs[n].init.params.length+" params)";
 
               if(dict.getItem(name)==undefined) {
-                dict.setItem(name, nd.start);
+                dict.setItem(name, [nd.start, nd.end]);
               }
             }
           }
+          break;
+        case "IfStatement":
+          dict = dictDecFuncs(nd.consequent, dict);
           break;
       }
     }
@@ -1930,9 +1941,16 @@ var pnut = (function () {
 // private function:
 // create a dictionary to map function calls with their occurrence order.
 //------------------------------------------------------------------------
-  function dictFuncCalls(ast) {
+  function dictFuncCalls(ast, fCalls) {
     var calls = new HashMap();
     var nd, dec, name, exp;
+
+    if(arguments.length==2) { 
+      calls = fCalls; 
+    }
+    else {
+      calls = new HashMap(); 
+    }
 
     for(m in ast.body) {
       nd = ast.body[m];
@@ -1942,16 +1960,10 @@ var pnut = (function () {
           for(n in nd.declarations) {
             dec = nd.declarations[n];
             if(dec.init!=null && dec.init.type=="CallExpression") {
-              if(dec.init.arguments.length<2) {
-                name = "Function " + dec.init.callee.name + 
-                       " ("+ dec.init.arguments.length+" param)";
-              } else {
-                name = "Function " + dec.init.callee.name + 
-                       " ("+ dec.init.arguments.length+" params)";
-              }
+              name = dec.init.callee.name + "("+ dec.init.arguments.length+" params)";
 
               if(calls.getItem(name)==undefined) {
-                calls.setItem(name, nd.start);
+                calls.setItem(name, [nd.start, nd.end]);
               }
             }
           }
@@ -1959,18 +1971,83 @@ var pnut = (function () {
         case "ExpressionStatement":
           exp = nd.expression;
           if(exp.type=="CallExpression") {
-            if(exp.arguments.length<2) {
-              name = "Function " + exp.callee.name + 
-                     " ("+ exp.arguments.length+" param)";
-            } else {
-              name = "Function " + exp.callee.name + 
-                     " ("+ exp.arguments.length+" params)";
-            }
-
+            name = exp.callee.name + "("+ exp.arguments.length+" params)";
             if(calls.getItem(name)==undefined) {
-              calls.setItem(name, nd.start);
+              calls.setItem(name, [nd.start, nd.end]);
             }
           }
+          break;
+        case "IfStatement":
+          calls = dictFuncCalls(nd.consequent, calls);
+          break;
+      }
+    }
+    return calls;
+  }
+
+
+//------------------------------------------------------------------------
+// private function:
+// create a list to collect function calls based on their occurrence order.
+//------------------------------------------------------------------------
+  function listFuncCalls(ast, fCalls) {
+    var calls, nd, dec, name, exp;
+
+    if(arguments.length==2) { 
+      calls = fCalls; 
+    }
+    else {
+      calls = []; 
+    }
+
+    for(m in ast.body) {
+      nd = ast.body[m];
+
+      switch(nd.type) {
+        case "VariableDeclaration":
+          for(n in nd.declarations) {
+            dec = nd.declarations[n];
+            if(dec.init!=null && dec.init.type=="CallExpression") {
+              name = dec.init.callee.name + "("+ dec.init.arguments.length+" params)";
+              calls.push(name);
+            }
+          }
+          break;
+        case "ExpressionStatement":
+          exp = nd.expression;
+          if(exp.type=="CallExpression") {
+            name = exp.callee.name + "("+ exp.arguments.length+" params)";
+            calls.push(name);
+          }
+          break;
+        case "IfStatement":
+          csqt = nd.consequent;
+          altn = nd.alternate;
+
+          if(csqt.body!=undefined) {
+            calls = listFuncCalls(csqt, calls);
+          } else {
+            exp = csqt.expression;
+            if(exp.type=="CallExpression") {
+              name = exp.callee.name + "("+ exp.arguments.length+" params)";
+              calls.push(name);
+            }
+          }
+
+          if(altn!=null) {
+            if(altn.body!=undefined) {
+              calls = listFuncCalls(altn, calls);
+            } else {
+              exp = altn.expression;
+              if(exp.type=="CallExpression") {
+                name = exp.callee.name + "("+ exp.arguments.length+" params)";
+                calls.push(name);
+              }
+            }
+          }
+          break;
+        case "FunctionDeclaration":
+          if(nd.body.body.length>0) { calls = listFuncCalls(nd.body, calls); }
           break;
       }
     }
@@ -1983,21 +2060,16 @@ var pnut = (function () {
 // create a dictionary to map declared functions with the number 
 // how many times they get called in a program.
 //------------------------------------------------------------------------
-  function dictDecFuncsAndCallNum (ast) {
+  function dictDecFuncsAndCallNum(ast) {
     var funcs = dictDecFuncs(ast).keys();
-    var calls = dictFuncCalls(ast).keys(); 
+    var calls = listFuncCalls(ast); 
     var dict  = new HashMap();
-    var exp;
 
-    for(m in funcs) {
-      dict.setItem(funcs[m], 0);
-    }
+    for(m in funcs) { dict.setItem(funcs[m], 0); }
 
     for(m in calls) {
-      exp = calls[m];
-
-      if(dict.getItem(exp)!=undefined) {
-        dict.setItem(exp, dict.getItem(exp)+1);
+      if(dict.getItem(calls[m])!=undefined) {
+        dict.setItem(calls[m], dict.getItem(calls[m])+1);
       }
     }
     return dict;
@@ -2019,17 +2091,21 @@ var pnut = (function () {
   function listInvalidFuncCallExps(ast) {
     var decs  = dictDecFuncs(ast); 
     var calls = dictFuncCalls(ast); 
-    var exps  = decs.keys();
+    var exps  = calls.keys();
     var list  = [];
 
     for(m in exps) {
-      if(decs.getItem(exps[m])==undefined) {
+      var dec = decs.getItem(exps[m]);
+      var use = calls.getItem(exps[m]);
+
+      if(dec==undefined) {
         list.push(exps[m]);
       } 
-      else if(decs.getItem(exps[m])>calls.getItem(exps[m])){
+      else if(use[0]<dec[0] || use[1]<dec[0]) {
         list.push(exps[m]);
       }
     }
+
     return list;
   }
 
@@ -2066,7 +2142,7 @@ var pnut = (function () {
 
 /******************************************************************/
 /* 7. Style Grading for Recursive Function                        */
-/*    a. isRecuriveFunction(ast)  ==> boolean ? true:false        */
+/*    a. isRecursiveFunction(ast)  ==> boolean ? true:false        */
 /******************************************************************/ 
 
 //------------------------------------------------------------------------------
@@ -2094,24 +2170,59 @@ var pnut = (function () {
 //                   }
 //                   myMain();
 //------------------------------------------------------------------------------
-  function isRecuriveFunction(ast) { 
-    var func, nds;
+  function isRecursiveFunction(ast) { 
+    var func, nds, subnd, block, name;
 
     for(m in ast.body) {
       func = ast.body[m];
+
       if(func.type == "FunctionDeclaration") {
         nds = func.body.body;
+        name = func.id.name + "("+ func.params.length+" params)";
 
         for(n in nds) {
-          var block = nds[n];
-          if(block.type == "ReturnStatement" && recursionDetector(block.argument, func.id.name)) {
-            console.log("Recursion: " + true);
-            return true;
+          subnd = nds[n];
+
+          if(subnd.type=="ReturnStatement") {
+            if(recursionDetector(subnd.argument, name)) { return true; }
+          }
+          else if(subnd.type=="IfStatement") {
+            csqt = subnd.consequent;
+            altn = subnd.alternate; 
+
+            // two checking cases: if(xxx) yyy or if(xxx) { yyy } 
+            if(csqt.body==undefined && recursionDetector(csqt.argument, name)) {             
+              return true; 
+            }
+            else if(csqt.body!=undefined && csqt.body.length>0) {
+              csqt = csqt.body;
+
+              for(c in csqt) {
+                if(csqt[c].type=="ReturnStatement"&&recursionDetector(csqt[c].argument, name)) {
+                  return true;
+                }
+              }
+            }
+
+            if(altn!=null) {
+              // two checking cases: if(xxx) yyy or if(xxx) { yyy } 
+              if(altn.argument!=undefined && recursionDetector(altn.argument, name)) {
+                return true;
+              }
+              else if(altn.body!=undefined && altn.body.length>0) {
+                altn = altn.body;
+
+                for(a in altn) {
+                  if(altn[a].type=="ReturnStatement"&&recursionDetector(altn[a].argument, name)) {
+                    return true;
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
-    console.log("Recursion: " + false);
     return false;
   }
 
@@ -2122,7 +2233,10 @@ var pnut = (function () {
   function recursionDetector(nd, funcName) {
     if(nd.type=="Identifier") { return false; }
     else if(nd.type=="Literal") { return false; }
-    else if(nd.type=="CallExpression") { return nd.callee.name==funcName; }
+    else if(nd.type=="CallExpression") { 
+      var call = nd.callee.name + "(" + nd.arguments.length + " params)";
+      return (call==funcName); 
+    }
 
     return recursionDetector(nd.left, funcName)||recursionDetector(nd.right, funcName);
   }
@@ -2252,7 +2366,7 @@ var pnut = (function () {
     isAnyFuncReturnObj         : isAnyFuncReturnObj,
 
     /* 7. Style Grading for Recursive Function                */
-    isRecuriveFunction         : isRecuriveFunction,
+    isRecursiveFunction         : isRecursiveFunction,
 
 
   }
