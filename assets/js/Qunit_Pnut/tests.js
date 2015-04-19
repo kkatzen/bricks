@@ -746,7 +746,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
           "a =1;"+
           "b=2;"+
           "while(a<2){"+
-          "    while(b<2);"+
+          "    while(b<2){}"+
           "}";
   AST  = acorn.parse(code);
   assert.deepEqual( 0, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 3");
@@ -757,9 +757,9 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
       "function foo() { "+
           "a =1;"+
           "b=2;"+
-          "while(a<2)"+
-          "    while(b<2);"+
-          //"}"+
+          "while(a<2) {"+
+          "    while(b<2){}"+
+          "}"+
       "}";
   AST  = acorn.parse(code);
    assert.deepEqual(1, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 4");
@@ -963,7 +963,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
 
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numWhileLoopsInGloLev(AST), "4.a Case 5");
+  assert.deepEqual( 2, pnut.numForLoopsInGloLev(AST), "4.a Case 5");
 
   // Case 6
   var code = 
@@ -1180,8 +1180,9 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
 //Case 4
   code = 
       "function foo() { "+
-          "for(i = 0; i < 2; i++)"+
-          " for(j = 0; j < 2; j++);"+
+          "for(i = 0; i < 2; i++) {"+
+          " for(j = 0; j < 2; j++) {}"+
+          "}"+
       "}";
   AST  = acorn.parse(code);
    assert.deepEqual(1, pnut.numNestedForLoopsInFuncs(AST), "5.d case 4");
@@ -1587,7 +1588,7 @@ QUnit.test( "Test 6.g isAnyFuncReturnObj", function( assert ) {
 });
 
 QUnit.module( "group 7" );
-QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
+QUnit.test( "Test 7.a isRecursiveFunction", function( assert ) {
 //------------------------------------------------------------------------------
 // 7-a. exam if a function is recursive or not by checking its return statement
 //------------------------------------------------------------------------------
@@ -1605,7 +1606,7 @@ QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
                   "myMain();";
 
   AST  = acorn.parse(code);
-  assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 1");
+  assert.ok( ( true == pnut.isRecursiveFunction(AST)), "7.a case 1");
 
   // Case 2
   code = 
@@ -1622,7 +1623,7 @@ QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
                   "myMain();";
 
   AST  = acorn.parse(code);
-  assert.ok( ( false == pnut.isRecuriveFunction(AST)), "7.a case 2");
+  assert.ok( ( false == pnut.isRecursiveFunction(AST)), "7.a case 2");
   
   //case 3
   code = 
@@ -1631,7 +1632,7 @@ QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
                   "}";
 
   AST  = acorn.parse(code);
-  assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 3");
+  assert.ok( ( true == pnut.isRecursiveFunction(AST)), "7.a case 3");
   
   //case 4
   code = 
@@ -1644,7 +1645,7 @@ QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
                   "}";
 
   AST  = acorn.parse(code);
-  assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 4");
+  assert.ok( ( true == pnut.isRecursiveFunction(AST)), "7.a case 4");
 
   //case 5
   code = 
@@ -1657,7 +1658,7 @@ QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
                   "}";
 
   AST  = acorn.parse(code);
-  assert.ok( ( true == pnut.isRecuriveFunction(AST)), "7.a case 5");
+  assert.ok( ( true == pnut.isRecursiveFunction(AST)), "7.a case 5");
 
   //case 6
   code = 
@@ -1665,7 +1666,7 @@ QUnit.test( "Test 7.a isRecuriveFunction", function( assert ) {
                   "function rec()  { return rec(x); }";
 
   AST  = acorn.parse(code);
-  assert.ok( ( false == pnut.isRecuriveFunction(AST)), "7.a case 6");
+  assert.ok( ( false == pnut.isRecursiveFunction(AST)), "7.a case 6");
 
 
 });
