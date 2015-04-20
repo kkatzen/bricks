@@ -48,6 +48,16 @@ QUnit.test( "Test 1.a numDecVars", function( assert ) {
 
   AST  = acorn.parse(code);
   assert.deepEqual( 1, pnut.numDecVars(AST), "1.a case 4");
+
+
+    // Case 1:
+  var code = "if(true){"+
+                  "var v;"+
+                  "var p=\"me\";"+
+              "}";
+
+  AST  = acorn.parse(code);
+  assert.deepEqual( 2, pnut.numDecVars(AST), "1.a case 5");
 });
 
 //------------------------------------------------------------------------
@@ -121,6 +131,14 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
   AST  = acorn.parse(code); 
   assert.deepEqual(2, pnut.numUndecVars(AST), "1.c Case 6");
 
+// Case 2:
+  var code = 
+         "if(true) { "+
+            "d = 0; "+
+          "} ";
+
+  AST  = acorn.parse(code);
+  assert.deepEqual(1, pnut.numUndecVars(AST), "1.c Case 7");
 });
 //------------------------------------------------------------------------
 // 1-d. list all undeclacred variables that get used in a program
@@ -157,6 +175,14 @@ QUnit.test( "Test 1.f isAnyFuncVar", function( assert ) {
              "function foo() { var f2 = bar; }";
   AST  = acorn.parse(code);
   assert.ok( (false == pnut.isAnyFuncVar(AST)),  "1.f case 3");
+
+    //Case 2
+  var code = "function bar() { }"+
+             "if(true) { "+
+                "var f2 = bar;"+
+              "} ";
+  AST  = acorn.parse(code);
+  assert.ok( (true == pnut.isAnyFuncVar(AST)),  "1.f case 2");
   
 });
 //------------------------------------------------------------------------
@@ -201,6 +227,18 @@ QUnit.test( "Test 2.a numDecArrs", function( assert ) {
 
   AST  = acorn.parse(code);
   assert.deepEqual(2, pnut.numDecArrs(AST), "2.a case 3");
+
+    // Case 4
+  var code = 
+         "if(true) { "+
+            "var b = [one, two, three];"+
+          "} "+
+         "nerp = [one, two, three]; "+
+         "var c = new Array(); ";
+
+  AST  = acorn.parse(code);
+  assert.deepEqual( 2, pnut.numDecArrs(AST), "2.a case 4");
+
 });
 //------------------------------------------------------------------------
 // 2-b. list declared arrays in a program
@@ -279,6 +317,16 @@ QUnit.test( "Test 2.e numArrsUsed", function( assert ) {
 
   AST  = acorn.parse(code);
   assert.deepEqual( 3, pnut.numArrsUsed(AST), "2.e case 2");
+
+    // Case 3
+  var code =
+          "if(true){"+
+          "var c = new Array({}); "+
+          "c.push(3);"+
+          "}";
+
+  AST  = acorn.parse(code);
+  assert.deepEqual( 1, pnut.numArrsUsed(AST), "2.e case 3");
 });
 //------------------------------------------------------------------------
 // 2-f. list all arrays that are used in a program 
@@ -752,7 +800,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
   assert.deepEqual( 0, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 3");
 
 
-//Case 4
+//Case 4  Breaking on this one
   code = 
       "function foo() { "+
           "a =1;"+
@@ -1185,7 +1233,7 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
           "}"+
       "}";
   AST  = acorn.parse(code);
-   assert.deepEqual(1, pnut.numNestedForLoopsInFuncs(AST), "5.d case 4");
+  assert.deepEqual(pnut.numNestedForLoopsInFuncs(AST), 1 , "5.d case 4");
 
    // Case 5
   var code = 
@@ -1386,6 +1434,13 @@ QUnit.test( "Test 6.c areCallExpsAllValid", function( assert ) {
   AST  = acorn.parse(code);
   assert.ok( ( false == pnut.areCallExpsAllValid(AST)), "6.c case 4");
 
+ var code = 
+      "if(true){"+
+         "function myMain() { return 5; }"+
+         "myMain();"+
+      "}";
+  AST  = acorn.parse(code);
+  assert.ok( ( true == pnut.areCallExpsAllValid(AST)), "6.c case 5");
 
 });
 
@@ -1549,11 +1604,27 @@ QUnit.test( "Test 6.f areDecFuncsCalledOnce", function( assert ) {
 QUnit.test( "Test 6.g isAnyFuncReturnObj", function( assert ) {
 //------------------------------------------------------------------------
 // 6-g. exam if any function is a pass-by-reference function or not
-//      I don't understand what this means...
-//      ex: CORRECT: function bar(x) { return x; }
-//          WRONG:   funciton bar()  { return 5; }
 //------------------------------------------------------------------------
+
  //Case 1.
+  var code = 
+        "function foo() {"+
+         "var ob = { a:3, b:5 };"+
+         "return ob;"+
+       "}";
+  AST  = acorn.parse(code);
+  assert.ok( ( true == pnut.isAnyFuncReturnObj(AST)), "6.g case 1");
+
+
+//Case 2.
+  var code = 
+        "function foo() {"+
+         "return { a:3, b:5 };"+
+       "}";
+  AST  = acorn.parse(code);
+  assert.ok( ( true == pnut.isAnyFuncReturnObj(AST)), "6.g case 2");
+
+ //Case 3.
   var code = 
                   "function foo() {"+
                      "var ob = { a:3, b:5 };"+
@@ -1561,9 +1632,9 @@ QUnit.test( "Test 6.g isAnyFuncReturnObj", function( assert ) {
                   "}";
 
   AST  = acorn.parse(code);
-  assert.ok( ( true == pnut.isAnyFuncReturnObj(AST)), "6.g case 1");
+  assert.ok( ( true == pnut.isAnyFuncReturnObj(AST)), "6.g case 3");
 
- //Case 2.
+ //Case 4.
   code = 
                   "function foo(x) {"+
                      "if (x==1) return 1;"+
@@ -1571,19 +1642,14 @@ QUnit.test( "Test 6.g isAnyFuncReturnObj", function( assert ) {
                   "}";
 
   AST  = acorn.parse(code);
-  assert.ok( ( false == pnut.isAnyFuncReturnObj(AST)), "6.g case 2");
+  assert.ok( ( false == pnut.isAnyFuncReturnObj(AST)), "6.g case 4");
 
-   //Case 3.
-  var code = "function bar(x) { return x; }";
 
-  AST  = acorn.parse(code);
-  assert.ok( ( true == pnut.isAnyFuncReturnObj(AST)), "6.g case 3");
-
- //Case 4.
+ //Case 5.
   code =  "function bar() { return 5; }";
 
   AST  = acorn.parse(code);
-  assert.ok( ( false == pnut.isAnyFuncReturnObj(AST)), "6.g case 4");
+  assert.ok( ( false == pnut.isAnyFuncReturnObj(AST)), "6.g case 5");
 
 });
 
