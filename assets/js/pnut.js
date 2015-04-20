@@ -1875,7 +1875,7 @@ var pnut = (function () {
               if(set.has(rtn.argument.name)) { return true; }
               break;
             case "ObjectExpression":
-              if(rtn.properties!=undefined && rtn.properties.length>0) { return true; }
+              if(rtn.argument.properties.length>0) { return true; }
               break;
           }
         }
