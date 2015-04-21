@@ -138,10 +138,14 @@ function problemCorrect(user, problem, student, totalStudents){
 function getStudentList() {
     //Generate list of all students to view individuals
     $("#viewStudentsList").empty();
-    var tbl = $("<table class='table'><thead><tr><th>Name</th></tr></thead><tbody id='viewStudentsTable'></tbody></table>");
+    var tbl = $("<table class='table' id='viewStudentsTable'></table>");
+    //var tbl = $("<ul id='viewStudentsTable'></ul>");
+
     $("#viewStudentsList").append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
+        var student = $("<tr></tr>");
+        var count = 0;
         users.forEach(function (user) {
             var a = $("<td></td>")
                 .html("<a href='#individualStudent' data-toggle='pill'>" + user.displayName + "</a>")
@@ -155,10 +159,15 @@ function getStudentList() {
                         getIndividual(user);
                     });
                 });            
-            var student = $("<tr></tr>");
             student.append(a);
-            $("#viewStudentsTable").append(student);
+            count++;
+            if(count > 3){
+                $("#viewStudentsTable").append(student);
+                student = $("<tr></tr>");
+                count = 0;
+            }
         });
+        $("#viewStudentsTable").append(student);
     });
 }
 
@@ -317,6 +326,12 @@ function getIndividualNone(onyen) {
     $("#individualProgessBar").addClass("hidden");
 
     $("#individualName").html("No user with found with onyen <i>\"" + onyen + "\"</i>");
+    var heading = $("<h3></h3>");
+    var backLink = $("<a></a>")
+        .attr("href","#students")
+        .attr("data-toggle","pill")
+        .html("Back to Students List");
+    $("#individualSubmissionList").append(heading.append(backLink));
 
 }
 
