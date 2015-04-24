@@ -31,13 +31,25 @@ module.exports = {
    *    `/folder/read`
    */
    read: function (req, res) {
-      Folder.find()
-      .sort({"num": 1})
-      .exec(function(err, folders) {
-            res.send(
-                folders
-            );
-      });
+      var id = req.param("id") || null;
+      if (id) {
+        Folder.findOne({id:id}).exec(function (err, folder) {
+          if (err) {
+            res.send(500, {error: "DB error finding folder"});
+            return;
+          } else {
+            res.send(folder);
+          }
+        });
+      }else {    
+        Folder.find()
+        .sort({"num": 1})
+        .exec(function(err, folders) {
+              res.send(
+                  folders
+              );
+        });
+      }
   },
 
   

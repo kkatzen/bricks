@@ -64,9 +64,10 @@ function problemCorrect(user, problem, student, totalStudents){
     var rsection = $("<td></td>");
     var results = {tried: false, correct: false, style: false};
     $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
-        student.append("<td>" + submissions.length + "</td>");
         if(submissions.length == 0){
+            student.append("<td>" + submissions.length + "</td>");
         } else {
+        	student.append("<td><a data-toggle='collapse' data-parent='#accordion' href='#submissionUser" + user.id + "' >" + submissions.length + "</a></td>");
             results.tried = true;
             submissions.forEach(function(submission) {
                 if(submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
@@ -99,6 +100,32 @@ function problemCorrect(user, problem, student, totalStudents){
         student.append(rsection);
         $("#allStudents1ProblemResults").append(student);
 
+        var collapseBody = $("<tr class='collapse out' id='submissionUser" + user.id + "'></tr>");
+       	$("#allStudents1ProblemResults").append(collapseBody);
+
+		submissions.forEach( function (submission) {
+            var d = new Date(submission.createdAt);
+			var a = $("<a></a>")
+				.attr("href","#submission")
+				.attr("data-toggle","pill")  //save
+                .html(d.toLocaleString())
+                .click(function (event) {
+                    event.preventDefault();
+                        getSubmission(submission,user,problem);
+                });
+        	$("#submissionUser" + user.id)
+                .append($("<tr></tr>")
+                    .append($("<td></td>")
+                        .append(a))
+                    .append($("<td></td>")
+                        .append("correct=" + submission.value.correct))
+                    .append($("<td></td>")
+                        .append("style=" + submission.value.style))
+
+                );
+        });
+		console.log("collpasemf");
+
         //update progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
         $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
@@ -111,10 +138,14 @@ function problemCorrect(user, problem, student, totalStudents){
 function getStudentList() {
     //Generate list of all students to view individuals
     $("#viewStudentsList").empty();
-    var tbl = $("<table class='table'><thead><tr><th>Name</th></tr></thead><tbody id='viewStudentsTable'></tbody></table>");
+    var tbl = $("<table class='table' id='viewStudentsTable'></table>");
+    //var tbl = $("<ul id='viewStudentsTable'></ul>");
+
     $("#viewStudentsList").append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
+        var student = $("<tr></tr>");
+        var count = 0;
         users.forEach(function (user) {
             var a = $("<td></td>")
                 .html("<a href='#individualStudent' data-toggle='pill'>" + user.displayName + "</a>")
@@ -128,10 +159,15 @@ function getStudentList() {
                         getIndividual(user);
                     });
                 });            
-            var student = $("<tr></tr>");
             student.append(a);
-            $("#viewStudentsTable").append(student);
+            count++;
+            if(count > 3){
+                $("#viewStudentsTable").append(student);
+                student = $("<tr></tr>");
+                count = 0;
+            }
         });
+        $("#viewStudentsTable").append(student);
     });
 }
 
@@ -155,12 +191,29 @@ function getSubmission(submission,user,problem) {
                 getIndividual(user);
             });
         });
+    var b = $("<a></>")
+    	.attr("href","#questions")
+    	.attr("data-toggle","pill")
+    	.html(problem.name)
+        .click(function (event) {
+            event.preventDefault();
+	        curProblem = problem;
+	        fillProblemEdit(curProblem);
+	        fillProblemDisplay(curProblem);
+	        getStudentResults(curProblem);
+
+        });
+    $("#submissionProblem").empty().append(b);
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
     editor.setValue(submission.code);
     $("#submissionMessage").html(submission.message);
     $("#submissionTitle").html(problem.name);
+	$.post("/folder/read/", {id: problem.folder}, function(folder){
+		console.log(folder.name);
+		$("#submissionTitle").html(problem.name + "<i> in " + folder.name + "</i>");
+	});
 
     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
         submissions.forEach( function (submission) {
@@ -273,6 +326,12 @@ function getIndividualNone(onyen) {
     $("#individualProgessBar").addClass("hidden");
 
     $("#individualName").html("No user with found with onyen <i>\"" + onyen + "\"</i>");
+    var heading = $("<h3></h3>");
+    var backLink = $("<a></a>")
+        .attr("href","#students")
+        .attr("data-toggle","pill")
+        .html("Back to Students List");
+    $("#individualSubmissionList").append(heading.append(backLink));
 
 }
 

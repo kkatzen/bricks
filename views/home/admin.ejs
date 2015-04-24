@@ -84,6 +84,10 @@ form > button {
 	margin-left:5px;
 	padding:5px;
 }
+#viewStudentsTable {
+	margin-top: 20px;
+	text-align: center;
+}
 
 </style>
 <script src="lib/codemirror.js"></script>
@@ -104,7 +108,8 @@ form > button {
 			<a class="navbar-brand" href="../">Bricks</a>
 			<a class="navbar-brand" href="#students" data-toggle="pill">Students</a>
 			<a class="navbar-brand" href="#admin" data-toggle="pill">Manage</a>
-			<a class="navbar-brand" href="#progress" data-toggle="pill"> Progress</a>
+			<a class="navbar-brand" href="#progress" data-toggle="pill">Progress</a>
+			<a class="navbar-brand" href="#help" data-toggle="pill">Help</a>
 		</div>
 		<div class="navbar-right">
 			<p class="navbar-text"><%= req.user.displayName %></p>
@@ -257,7 +262,7 @@ form > button {
 			<!-- STUDENT PROGRESS SECTION -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					Student Progress  <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students will full style points">0%</span>
+					Student Progress  <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span>
 					<button class="btn btn-primary btn-sm pull-right" id="refreshData">Refresh</button>
 				</div>
 				<div id="allStudents1ProblemTable">
@@ -365,6 +370,7 @@ form > button {
 				<div id="submissionCollapse" class="panel-collapse collapse in">
 					<div class="panel-body">
 						Created By: <span id="submissionCreatedBy"></span><br />
+						Problem: <span id="submissionProblem"></span><br />
 						Created At: <span id="submissionCreatedAt"></span><br />
 					</div>
 				</div>
@@ -437,15 +443,18 @@ form > button {
 		<!-- LIST STUDENTS SECTION -->
 		<div class="tab-pane" id="students">
 			<div class="panel panel-default">
-				<div class="panel-heading"><h4 class="panel-title">Students</h4></div>
-
-				<form class="form-inline">
-					<div class="form-group">
-						<input type="text" class="form-control" id="onyen" placeholder="Enter onyen">
-						<!--<button href="#individualStudent" type="button" class="btn btn-primary"  data-toggle='pill' id="onyenSearchButton">Submit</button>-->
-						<a href="#individualStudent" data-toggle="pill" class="btn btn-info" role="button" id="onyenSearchButton">Link Button</a>
-					</div>
-				</form>
+				<div class="panel-heading">
+					<h4 class="panel-title">Students
+						<form class="form-inline pull-right">
+							<div class="form-group">
+								<input type="text" class="form-control" id="onyen" placeholder="Enter onyen">
+								<!--<button href="#individualStudent" type="button" class="btn btn-primary"  data-toggle='pill' id="onyenSearchButton">Submit</button>-->
+								<a href="#individualStudent" data-toggle="pill" class="btn btn-info" role="button" id="onyenSearchButton">Search</a>
+							</div>
+						</form>
+					</h4>
+				</div>
+				
 				<div id="viewStudentsList">
 					<div class="panel-body">
 						Loading students...
@@ -467,6 +476,20 @@ form > button {
 
 		</div>
 		<!-- INDIVIDUAL STUDENT SECTION ENDS -->
+
+		<!-- HELP SECTION -->
+		<div class="tab-pane" id="help">
+			<h1>Help</h1>
+			Looking for help? You've come to the right place!
+			<h3>Re-Ordering Problems and Folders</h3>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus faucibus elit eget est efficitur vulputate. Vestibulum sagittis lectus vel sapien tristique, at commodo purus interdum. Donec vitae molestie orci. Maecenas egestas eget libero ut egestas. Curabitur egestas non dolor nec vehicula. Aliquam mauris nibh, dapibus in urna in, consequat pretium metus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas sem quam, sodales et facilisis ac, fringilla eu nibh. In at urna nulla. Fusce interdum odio at aliquet facilisis. Nullam augue turpis, laoreet sit amet ex sed, luctus faucibus lacus. Duis pulvinar nulla eget nisl auctor semper. Nam pretium venenatis mauris ac gravida. Vivamus in nibh in massa maximus sollicitudin vel in ante. Proin et molestie erat, in tincidunt turpis.
+
+			<h3>Adding/Editing Problems</h3>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus faucibus elit eget est efficitur vulputate. Vestibulum sagittis lectus vel sapien tristique, at commodo purus interdum. Donec vitae molestie orci. Maecenas egestas eget libero ut egestas. Curabitur egestas non dolor nec vehicula. Aliquam mauris nibh, dapibus in urna in, consequat pretium metus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas sem quam, sodales et facilisis ac, fringilla eu nibh. In at urna nulla. Fusce interdum odio at aliquet facilisis. Nullam augue turpis, laoreet sit amet ex sed, luctus faucibus lacus. Duis pulvinar nulla eget nisl auctor semper. Nam pretium venenatis mauris ac gravida. Vivamus in nibh in massa maximus sollicitudin vel in ante. Proin et molestie erat, in tincidunt turpis.
+
+		</div>
+		<!-- HELP SECTION ENDS -->
+
 
 	</div>
 	<!-- BODY ENDS -->
