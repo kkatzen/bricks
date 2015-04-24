@@ -246,22 +246,24 @@ function addSubmission(submission) {
 	var timeString = time.toLocaleDateString() + " " + time.toLocaleTimeString();
     var link = $("<tr></tr>");
 	link.append("<td><a href='#'>" + timeString + "</a></td>");
-    var grade = $("<td></td>");
+    var gradeF = $("<td></td>");
+    var gradeS = $("<td></td>");
     var results = { correct: false, style: false };
     results.correct = results.correct || (submission.value.correct == curProblem.value.correct);
     results.style = results.style || (submission.value.style == curProblem.value.style);
     //add checks and x's to the submission
     if (results.correct) {
-        $(grade).append(correct("8px"));
+        $(gradeF).append(correct("8px"));
     } else {
-        $(grade).append(wrong("8px"));
+        $(gradeF).append(wrong("8px"));
     }
     if (results.style) {
-        $(grade).append(correct("18px"));
+        $(gradeS).append(correct("18px"));
     } else {
-        $(grade).append(wrong("18px"));
+        $(gradeS).append(wrong("18px"));
     }
-    link.append(grade);
+    link.append(gradeF);
+    link.append(gradeS);
     //make the problem link produce the submission code on click
 	$("a", link).click(function() {
 		if (confirm('Put the following into the console? \n' + submission.code)) {
