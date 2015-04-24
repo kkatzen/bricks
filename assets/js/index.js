@@ -236,9 +236,7 @@ function addProbInfo (problem) {
 			}else {
 	        	$("#styleCheck").append(wrong("8px"));
 			}
-		}
-				
-		
+		}		
 	});
 }
 
@@ -272,6 +270,15 @@ function addSubmission(submission) {
 	});
     //attach the link to the submission
 	$("#subs").prepend(link);
+}
+function resizeWindow(){
+/*	var window_height = $("#consoleHeader").height();
+    var window_height2 = $("#codemirror").height();
+    var window_height3 = $("#instructions").height();
+    var height = parseInt(window_height) + parseInt(window_height2) + parseInt(window_height3);
+    console.log(window_height + " " + window_height2 + " " + window_height3 + " "  + height);
+    */
+    $('.scrollableAccordian').height($(window).height());
 }
 
 function foldersReload() {
@@ -370,7 +377,7 @@ window.onload = function () {
 
 	$('#accShow').on('click', function() {
 	    if($(this).text() == 'Hide All') {
-	        $(this).text('Show All');
+	        $(this).text('Expand Sections');
 	        $('.folderCollapse').collapse('hide');
 	    } else {
 	        $(this).text('Hide All');
@@ -379,14 +386,10 @@ window.onload = function () {
 	    return false;
 	});
 
-    var window_height = $(window).height(),
-       content_height = window_height;
-    $('.scrollableAccordian').height(content_height);
+	resizeWindow();
 
 	$( window ).resize(function() {
-	    var window_height = $(window).height(),
-	       content_height = window_height;
-	    $('.scrollableAccordian').height(content_height);
+		resizeWindow();
 	});
 
 };
