@@ -5,22 +5,28 @@
     html, body, .container-fluid, .col-md-9, #codemirror, .CodeMirror {
         height: 95%;
     }
+    .left-menu {
+    	height:100%;
+    }
     .scrollableAccordian {
+    	height:100%;
 	    overflow: scroll;
 	}
     .CodeMirror-scroll {
         overflow-y: auto;
         overflow-x: auto;
     }
+    #correctCheck, #styleCheck {
+    	padding-right: 8px;
+    }
     .console {
-    	background-color: white;
-    	color: #202020;
-    	border: 1px solid gray;
-    	padding: 2px;
+    	background-color: #2a2b2b;
+    	color: #dddddd;
+    	padding: 3px 10px;
     }
     .textConsole {
     	width: 100%;
-    	background-color: gray;
+    	background-color: #edeff0;
     }
     #pointbreakdown {
     	border: 2px solid gray;
@@ -120,13 +126,13 @@ User.find({admin: true}).exec(function(err, users) {
 	</div><!-- /.container-fluid -->
 </nav>
 <!--Content-->
-<div class="container-fluid">
+<div class="left-menu container-fluid">
 	<!--Question Info -->
   	<div class="col-md-3">
     	<div class="row">
       		<div>
       			<button type="button" id="accShow" class="btn btn-default" aria-label="Left Align" >
-      			Show All</button>
+      			Expand sections</button>
       		    <div class="panel-group scrollableAccordian" id="folderAccordion" >
 
 			    </div>
@@ -147,10 +153,10 @@ User.find({admin: true}).exec(function(err, users) {
 		      		</div>
 	  				<div class='panel-body'> 
 	  					<div id="pointbreakdown" class="hidden">
-			  				Point Breakdown:<br/>
-			  				Style- <span id="highestPtStyle">0</span>/<span id="availablePtStyle"></span><span id="styleCheck"></span>
+			  				<b>Point Breakdown:</b><br/>
+			  				<span id="correctCheck"></span>Functionality - <span id="highestPtCorrect">0</span>/<span id="availablePtCorrect"></span>
 			  				<br />
-			  				Func- <span id="highestPtCorrect">0</span>/<span id="availablePtCorrect"></span><span id="correctCheck"></span>
+			  				<span id="styleCheck"></span>Style - <span id="highestPtStyle">0</span>/<span id="availablePtStyle"></span>
 			  				<br />
 		  				</div>
 		  				<div id="desc-body" >
@@ -177,13 +183,13 @@ User.find({admin: true}).exec(function(err, users) {
 
     	<div id="submissions" class='panel panel-default hidden'>
       		<div class='panel-heading'> 
-				<h3 class='panel-title'>Submissions
+				<h3 class='panel-title'>Past Submissions
                 </h3>
       		</div>
 			<table class="table" >
 			<thead>
-			<tr><td>Submission Time</td>
-			<td>Func Style</td>
+			<tr><td>Time of submission</td>
+			<td>Functionality</td> <td>Style</td>
 			</tr>
 			</thead>
 			<tbody id="subs"> </tbody>

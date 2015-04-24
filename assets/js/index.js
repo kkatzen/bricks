@@ -348,6 +348,7 @@ window.onload = function () {
 			$("#console").append(e);
 		}
 	});
+	
 	$("#submit").click(function () {
 		if (curProblem == null) {
 			alert("You must select a problem before submitting");
