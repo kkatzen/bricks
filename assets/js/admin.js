@@ -268,7 +268,7 @@ function getIndividual(user) {
         folders.forEach(function (folder) {
             var toggleLabel = '<h4><a data-toggle="collapse" data-parent="#accordion" href="#ISL'+ folder.id + '">' + folder.name + '</a></h4>';
             $("#individualSubmissionList").append(toggleLabel + "<ul id ='ISL" + folder.id + "' class='panel-collapse collapse'></ul>");
-            $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
+            $.post("/problem/read", {folder: folder.id}, function (problems) {
                 problems.forEach( function (problem) {
                     var availableStylePoints = problem.value.style;
                     var availableFuncPoints = problem.value.correct;
@@ -366,10 +366,11 @@ function addFolder(folder) {
     $("#leftSideFolders").append(accordian);
 
     $("#" + accordianFolderId).empty();
-    $.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
+    $.post("/problem/read", {folder: folder.id}, function (problems) {
         problems.forEach( function (problem) {
             numpoints += parseInt(problem.value.style) + parseInt(problem.value.correct);
             var link = addProblemToAccordian(problem, accordianFolderId);
+            console.log(problem.name + " " + problem.id);
             $("#" + accordianFolderId).append(link);
         });
     });
