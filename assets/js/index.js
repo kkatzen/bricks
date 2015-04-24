@@ -101,7 +101,7 @@ function addProblemToAccordian(problem,folderName){
 				$("#" + problem.id).css("color", "green");
 				$("a", link).css("color", "green");
 			}
-			var probGrade = $("<span class='badge'>" + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
+			var probGrade = $('<span style="float:right;padding-right:15px">' + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
 			$("a", link).append(probGrade);
 
 			var currentEarned = $(earnedPointsDiv).text();
