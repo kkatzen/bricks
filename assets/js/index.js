@@ -63,7 +63,7 @@ function addProblemToAccordian(problem,folderName){
 	var maxScore = 0;
 	var probMax = Number(problem.value.correct) + Number(problem.value.style);
 	totScore += probMax;
-	var link = $("<li></li>").append(
+	var link = $('<li id="' + problem.id + '"></li>').append(
 		$("<a></a>")
 			.attr("href","#")
 			.append(problem.name)
@@ -95,9 +95,11 @@ function addProblemToAccordian(problem,folderName){
 			});
 			studScore += maxScore;
 			if (maxScore < probMax) {
-				$("a", link).append(inProgress("8px"));
+				$("#" + problem.id).css("color", "#ae4345");
+				$("a", link).css("color", "#ae4345");
 			} else {
-				$("a", link).append(correct("8px"));
+				$("#" + problem.id).css("color", "green");
+				$("a", link).css("color", "green");
 			}
 			var probGrade = $("<span class='badge'>" + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
 			$("a", link).append(probGrade);
