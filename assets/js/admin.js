@@ -19,6 +19,22 @@ function fillProblemEdit(problem) {
     $("#editStylePoints").val(problem.value.style),
     $("#editCorrectPoints").val(problem.value.correct),
     $("#editOnSubmit").val(problem.onSubmit);
+    $( "#deleteProblem" ).click(function() {   
+        if (confirm('Are you sure you wish to delete this problem ?')) {
+            $.post("/problem/destroy", {id: problem.id}, function () {
+
+            });
+        }
+    });
+}
+
+function emptyProblem(){
+    $("#edit").addClass("hidden");
+    $("#editPlaceholder").removeClass("hidden");
+    $("#pointbreakdown").addClass("hidden");
+    $("#problemDisplayName").empty().append("Choose a Problem");
+    $("#problemDisplayBody").empty().append("Select a problem from the left to view more information.");
+
 }
 
 function fillProblemDisplay(problem) {
@@ -208,7 +224,7 @@ function getSubmission(submission,user,problem) {
     $("#relatedSubmissions").empty();
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
     editor.setValue(submission.code);
-    $("#submissionMessage").html(submission.message);
+    $("#submissionMessage").empty().html(submission.message);
     $("#submissionTitle").html(problem.name);
 	$.post("/folder/read/", {id: problem.folder}, function(folder){
 		console.log(folder.name);
@@ -459,10 +475,22 @@ function reloadSortableFolders() {
 
             $.post("/problem/read", {folder: folder.id}, function (problems) {
                 problems.forEach( function (problem) {
+
+                    var removeButton = $("<a href='#'></a>")
+                    .css("color","red")
+                    .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
+                    .click(function () {
+                        if (confirm('Are you sure you wish to delete this problem ?')) {
+                            $.post("/problem/destroy", {id: problem.id}, function () {
+                                reloadSortableFolders();
+                            });
+                        }
+                    });
+
                     var sortableProblem = $("<li></li>")
                     .attr("class","ui-state-default")
                     .attr("id",problem.id)
-                    .append('<span class="sortableGrip2 ui-icon ui-icon-arrowthick-2-n-s"></span>' + problem.name);
+                    .append('<span class="sortableGrip2 ui-icon ui-icon-arrowthick-2-n-s"></span>' + problem.name).append(removeButton);
                     $("#sortableFolder" + folder.id).append(sortableProblem);
                 });
             });
