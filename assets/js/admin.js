@@ -75,6 +75,11 @@ function getStudentResults(problem) {
     });
 }
 
+function updateProblemProgressBar(problem){
+    $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
+    $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+}
+
 function problemCorrect(user, problem, student, totalStudents){
     //check score of a student for a problem
     var rsection = $("<td></td>");
@@ -145,8 +150,7 @@ function problemCorrect(user, problem, student, totalStudents){
         //update progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
         $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
-        $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
-        $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+        updateProblemProgressBar(problem);
 
     });
 }
@@ -582,11 +586,19 @@ window.onload = function () {
 	reloadFolders();
     loadUsers();
     getStudentList();
+    /*
     setInterval(
         function() {
             getStudentResults(curProblem);
         },
         30000 /* 30000 ms = 30 sec */
+   // ); 
+    
+    setInterval(
+        function() {
+            updateProblemProgressBar(curProblem);
+        },
+        500 /* 30000 ms = 30 sec */
     );
 
     editor = CodeMirror.fromTextArea(codemirror, {
