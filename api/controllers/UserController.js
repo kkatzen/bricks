@@ -21,7 +21,6 @@ module.exports = {
         var onyen = req.param("onyen") || null;
 
         if(id){
-            console.log("has id");
                 User.findOne({id:id}).exec(function (err, user) {
                 if (err) {
                     res.send(500, {error: "DB error finding user"});
@@ -31,7 +30,6 @@ module.exports = {
                 }
             });
         }else if(onyen){
-            console.log("has onyen");
                 User.findOne({username:onyen}).exec(function (err, user) {
                 if (err) {
                     res.send(500, {error: "DB error finding user"});
@@ -41,7 +39,6 @@ module.exports = {
                 }
             });
         }else {
-            console.log("has no id");
             User.find()
             .sort({"displayName": 1})
             .exec(function(err, users) {

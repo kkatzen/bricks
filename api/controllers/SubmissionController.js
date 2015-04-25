@@ -47,6 +47,14 @@ module.exports = {
                     res.send(submissions);
                 }
             });
+        } else if (!problem && student) {
+            Submission.find({user: student}).sort({createdAt: 1}).exec(function(err, submissions) {
+                if (err) {
+                    console.log("error getting submissions from database");
+                } else {
+                    res.send(submissions);
+                }
+            });
         } else {
             Submission.find().sort({createdAt: 1}).exec(function(err, submissions) {
                 if (err) {

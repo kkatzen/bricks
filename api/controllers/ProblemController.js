@@ -122,12 +122,28 @@ module.exports = {
    *    `/assignment/delete`
    */
    delete: function (req, res) {
+    console.log("deleting a problem.");
     var id = req.param("id");
     Problem.destroy({id: id}).done(function(err, problem){
         if(err){
             console.log(err);
         } else {
         }
+    });
+    Submission.find({problem: id}).done(function(err, submissions){
+      console.log("gettting all submissions for this problem i've deleted.");
+        submissions.forEach( function (submission) {
+          console.log("a submission.");
+
+            Submission.destroy({id: submission.id}).done(function(err, submission){
+                console.log("its trying to destory me.");
+                  if(err){
+                      console.log(err);
+                  } else {
+                    console.log("i am dead.");
+                  }
+            });
+        });
     });
   },
 
