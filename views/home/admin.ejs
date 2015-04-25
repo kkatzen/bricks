@@ -69,6 +69,14 @@
 form > button {
 	margin-top: 10px;
 }
+
+.attemptProblem td {
+padding-left:30px
+}
+.attemptProblem td:last-child {
+padding-left:3px
+}
+
 .navbar-default {
 		margin-top: 20px;
 }
@@ -269,7 +277,7 @@ form > button {
 			<!-- STUDENT PROGRESS SECTION -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					Student Progress  <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span>
+					Student Attempts  <!-- <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span> -->
 					<button class="btn btn-primary btn-sm pull-right" id="refreshData" data-toggle="tooltip" data-placement="top" title="Progress Bar updates in realtime. Use refresh to update table below.">Refresh</button>
 				</div>
 				<div id="allStudents1ProblemTable">
@@ -374,7 +382,7 @@ form > button {
 						</a>
 					</h4>
 				</div>
-				<div id="submissionCollapse" class="panel-collapse collapse in submissionCollapse">
+				<div id="submissionCollapse" class="panel-collapse collapse in">
 					<div class="panel-body">
 						Created By: <span id="submissionCreatedBy"></span><br />
 						Problem: <span id="submissionProblem"></span><br />
@@ -391,7 +399,7 @@ form > button {
 						</a>
 					</h4>
 				</div>
-				<div id="submissionFeedbackCollapse" class="panel-collapse collapse in submissionCollapse">
+				<div id="submissionFeedbackCollapse" class="panel-collapse collapse in">
 					<div class="panel-body">
 						<span id="submissionPoints"></span>
 						<div class="alert alert-warning" id="submissionMessage"></div>
@@ -409,14 +417,13 @@ form > button {
 						</a>
 					</h4>
 				</div>
-				<div id="relatedSubmissionCollapse" class="panel-collapse collapse in submissionCollapse">
+				<div id="relatedSubmissionCollapse" class="panel-collapse collapse in">
 					<div class="panel-body">
 					<ul id="relatedSubmissions">
 					</ul>
 					</div>
 				</div>
 			</div>			
-			<button type="button" class="btn btn-danger" data-toggle='pill' id="submissionCollapseAll">Hide Student Info</button>
 
 		</div>
 		<!-- SUBMISSION SECTION ENDS -->
@@ -475,8 +482,6 @@ form > button {
 		<!-- INDIVIDUAL STUDENT SECTION -->
 		<div class="tab-pane" id="individualStudent">
 			<h1 id="individualName"></h1>
-			
-			<button type="button" class="btn btn-primary" data-toggle='pill' disabled="disabled" id="studentRefresh">refresh</button>
 
 			<!-- PROGRESS BAR-->
 			<div id="individualProgessBar" class="hidden col-md-12"></div>
