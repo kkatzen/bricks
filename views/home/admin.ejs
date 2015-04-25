@@ -20,6 +20,7 @@
 				var classname = "#li-" + id;
 				$(classname).remove();
 		};
+
 		function addProblem(problem){
 		var item = $("<li></li>").attr("id","li-" + problem.id).html(problem.name);
 		var close = $("<a></a>").attr("class","delete").css("margin-left","5px").click(function() {
@@ -53,13 +54,17 @@
 	#sortable ul > li { background: none; border: 0px solid white; margin-left: 5px;}
 
 	.sortableGrip2 { cursor: move; float: left; };
-	.sortableFolder {margin-top: 5px; padding-left: 0px; padding-right: 0px;}
+	.sortableFolder {margin-top: 5px; padding-left: 0px; padding-right: 0px; }
+	.panel-heading {padding-right:5px; }
 	.sortableGrip { cursor: move; float: left; };
+	.panel-collapse {padding:20px; }
+	.panel-collapse p {margin:0 20px; padding:0; }
 
 
 #navigationPanel {
 	margin-top: 20px;
 	padding: 0px;
+	border:none;
 }
 form > button {
 	margin-top: 10px;
@@ -125,7 +130,7 @@ form > button {
 <% if (req.isAuthenticated() && req.user.admin) {%>
 
 	<!-- SIDE BAR -->
-	<div id="navigationPanel" class="panel panel-default col-md-2  ">
+	<div id="navigationPanel" class="panel panel-default col-md-3  ">
 		<button id="sortFolders" type="button" class="btn btn-default">Edit Folders</button>
 		<button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add</button>
 		<p>
@@ -135,7 +140,7 @@ form > button {
 
 
 	<!-- BODY -->
-	<div class="tab-content  col-md-10 ">
+	<div class="tab-content  col-md-9 ">
 
 		<!-- QUESTION SECTION -->
 		<div class="tab-pane active" id="questions">

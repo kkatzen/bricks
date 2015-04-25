@@ -7,6 +7,7 @@ function wrong(){
    return $("<span class='glyphicon glyphicon-remove'></span>").css("color", "red").css("margin-right", "5px");
 }
 
+
 function fillProblemEdit(problem) {
 	$("#edit").removeClass("hidden");
 	$("#editPlaceholder").addClass("hidden");
@@ -397,7 +398,7 @@ function addFolder(folder) {
 }
 
 function addProblemToAccordian(problem,folderName){
-    var link = $("<li></li>").append(
+    var link = $("<p></p>").append(
         $("<a></a>")
             .attr("href","#questions")
             .attr("data-toggle","pill")
@@ -445,9 +446,23 @@ function reloadSortableFolders() {
     $.post("/folder/read", null, function (folders) {
         folders.forEach(function (folder) {
 
+
+            var expandButton = $("<a href='#accoridanFolder" + folder.id + "'></a>")
+            .attr("data-parent","#accordion")
+            .attr("data-toggle","collapse")
+            .html('<span class="glyphicon expand-folders glyphicon-folder-open" style="padding:0 8px;float:right"></span>')
+            .click(function () {
+                if ($(".expand-folders").hasClass("glyphicon-folder-open")) {
+                    $(".expand-folders").removeClass("glyphicon-folder-open").addClass("glyphicon-folder-close");
+                } else {
+                    $(".expand-folders").removeClass("glyphicon-folder-close").addClass("glyphicon-folder-open");
+                }
+            });
+
+
             var removeButton = $("<a href='#'></a>")
             .css("color","red")
-            .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
+            .html('<span class="glyphicon glyphicon-remove" style="padding:0 5px;float:right"></span>') // the trailing space is important!
             .click(function () {
                 if (confirm('Are you sure you wish to delete this folder ?')) {
                     $.post("/folder/destroy", {id: folder.id}, function () {
@@ -455,11 +470,6 @@ function reloadSortableFolders() {
                     });
                 }
             });
-
-            var expandButton = $("<a href='#accoridanFolder" + folder.id + "'></a>")
-            .attr("data-parent","#accordion")
-            .attr("data-toggle","collapse")
-            .html("<span class='glyphicon glyphicon-folder-open'></span>");
 
             var heading = $("<h4></h4>")
             .addClass("panel-title")
@@ -482,7 +492,7 @@ function reloadSortableFolders() {
 
                     var removeButton = $("<a href='#'></a>")
                     .css("color","red")
-                    .html("<span class='glyphicon glyphicon-remove'></span> ") // the trailing space is important!
+                    .html('<span class="glyphicon glyphicon-remove" style="padding: 0 5px;float:right"></span>') // the trailing space is important!
                     .click(function () {
                         if (confirm('Are you sure you wish to delete this problem ?')) {
                             $.post("/problem/destroy", {id: problem.id}, function () {
