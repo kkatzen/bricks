@@ -743,6 +743,17 @@ window.onload = function () {
 
     });
 
+    $('#submissionCollapseAll').on('click', function() {
+        if($(this).text() == 'Hide Student Info') {
+            $(this).text('Show Student Info');
+            $('.submissionCollapse').collapse('hide');
+        } else {
+            $(this).text('Hide Student Info');
+            $('.submissionCollapse').collapse('show');
+        }
+        return false;
+    });
+
     //enable tooltips
     $('[data-toggle="tooltip"]').tooltip()
 };

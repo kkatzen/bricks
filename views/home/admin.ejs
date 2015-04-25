@@ -369,7 +369,7 @@ form > button {
 						</a>
 					</h4>
 				</div>
-				<div id="submissionCollapse" class="panel-collapse collapse in">
+				<div id="submissionCollapse" class="panel-collapse collapse in submissionCollapse">
 					<div class="panel-body">
 						Created By: <span id="submissionCreatedBy"></span><br />
 						Problem: <span id="submissionProblem"></span><br />
@@ -386,7 +386,7 @@ form > button {
 						</a>
 					</h4>
 				</div>
-				<div id="submissionFeedbackCollapse" class="panel-collapse collapse in">
+				<div id="submissionFeedbackCollapse" class="panel-collapse collapse in submissionCollapse">
 					<div class="panel-body">
 						<span id="submissionPoints"></span>
 						<div class="alert alert-warning" id="submissionMessage"></div>
@@ -404,13 +404,14 @@ form > button {
 						</a>
 					</h4>
 				</div>
-				<div id="relatedSubmissionCollapse" class="panel-collapse collapse in">
+				<div id="relatedSubmissionCollapse" class="panel-collapse collapse in submissionCollapse">
 					<div class="panel-body">
 					<ul id="relatedSubmissions">
 					</ul>
 					</div>
 				</div>
 			</div>			
+			<button type="button" class="btn btn-danger" data-toggle='pill' id="submissionCollapseAll">Hide Student Info</button>
 
 		</div>
 		<!-- SUBMISSION SECTION ENDS -->
