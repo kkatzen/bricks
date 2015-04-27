@@ -336,7 +336,7 @@ function getIndividual(user, refresh) {
                     var attemptedStylePoints = parseInt(0);
                     var attemptedFuncPoints = parseInt(0);
                     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
-                        $("#ISL" + folder.id).append("<li>" + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
+                        $("#ISL" + folder.id).append("<li>" + "<div class='problem-name-first left'><a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
                         submissions.forEach( function (submission) {
                             submissionCount++;
                             console.log(user.displayName + " " + submissionCount + "/" + totalSubmissionNumber);
