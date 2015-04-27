@@ -227,7 +227,7 @@ function getSubmission(submission,user,problem) {
     $("#submissionProblem").empty().append(b);
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
-    $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
+    $("#submissionPoints").html("Style points: " + submission.value.style +  "/" + problem.value.style + "<br/>Functionality points: " + submission.value.correct + "/" + problem.value.correct);
     console.log(submission.code);
 
     editor.setValue(submission.code);
@@ -318,7 +318,7 @@ function getIndividual(user, refresh) {
                     var attemptedStylePoints = parseInt(0);
                     var attemptedFuncPoints = parseInt(0);
                     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
-                        $("#ISL" + folder.id).append("<li>" + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
+                        $("#ISL" + folder.id).append("<li>" + "<div class='problem-name-first left'><a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
                         submissions.forEach( function (submission) {
                             submissionCount++;
                             console.log(user.displayName + " " + submissionCount + "/" + totalSubmissionNumber);
@@ -348,15 +348,15 @@ function getIndividual(user, refresh) {
                             percent = percent + "%";
                             $("#pbgreen").css("width",percent);
                         });
-                        if(submissions.length > 0){
+                        if(submissions.length >= 0){
                             totalAttempted += parseInt(availableStylePoints) - parseInt(earnedStylePoints);
                             totalAttempted += parseInt(availableFuncPoints) - parseInt(earnedFuncPoints);
-                            $("#ipCount" + problem.id).append("<br />" + submissions.length + "submissons");
+                            $("#ipCount" + problem.id).append("<div class='left'>" + submissions.length + " submissons</div>");
                         }
                         var percent = parseInt(totalAttempted) / parseInt(numpoints) * parseInt(100);
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
-                        $("#ipPoints" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
+                        $("#ipPoints" + problem.id).append("<div class='left'>Functional points: " + earnedStylePoints  + "/" + availableStylePoints + "</div><div class='left'>Style points: " + earnedFuncPoints + "/" + availableFuncPoints + "</div>")
                     });
                 });
             });

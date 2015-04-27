@@ -100,6 +100,17 @@ form > button {
 .attemptProblem td:last-child {
 	padding-left:3px
 }
+.left {
+	float:left;
+	width: 21.5%;
+}
+.problem-name-first {
+	width:35%
+}
+
+ul {
+	list-style-type: none;
+}
 
 </style>
 <script src="lib/codemirror.js"></script>
@@ -481,15 +492,15 @@ form > button {
 
 		<!-- INDIVIDUAL STUDENT SECTION -->
 		<div class="tab-pane" id="individualStudent">
-			<h1 id="individualName"></h1>
+			<h1 id="individualName" style="float:left;margin-left:15px"></h1>
 			
-			<button type="button" class="btn btn-primary" data-toggle='pill' disabled="disabled" id="studentRefresh">refresh</button>
+			<button type="button" class="btn btn-primary" data-toggle='pill' disabled="disabled" id="studentRefresh" style="float:right;margin-top:22px">refresh</button>
 
 			<!-- PROGRESS BAR-->
-			<div id="individualProgessBar" class="hidden col-md-12"></div>
+			<div id="individualProgessBar" class="hidden col-md-12" style="margin-top:10px"></div>
 
 			<!--SUBMISSION LIST-->
-			<div id="individualSubmissionList"></div>
+			<div class="col-md-12" id="individualSubmissionList"></div>
 
 		</div>
 		<!-- INDIVIDUAL STUDENT SECTION ENDS -->
