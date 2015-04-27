@@ -290,10 +290,11 @@ function getIndividual(user, refresh) {
     $('[data-toggle="tooltip"]').tooltip()
     var totalSubmissionNumber = 100000000000000;
 
-    /*
-    Code for catching deleting "hanging" submissions whose folder/problem have been deleted
+    
     $.post("/submission/read/", {student: user.username}, function(submissions){
         totalSubmissionNumber = submissions.length;
+        /*
+        Code for catching deleting "hanging" submissions whose folder/problem have been deleted
         submissions.forEach( function (submission) {
             
             $.post("/problem/read", {id: submission.problem}, function (problem) {
@@ -313,8 +314,8 @@ function getIndividual(user, refresh) {
                     }
                 });
             });
-        });
-    });*/
+        });*/
+    });
 
     if(totalSubmissionNumber == 0){
         $("#studentRefresh").removeAttr('disabled');
