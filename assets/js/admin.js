@@ -450,7 +450,6 @@ function addFolder(folder) {
         problems.forEach( function (problem) {
             numpoints += parseInt(problem.value.style) + parseInt(problem.value.correct);
             var link = addProblemToAccordian(problem, accordianFolderId);
-          //  console.log(problem.name + " " + problem.id);
             $("#" + accordianFolderId).append(link);
         });
     });
@@ -490,12 +489,14 @@ function reloadSortableFolders() {
                 $("#newFolderError").append(noNameError);
             } else {
                 $.post("/folder/create", {name: $("#newFolder").val()}, function (folder) {
-                    if(blinkTimer > 0){
-                        reloadSortableFolders();
-                    }else {
-                       reloadFolders();
-                    }
-                    $("#newFolder").val("");
+                    $.post("/folder/reorder", {}, function () {
+                        if(blinkTimer > 0){
+                            reloadSortableFolders();
+                        }else {
+                           reloadFolders();
+                        }
+                        $("#newFolder").val("");
+                    });
                 });
             }
         });
@@ -525,7 +526,9 @@ function reloadSortableFolders() {
             .click(function () {
                 if (confirm('Are you sure you wish to delete this folder ?')) {
                     $.post("/folder/delete", {id: folder.id}, function () {
-                        reloadSortableFolders();
+                        $.post("/folder/reorder", {}, function () {
+                            reloadSortableFolders();
+                        });
                     });
                 }
             });
