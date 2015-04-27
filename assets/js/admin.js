@@ -314,9 +314,8 @@ function getIndividual(user, refresh) {
                 });
             });
         });
-    */
+    });*/
 
-    });
     if(totalSubmissionNumber == 0){
         $("#studentRefresh").removeAttr('disabled');
     }
