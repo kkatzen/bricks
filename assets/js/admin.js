@@ -22,8 +22,8 @@ function fillProblemEdit(problem) {
     $("#editOnSubmit").val(problem.onSubmit);
     $( "#deleteProblem" ).click(function() {   
         if (confirm('Are you sure you wish to delete this problem ?')) {
-            $.post("/problem/destroy", {id: problem.id}, function () {
-
+            $.post("/problem/delete", {id: problem.id}, function () {
+                emptyProblem();
             });
         }
     });
@@ -52,7 +52,7 @@ function getStudentResults(problem) {
     numstyle = 0;
     numattempted = 0;
     numearned = 0;
-    var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Func/Style</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
+    var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Result</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
     $("#allStudents1ProblemTable").empty().append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
@@ -66,7 +66,7 @@ function getStudentResults(problem) {
                             alert("No user with that id found");
                             return;
                         }
-                        getIndividual(user);
+                        getIndividual(user,false);
                     });
                 });
             var student = $("<tr></tr>");
@@ -106,14 +106,14 @@ function problemCorrect(user, problem, student, totalStudents){
             numattempted++;
             if(results.correct) {
                 numfunct++;
-                rsection.append(problem.value.correct + " / ");
+                rsection.append(correct());
             } else {
-                rsection.append(problem.value.correct + " / ");
+                rsection.append(wrong());
             } if(results.style) {
                 numstyle++;
-                rsection.append(problem.value.style);
+                rsection.append(correct());
             } else {
-                rsection.append(problem.value.style);
+                rsection.append(wrong());
             }
             if(results.correct && results.style){
                 numearned++;
@@ -136,13 +136,13 @@ function problemCorrect(user, problem, student, totalStudents){
                         getSubmission(submission,user,problem);
                 });
         	$("#submissionUser" + user.id)
-                .append($("<tr class='attemptProblem'></tr>")
+                .append($("<tr></tr>")
                     .append($("<td></td>")
                         .append(a))
                     .append($("<td></td>")
-                        .append(submission.value.correct + " /"))
+                        .append("correct=" + submission.value.correct))
                     .append($("<td></td>")
-                        .append(" " + submission.value.style))
+                        .append("style=" + submission.value.style))
 
                 );
         });
@@ -177,7 +177,7 @@ function getStudentList() {
                             alert("No user with that id found");
                             return;
                         }
-                        getIndividual(user);
+                        getIndividual(user,false);
                     });
                 });            
             student.append(a);
@@ -209,7 +209,7 @@ function getSubmission(submission,user,problem) {
                     alert("No user with that id found");
                     return;
                 }
-                getIndividual(user);
+                getIndividual(user,false);
             });
         });
     var b = $("<a></>")
@@ -228,7 +228,11 @@ function getSubmission(submission,user,problem) {
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
     $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
+    console.log(submission.code);
+
     editor.setValue(submission.code);
+    console.log("refresh editor");
+
     $("#submissionMessage").empty().html(submission.message);
     $("#submissionTitle").html(problem.name);
 	$.post("/folder/read/", {id: problem.folder}, function(folder){
@@ -258,13 +262,14 @@ function getSubmission(submission,user,problem) {
             $("#relatedSubmissions").append(a);
         });
     });
-
+    setTimeout( editor.refresh(), 0 );
 
 }
 
-function getIndividual(user) {
+function getIndividual(user, refresh) {
+    console.log("getIndividual called");
     //Generate page for particular individual student    
-    if(curStudent == user.id){
+    if(curStudent == user.id && refresh == false){
         return;
     }
     curStudent = user.id;
@@ -274,6 +279,7 @@ function getIndividual(user) {
     $("#pbp-red").css("width","0%");
     $("#individualProgessBar").removeClass("hidden");
     $("#individualSubmissionList").empty();
+    $("#studentRefresh").attr("disabled", "disabled");
 
     $("#individualName").html(user.displayName + " " + user.username);
 
@@ -282,7 +288,21 @@ function getIndividual(user) {
     $("#individualProgessBar").empty().append('<div class="progress"><div id="pbgreen" class="progress-bar progress-bar-success" style="width: 0%;" data-toggle="tooltip" data-placement="top" title="' + tooltipGreen + '"><span class="sr-only">35% Complete (success)</span></div> <div id="pbyellow" class="progress-bar progress-bar-warning progress-bar-striped" style="width: 0%" data-toggle="tooltip" data-placement="top" title="' + tooltipYellow + '"><span class="sr-only">20% Complete (warning)</span></div><div id="pbred" class="progress-bar progress-bar-danger" style="width: 0%"><span class="sr-only">10% Complete (danger)</span></div></div>');
     //must enable tooltips
     $('[data-toggle="tooltip"]').tooltip()
+    var totalSubmissionNumber = 100000000000000;
+    $.post("/submission/read/", {student: user.username}, function(submissions){
+        totalSubmissionNumber = submissions.length;
+        submissions.forEach( function (submission) {
+            $.post("/problem/read", {id: submission.problem}, function (problem) {
+                console.log("OK PROB?" + problem.name + " " + problem.id + " " + submission.problem);
+            });
+        });
 
+
+    });
+    if(totalSubmissionNumber == 0){
+        $("#studentRefresh").removeAttr('disabled');
+    }
+    var submissionCount = 0;
     $.post("/folder/read", null, function (folders) {
         var totalEarned = 0;
         var totalAttempted = 0;
@@ -300,6 +320,12 @@ function getIndividual(user) {
                     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
                         $("#ISL" + folder.id).append("<li>" + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
                         submissions.forEach( function (submission) {
+                            submissionCount++;
+                            console.log(user.displayName + " " + submissionCount + "/" + totalSubmissionNumber);
+                            if(totalSubmissionNumber == submissionCount){
+                                $("#studentRefresh").removeAttr('disabled');
+                            }
+
 							var d = new Date(submission.createdAt);
 
                             var a = $("<li></li>")
@@ -336,6 +362,19 @@ function getIndividual(user) {
             });
         });
     });
+    $("#studentRefresh").unbind('click');
+    $("#studentRefresh").click(function () { 
+        $.post("/user/read", {id: curStudent}, function (user) {
+            if (!user) {
+                alert("error");
+            }else {
+                getIndividual(user, true);
+                $("#studentRefresh").attr("disabled", "disabled");
+            }
+        });
+
+    });
+    
 }
 
 function getIndividualNone(onyen) {
@@ -495,10 +534,12 @@ function reloadSortableFolders() {
                     .html('<span class="glyphicon glyphicon-remove" style="padding: 0 5px;float:right"></span>') // the trailing space is important!
                     .click(function () {
                         if (confirm('Are you sure you wish to delete this problem ?')) {
-                            $.post("/problem/destroy", {id: problem.id}, function () {
-                                reloadSortableFolders();
+                            $.post("/problem/delete", {id: problem.id}, function () {
+                                console.log('reloadSortableFolders();')
                             });
                         }
+                        reloadSortableFolders();
+
                     });
 
                     var sortableProblem = $("<li></li>")
@@ -747,10 +788,21 @@ window.onload = function () {
                 getIndividualNone(onyenValue);
             }else {
                 $("#individual").tab('show');
-                getIndividual(user);
+                getIndividual(user, false);
             }
         });
 
+    });
+
+    $('#submissionCollapseAll').on('click', function() {
+        if($(this).text() == 'Hide Student Info') {
+            $(this).text('Show Student Info');
+            $('.submissionCollapse').collapse('hide');
+        } else {
+            $(this).text('Hide Student Info');
+            $('.submissionCollapse').collapse('show');
+        }
+        return false;
     });
 
     //enable tooltips
