@@ -94,6 +94,13 @@ form > button {
 	text-align: center;
 }
 
+.attemptProblem td {
+	padding-left:30px
+}
+.attemptProblem td:last-child {
+	padding-left:3px
+}
+
 </style>
 <script src="lib/codemirror.js"></script>
 <script src="../mode/javascript/javascript.js"></script>
@@ -269,7 +276,7 @@ form > button {
 			<!-- STUDENT PROGRESS SECTION -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					Student Progress  <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span>
+					Student Attempts  <!-- <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span> -->
 					<button class="btn btn-primary btn-sm pull-right" id="refreshData" data-toggle="tooltip" data-placement="top" title="Progress Bar updates in realtime. Use refresh to update table below.">Refresh</button>
 				</div>
 				<div id="allStudents1ProblemTable">

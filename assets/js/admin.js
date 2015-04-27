@@ -106,14 +106,14 @@ function problemCorrect(user, problem, student, totalStudents){
             numattempted++;
             if(results.correct) {
                 numfunct++;
-                rsection.append(correct());
+                rsection.append(problem.value.correct + " / ");
             } else {
-                rsection.append(wrong());
+                rsection.append(problem.value.correct + " / ");
             } if(results.style) {
                 numstyle++;
-                rsection.append(correct());
+                rsection.append(problem.value.style);
             } else {
-                rsection.append(wrong());
+                rsection.append(problem.value.style);
             }
             if(results.correct && results.style){
                 numearned++;
@@ -136,13 +136,13 @@ function problemCorrect(user, problem, student, totalStudents){
                         getSubmission(submission,user,problem);
                 });
         	$("#submissionUser" + user.id)
-                .append($("<tr></tr>")
+                .append($("<tr class='attemptProblem'></tr>")
                     .append($("<td></td>")
                         .append(a))
                     .append($("<td></td>")
-                        .append("correct=" + submission.value.correct))
+                        .append(submission.value.correct + " /"))
                     .append($("<td></td>")
-                        .append("style=" + submission.value.style))
+                        .append(" " + submission.value.style))
 
                 );
         });
