@@ -85,11 +85,17 @@ module.exports = {
    *    `/submission/delete`
    */
    delete: function (req, res) {
-    
-    // Send a JSON response
-    return res.json({
-      hello: 'world'
+    var id = req.param("id");
+    Submission.destroy({id: id}).done(function(err, submission){
+        if(err){
+            console.log(err);
+        } else {
+        }
     });
+    // Send a JSON response
+    /*return res.json({
+      hello: 'world'
+    });*/
   },
 
 

@@ -96,15 +96,38 @@ module.exports = {
    * Action blueprints:
    *    `/folder/destroy`
    */
-	destroy: function (req, res) {
+	delete: function (req, res) {
 		var id = req.param("id");
 		Folder.destroy({id: id}).done(function(err){
 			if(err){
 				console.log(err);
 			} else {
 			}
-			res.end();
 		});
+    //delete all children problems
+    Problem.find({folder: id}).done(function(err, problems){
+        problems.forEach( function (problem) {
+            Problem.destroy({id: problem.id}).done(function(err, problem){
+              if(err){
+                  console.log(err);
+              } else {
+              }
+            });
+            //delete all children submissions
+            Submission.find({problem: problem.id}).done(function(err, submissions){
+              submissions.forEach( function (submission) {
+                  Submission.destroy({id: submission.id}).done(function(err, submission){
+                    if(err){
+                        console.log(err);
+                    } else {
+                    }
+                  });
+                });
+            });
+        });
+    });
+    res.end();
+
 	},
 
    reorder: function (req, res) {
