@@ -2,13 +2,13 @@
 
 //------------------------------------------------------------------------
 //
-//  This JavaScript code implements an API for AST analysis
-//    the analysis is intended for simple auto grading 
-//    and for enforcing basic programming structure and style guidelines 
-//    for an intro programming class
+//  this JavaScript code implements an API for AST analysis
+//  the analysis is intended for simple auto grading 
+//  and for enforcing basic programming structure and style guidelines 
+//  for an intro programming class
 //
 //  We use the Acorn parser to generate an AST 
-//    The AST is a JSON object, in Mozilla SpiderMonkey format
+//  The AST is a JSON object, in Mozilla SpiderMonkey format
 //
 //  To adapt this API to another language you will have to
 //   -- get an AST for the target language in SpiderMonkey format 
@@ -16,7 +16,6 @@
 //   -- or write adapter functions
 //
 //  David Stotts, 5/16/2014
-//  Yuxin Mo, 2/12/2015 
 //
 //------------------------------------------------------------------------
 
@@ -31,6 +30,7 @@ var pnut = (function () {
 //   - data object will be sent to the server for analysis/grading
 //------------------------------------------------------------------------
 
+<<<<<<< HEAD
   function collectStructureStyleFacts(ast) {
     var dObj      = {};
 
@@ -235,17 +235,55 @@ var pnut = (function () {
     // console.log("NumUndecVars: " + listUndecVars(ast).length);
     return listUndecVars(ast).length;
   } 
+=======
+function collectStructureStyleFacts (ast) {
+  var dObj = {};
+
+  dObj.nTFD = numTopFuncDecls(ast);
+  dObj.nTFC = numTopFuncCalls(ast);
+  dObj.nBGD = numBadGlobalDecls(ast);
+  dObj.nBGU = numBadGlobalUses(ast);
+  dObj.nTFL = numForLoops(ast);
+  dObj.nTWL = numWhileLoops(ast);
+
+  dObj.uBGV = usesBadGlobalVars(ast);
+  dObj.isAFD1C = isAllFuncDeclsPlusOneCall(ast);
+  dObj.nAFL =  numForLoopsInAllFuncDecls(ast);
+  dObj.nAWL =  numWhileLoopsInAllFuncDecls(ast);
+
+  return dObj;
+}
+
 
 
 //------------------------------------------------------------------------
-// 1-d. list all undeclacred variables that get used in a program
-//------------------------------------------------------------------------ 
-  function listUndecVars(ast) {
-    var decVars  = listDecVars(ast);
-    var usedVars = listVarsUsed(ast);
-    var map      = new HashMap();
-    var arr      = [];
+//
+// API functions
+//
+//   numBadGlobalDecls (ast)          ==>  integer >= 0
+//   numBadGlobalUses (ast)           ==>  integer >= 0
+//   usesBadGlobalVars (ast)          ==>  boolean
+//   numForLoops (ast)                ==>  integer >= 0
+//   numWhileLoops (ast)              ==>  integer >= 0
+//   numForLoopsInAllFuncDecls(ast)   ==>  integer >= 0
+//   numWhileLoopsInAllFuncDecls(ast) ==>  integer >= 0
+//   numForNestLevels (ast)           ==>  integer >= 0
+//   numWhileNestLevels (ast)         ==>  integer >= 0
+//   numTopFuncDecls (ast)            ==>  integer >= 0
+//   numTopFuncCalls (ast)            ==>  integer >= 0
+//   isFuncCall (obj)                 ==>  boolean
+//   listTopLevelTypes (ast)          ==>  [ string ]
+//   isAllFuncDeclsPlusOneCall (ast)  ==>  boolean
+//
+//------------------------------------------------------------------------
+>>>>>>> userInterface
 
+
+//------------------------------------------------------------------------
+//   global variables, declaration and use
+//-----------------------------------------------------------------------
+
+<<<<<<< HEAD
     // store all declared vars in a hashmap
     for(m in decVars) { 
       map.setItem(decVars[m], 0); 
@@ -1156,8 +1194,27 @@ var pnut = (function () {
 
     // console.log("numWhileLoopsInFuncs: " + count);
     return count;
+=======
+function numBadGlobalDecls (ast) {
+  // global var decl
+  // but we exclude function value assignments to global
+  var count = 0;
+  var nst = ast.body.length;
+  var st;
+  for (var i=0; i<nst; i++) {
+    st = ast.body[i]; 
+    if (st.type == "VariableDeclaration") {
+      var decs = st.declarations; // an array of obj
+      for (var d=0; d<decs.length; d++) {
+        if (decs[d].init.type != "FunctionExpression") { count++; }
+      }
+    }
+>>>>>>> userInterface
   }
+  return count;
+}
 
+<<<<<<< HEAD
 //------------------------------------------------------------------------
 // 4-d. calculate total number of nested while loops in functions (local)
 //------------------------------------------------------------------------  
@@ -1200,10 +1257,30 @@ var pnut = (function () {
       count = (snd.type=="WhileStatement") ? 1+count+numWhileLoops(snd.body):count;
     } 
     return count;
+=======
+
+function numBadGlobalUses(ast) {
+  // global var on left of assignment
+  // but we exclude function value assignments to global
+  var count = 0;
+  var nst = ast.body.length;
+  var st;
+  for (var i=0; i<nst; i++) {
+    st = ast.body[i]; 
+    if (st.type == "ExpressionStatement") {
+      if (st.expression.type != "CallExpression") { count++; }
+    }
+>>>>>>> userInterface
   }
+  return count;
+}
 
 
+function usesBadGlobalVars(ast) { 
+  return (numBadGlobalDecls(ast) > 0 || numBadGlobalUses(ast) > 0); 
+}
 
+<<<<<<< HEAD
 
 /******************************************************************/
 /* 5. Style Grading for Use of For Loop                           */
@@ -1233,9 +1310,13 @@ var pnut = (function () {
     // console.log("numForLoopsInGloLev: " + numForLoops(ast));
     return numForLoops(ast);
   }
+=======
+
+>>>>>>> userInterface
 
 
 //------------------------------------------------------------------------
+<<<<<<< HEAD
 // 5-b. calculate total number of nested for loops in global level
 //      ex.
 //         var a = 0;
@@ -1385,8 +1466,33 @@ var pnut = (function () {
   function listDecFuncs(ast) {
     // console.log("listDecFuncs: " + DictDecFuncs(ast).keys());
     return DictDecFuncs(ast).keys(); 
-  }
+=======
+//   loops (top level)
+//------------------------------------------------------------------------
 
+function numForLoops (ast) {
+  // only counts for loops at the global level for now
+  var count = 0;
+  var nst = ast.body.length;
+  for (var i=0; i<nst; i++) {
+    if (ast.body[i].type == "ForStatement") { count++; }
+  }
+  return count;
+}
+
+
+function numWhileLoops (ast) {
+  // only counts while loops at the global level for now
+  var count = 0;
+  var nst = ast.body.length;
+  for (var i=0; i<nst; i++) {
+    if (ast.body[i].type == "WhileStatement") { count++; }
+>>>>>>> userInterface
+  }
+  return count;
+}
+
+<<<<<<< HEAD
 //------------------------------------------------------------------------
 // 6-c. exam call expressions that all call declared functions in which 
 //      functions are declared on the top of call expressions.
@@ -1495,8 +1601,40 @@ var pnut = (function () {
     }
     // console.log("isADecFuncPassedByRef: " + true);
     return false;
-  }
+=======
 
+function numForNestLevels (ast) { 
+  // yet to be implemented
+  return 0; 
+}
+
+
+function numWhileNestLevels (ast) { 
+  // yet to be implemented
+  return 0; 
+}
+
+
+//------------------------------------------------------------------------
+//   loops in functions
+//------------------------------------------------------------------------
+
+function numForLoopsInAllFuncDecls(ast) {
+  // search tree and when find a func decl we do the loop count 
+  // skips global level
+  var count = 0;
+  var nst = ast.body.length;
+  for (var i=0; i<nst; i++) {
+    if (ast.body[i].type == "FunctionDeclaration") { 
+       count += numForLoops( ast.body[i].body);
+       //alert("in func for count: " +count);
+    }
+>>>>>>> userInterface
+  }
+  return count;
+}
+
+<<<<<<< HEAD
 //------------------------------------------------------------------------
 // 6-h. identify if any function returns an object in a program
 //      ex:
@@ -1584,8 +1722,26 @@ var pnut = (function () {
     }
     return dict;  
   }
+=======
+
+function numWhileLoopsInAllFuncDecls(ast) {
+  // search tree and when find a func decl we do the loop count 
+  // skips global level
+  var count = 0;
+  var nst = ast.body.length;
+  for (var i=0; i<nst; i++) {
+    if (ast.body[i].type == "FunctionDeclaration") { 
+       count += numWhileLoops( ast.body[i].body);
+       //alert("in func for count: " +count);
+    }
+  }
+  return count;
+}
+
+>>>>>>> userInterface
 
 //------------------------------------------------------------------------
+<<<<<<< HEAD
 // private function:
 // create a dictionary to map function calls with their occurrence order.
 //------------------------------------------------------------------------
@@ -1756,11 +1912,84 @@ var pnut = (function () {
 
     return recursionDetector(nd.left, funcName)||recursionDetector(nd.right, funcName);
   }
+=======
+//   function declarations (top level)
+//   function calls (top level)
+//------------------------------------------------------------------------
+
+function numTopFuncDecls (ast) {
+  // counts top level function foo () { ... } syntax
+  // also counts top level var foo = function () { ... }
+  var count = 0;
+  var nst = ast.body.length;
+  var st;
+  for (var i=0; i<nst; i++) {
+    st = ast.body[i];
+    if (st.type == "FunctionDeclaration") {
+      // syntax: function foo(n) { ... }
+      count++; 
+    } 
+    else if (st.type == "VariableDeclaration") {
+      // syntax: var foo = function (n) { ... } 
+      var decs = st.declarations; // an array of obj
+      for (var d=0; d<decs.length; d++) {
+        if (decs[d].init.type == "FunctionExpression") { count++; }
+      }
+    } 
+    else { // move along to next statement, nothing to do for now
+    }
+  } // end for loop
+  return count;
+}
+
+
+function isFuncCall (ob) { 
+  switch (ob.type) {
+    case "ExpressionStatement":
+      if (ob.expression.type === "CallExpression") return true;
+      if (ob.expression.type === "AssignmentExpression") {
+	if (ob.expression.right.type === "CallExpression") return true;
+      }
+      break;
+    case "VariableDeclaration":
+      if (ob.declarations[0].init.type === "CallExpression") return true;
+      break;
+    default: return false;
+  }
+  return false; 
+}
+
+
+function numTopFuncCalls (ast) {
+  var count = 0;
+  var nst = ast.body.length;
+  var st;
+  for (var i=0; i<nst; i++) {
+    st = ast.body[i];
+    if (isFuncCall(st)) count += 1;
+  }
+  /*
+  for (var i=0; i<nst; i++) {
+    st = ast.body[i];
+    if (st.type == "ExpressionStatement") {
+      // syntax: myMain();
+      if (st.expression.type == "CallExpression") { count += 1; }
+      // syntax: z = myMain(); 
+      if (st.expression.type == "AssignmentStatement") { 
+	if (st.expression.right == "CallExpression") { count += 1; }
+      }
+    } 
+  } // end for loop
+  */
+  return count;
+}
+>>>>>>> userInterface
 
 
 
 
 //------------------------------------------------------------------------
+<<<<<<< HEAD
 // private function:
 //  HashMap:
 //    1. setItem(key, value) ==> map a new key to a value in the map
@@ -1770,18 +1999,14 @@ var pnut = (function () {
 //    5. keys()              ==> a list of all keys in the map
 //    6. values()            ==> a list of all values in the map
 //    7. clear()             ==> clear the map
+=======
+//   top level structure check
+//   is it nothing but func decls and one func call?
+>>>>>>> userInterface
 //------------------------------------------------------------------------
-  function HashMap(obj) {
-      this.length = 0;
-      this.items = {};
 
-      for (var p in obj) {
-        if (obj.hasOwnProperty(p)) {
-          this.items[p] = obj[p];
-          this.length++;
-        }
-      }
 
+<<<<<<< HEAD
       this.setItem = function(key, value) {
         var previous = undefined;
         if (this.hasItem(key)) { previous = this.items[key];
@@ -1832,13 +2057,51 @@ var pnut = (function () {
       }
   }
 
+=======
+function listTopLevelTypes (ast) {
+  // what are the main top level statements in the program
+  var nst = ast.body.length;
+  var list = [];
+  for (var i=0; i<nst; i++) { list[i] = ast.body[i].type ; }
+  return list; // array of strings
+}
+>>>>>>> userInterface
 
 
+function isAllFuncDeclsPlusOneCall (ast) {
+  if (numTopFuncCalls(ast) != 1) return false;
+  
+  var numFuncDecls = 0;
+  var stList = listTopLevelTypes(ast); // array of strings
 
+  for (var s=0; s<stList.length; s++) {
+     switch (stList[s]) {
+        case "FunctionDeclaration":
+           // cool this is ok, so count and just keep going
+           numFuncDecls += 1;
+           break;
+        case "VariableDeclaration":
+           // is this var decl really a func decl?
+           if (ast.body[s].declarations[0].init.type == "FunctionExpression") { 
+             numFuncDecls += 1; 
+           } else { 
+             return false; 
+           }
+           break;
+        case "ExpressionStatement":
+           // is this expression a single func call?
+	   if (!isFuncCall(ast.body[s])) return false;
+           break;
+        default: return false;
+     } // end switch
+  } // end for loop
+  return ( numFuncDecls > 0 ) ;
+}
 
 // all functions have been declared local to this anonymous function
 // now put them all into an object as methods and send that object back
 
+<<<<<<< HEAD
   return {
     collectStructureStyleFacts: collectStructureStyleFacts,
 
@@ -1897,6 +2160,24 @@ var pnut = (function () {
 
 
   }
+=======
+return {
+  collectStructureStyleFacts: collectStructureStyleFacts
+  ,numBadGlobalDecls: numBadGlobalDecls 
+  ,numBadGlobalUses: numBadGlobalUses
+  ,usesBadGlobalVars: usesBadGlobalVars
+  ,numForLoops: numForLoops 
+  ,numWhileLoops: numWhileLoops 
+  ,numForNestLevels: numForNestLevels 
+  ,numWhileNestLevels: numWhileNestLevels 
+  ,numForLoopsInAllFuncDecls: numForLoopsInAllFuncDecls
+  ,numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls
+  ,numTopFuncDecls: numTopFuncDecls 
+  ,numTopFuncCalls: numTopFuncCalls 
+  ,listTopLevelTypes: listTopLevelTypes 
+  ,isAllFuncDeclsPlusOneCall: isAllFuncDeclsPlusOneCall 
+}
+>>>>>>> userInterface
 
 })  // end anonymous function declaration 
 (); // now run it to create and return the object with all the methods

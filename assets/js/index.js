@@ -6,6 +6,8 @@ var folderStudScore = 0;
 var totScore = 0;
 var studScore = 0;
 
+
+/*
 fProto = {
    addProblem : function (problem) {
       var maxScore = 0;
@@ -51,6 +53,80 @@ fProto = {
 		$("ul",this.domNode).append(link);
 	}
 }
+*/
+
+function addProblemToAccordian(problem,folderName){
+	var earnedPointsDiv = "#earned-" +folderName;
+	var availPointsDiv = "#avail-" +folderName;
+	var checkDiv = "#check-" +folderName;
+	console.log("addProblemToAccordian()");
+	var maxScore = 0;
+	var probMax = Number(problem.value.correct) + Number(problem.value.style);
+	totScore += probMax;
+	var link = $('<li id="' + problem.id + '"></li>').append(
+		$("<a></a>")
+			.attr("href","#")
+			.append(problem.name)
+	);
+	if(problem.phase == 0) {
+	    link.css("background-color","lightgray");
+	}
+	link.click(function () { addProbInfo(problem); });
+
+	if (loggedIn) {
+		var results = { correct: false, style: false };
+		$.post("/submission/read/" + problem.id, {}, function (submissions) {
+		if (!submissions.length == 0) {
+			submissions.forEach( function (submission) {
+				var curSubScore = Number(submission.value.correct)+Number(submission.value.style);
+				if(curSubScore > maxScore) {
+					maxScore = curSubScore;
+				}
+				results.correct = 
+					results.correct || (submission.value.correct == problem.value.correct);
+				results.style = results.style || (submission.value.style == problem.value.style);
+				if (results.correct && results.style) { return true; } 
+
+				if($("#panel-" + folderName).hasClass("panel-danger")){
+					$("#panel-" + folderName).removeClass("panel-danger");
+					$("#panel-" + folderName).addClass("panel-warning");
+				}
+
+			});
+			studScore += maxScore;
+			if (maxScore < probMax) {
+				$("#" + problem.id).css("color", "#ae4345");
+				$("a", link).css("color", "#ae4345");
+			} else {
+				$("#" + problem.id).css("color", "green");
+				$("a", link).css("color", "green");
+			}
+			var probGrade = $('<span style="float:right;padding-right:15px">' + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
+			$("a", link).append(probGrade);
+
+			var currentEarned = $(earnedPointsDiv).text();
+			var availablePoints = $(availPointsDiv).text();
+			console.log("currentEarnedPre" +currentEarned);
+			console.log("maxScore" +maxScore);
+			currentEarned = Number(currentEarned);
+			currentEarned = currentEarned + maxScore;
+			console.log("currentEarnedPost" +currentEarned);
+			$(earnedPointsDiv).empty().append(currentEarned);
+			console.log("check a" + availablePoints + " e" + currentEarned);
+
+			if(availablePoints == currentEarned){
+				console.log("check is yes");
+				$(checkDiv).append(correct("8px"));
+				$("#panel-" + folderName).removeClass("panel-warning");
+				$("#panel-" + folderName).addClass("panel-success");
+			}
+
+		}
+		$("#grade").empty().append(studScore + "/" + totScore);
+		});
+	}
+	return link;
+}
 
 function correct (pad) {
    return $("<span></span>")
@@ -77,6 +153,7 @@ function inProgress (pad) {
 }
 
 function addFolder (folder) {
+	/*
 	var dropdown = $("<li></li>").addClass("dropdown");
 	var toggle = $("<a></a>")
 		.attr("href","#")
@@ -89,28 +166,79 @@ function addFolder (folder) {
 		.attr("id","f-" + folder.id);
 	dropdown.append(toggle).append(menu);
 	$("#folders").append(dropdown);
-	var fObj = { domNode : dropdown, data : folder };
-	fObj.__proto__ = fProto;
-	allFolders[folder.id] = fObj;
+	*/
+	var accordianFolderName = "accoridanFolder" + folder.id;
+	var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
+	var accordian = "<div id='panel-" + accordianFolderName  + "' class='panel panel-danger'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div><ul id = '" + accordianFolderName + "' class='panel-collapse collapse folderCollapse'></ul></div></div>";
+
+	$("#folderAccordion").append(accordian);
+	var accordianFolderBody = '';
+	$("#" + accordianFolderName).append(accordianFolderBody);
+	var folderScore = 0;
+	$("#avail-" + accordianFolderName).empty().append(folderScore);
+	//var fObj = { domNode : dropdown, data : folder };
+	//fObj.__proto__ = fProto;
+	//allFolders[folder.id] = fObj;
+	$("#" + accordianFolderName).empty();
 	$.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
 		problems.forEach( function (problem) {
-			fObj.addProblem(problem);
+			//fObj.addProblem(problem);
+			var link = addProblemToAccordian(problem, accordianFolderName);
+			folderScore += parseInt(problem.value.style) + parseInt(problem.value.correct);
+			$("#" + accordianFolderName).append(link);
 		});
+		$("#avail-" + accordianFolderName).empty().append(folderScore);
 	});
+
 }
 
 
 function addProbInfo (problem) {
 	$("#initSubmit").removeAttr("disabled");
 	$("#submissions").removeClass("hidden");
+	$("#pointbreakdown").removeClass("hidden");
 	$("#desc-title").empty().append(problem.name);
 	$("#desc-body").empty().append(problem.text);
 	curProblem = problem;
+	$("#availablePtStyle").empty().append(problem.value.style);
+	$("#availablePtCorrect").empty().append(problem.value.correct);
+	var highestStyle = 0;
+	var highestCorrect = 0;
 	$.post("/submission/read/" + problem.id, {}, function (submissions) {
         $("#subs").empty();
+
 		submissions.forEach( function (submission) {
 			addSubmission(submission);
+			console.log(submission.value.style);
+			console.log(submission.value.correct);			
+			if(submission.value.style > highestStyle){
+				highestStyle = submission.value.style;
+			}
+			if(submission.value.correct > highestCorrect){
+				highestCorrect = submission.value.correct;
+			}
+			console.log("highestCorrect" + highestCorrect);
+			console.log("highestStyle" + highestStyle);			
+
 		});
+		$("#highestPtCorrect").empty().append(highestCorrect);
+		$("#highestPtStyle").empty().append(highestStyle);
+		$("#correctCheck").empty();
+		$("#styleCheck").empty();
+
+		//append checks xs if they have attempted
+		if(submissions.length > 0){
+			if(problem.value.correct == highestCorrect){
+				$("#correctCheck").append(correct("8px"));
+			}else {
+	        	$("#correctCheck").append(wrong("8px"));
+			}	
+			if(problem.value.style == highestStyle){
+				$("#styleCheck").append(correct("8px"));
+			}else {
+	        	$("#styleCheck").append(wrong("8px"));
+			}
+		}		
 	});
 }
 
@@ -120,32 +248,45 @@ function addSubmission(submission) {
 	var timeString = time.toLocaleDateString() + " " + time.toLocaleTimeString();
     var link = $("<tr></tr>");
 	link.append("<td><a href='#'>" + timeString + "</a></td>");
-    var grade = $("<td></td>");
+    var gradeF = $("<td></td>");
+    var gradeS = $("<td></td>");
     var results = { correct: false, style: false };
     results.correct = results.correct || (submission.value.correct == curProblem.value.correct);
     results.style = results.style || (submission.value.style == curProblem.value.style);
     //add checks and x's to the submission
     if (results.correct) {
-        $(grade).append(correct("8px"));
+        $(gradeF).append(correct("8px"));
     } else {
-        $(grade).append(wrong("8px"));
+        $(gradeF).append(wrong("8px"));
     }
     if (results.style) {
-        $(grade).append(correct("18px"));
+        $(gradeS).append(correct("18px"));
     } else {
-        $(grade).append(wrong("18px"));
+        $(gradeS).append(wrong("18px"));
     }
-    link.append(grade);
+    link.append(gradeF);
+    link.append(gradeS);
     //make the problem link produce the submission code on click
 	$("a", link).click(function() {
-		alert(submission.code);
+		if (confirm('Put the following into the console? \n' + submission.code)) {
+			editor.setValue(submission.code);
+		}
 	});
     //attach the link to the submission
 	$("#subs").prepend(link);
 }
+function resizeWindow(){
+/*	var window_height = $("#consoleHeader").height();
+    var window_height2 = $("#codemirror").height();
+    var window_height3 = $("#instructions").height();
+    var height = parseInt(window_height) + parseInt(window_height2) + parseInt(window_height3);
+    console.log(window_height + " " + window_height2 + " " + window_height3 + " "  + height);
+    */
+    $('.scrollableAccordian').height($(window).height());
+}
 
 function foldersReload() {
-    $("#folders").empty();
+    $("#folderAccordion").empty();
 	$.post("/folder/read", {}, function (folders) {
         studScore = 0;
         totScore = 0;
@@ -154,10 +295,10 @@ function foldersReload() {
 		});
 	});
     if(curProblem) {
-        addProbInfo(problem);
+        addProbInfo(curProblem);
     }
 }
-
+var editor;
 window.onload = function () {
 	(function () {
 		var u = document.URL.split("/");
@@ -175,12 +316,13 @@ window.onload = function () {
         },
         120000 /* 120000ms = 2 min*/
     );
+    $("#folderAccordion").empty();
 	$.post("/folder/read", {}, function (folders) {
 		folders.forEach( function (folder) {
 			addFolder(folder);
 		});
 	});
-	var editor = CodeMirror.fromTextArea(codemirror, {
+	editor = CodeMirror.fromTextArea(codemirror, {
 		mode: "javascript",
 		styleActiveLine: true,
 		lineNumbers: true,
@@ -201,26 +343,28 @@ window.onload = function () {
 		}
 	});
 	var setErrorMsg = function (msg) {
-		$("#errors").removeClass("hidden");
-		$("#errMessage").empty();
-		$("#errMessage").append(msg);
+		//$("#errors").removeClass("hidden");
+		$("#console").empty();
+		$("#console").append(msg);
 	};
 	$("#test").click(function () {
 		var code = editor.getValue();
-		$("#errors").removeClass("hidden");
-		$("#errMessage").empty();
+		//$("#errors").removeClass("hidden");
+		$("#console").empty();
 		try {
 			eval(code);
-			$("#errMessage").append("No error reports");
+			$("#console").append("No error reports");
 		} catch (e) {
 			//alert(e);
-			$("#errMessage").append(e);
+			$("#console").append(e);
 		}
 	});
+	
 	$("#submit").click(function () {
 		if (curProblem == null) {
 			alert("You must select a problem before submitting");
 		} else {
+			$("#console").empty();
 			var problem = curProblem.id;
 			var code = editor.getValue();
 			var AST = acorn.parse(code);    // return an abstract syntax tree structure
@@ -234,4 +378,25 @@ window.onload = function () {
 			});
 		}
 	});
+
+	$('#accShow').on('click', function() {
+	    if($(this).text() == 'Hide All') {
+	        $(this).text('Expand Sections');
+	        $('.folderCollapse').collapse('hide');
+	    } else {
+	        $(this).text('Hide All');
+	        $('.folderCollapse').collapse('show');
+	    }
+	    return false;
+	});
+
+	resizeWindow();
+
+	$( window ).resize(function() {
+		resizeWindow();
+	});
+
 };
+
+
+
