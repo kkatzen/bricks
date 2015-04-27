@@ -52,7 +52,7 @@ function getStudentResults(problem) {
     numstyle = 0;
     numattempted = 0;
     numearned = 0;
-    var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Result</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
+    var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Functionality / Style Points</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
     $("#allStudents1ProblemTable").empty().append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
@@ -227,7 +227,7 @@ function getSubmission(submission,user,problem) {
     $("#submissionProblem").empty().append(b);
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
-    $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
+    $("#ISL" + folder.id).append("<li>" + '<div class="problem-name-first left">' + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
     console.log(submission.code);
 
     editor.setValue(submission.code);
@@ -371,12 +371,12 @@ function getIndividual(user, refresh) {
                             totalAttempted += parseInt(availableFuncPoints) - parseInt(earnedFuncPoints);
                         }
                         if(submissions.length >= 0){
-                            $("#ipCount" + problem.id).append("<br />" + submissions.length + "submissons");
+                            $("#ipCount" + problem.id).append("<div class='left'>" + submissions.length + " submissons</div>");
                         }
                         var percent = parseInt(totalAttempted) / parseInt(numpoints) * parseInt(100);
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
-                        $("#ipPoints" + problem.id).append("<br />Points:  " + earnedStylePoints  + "/" + availableStylePoints + " and " + earnedFuncPoints + "/" + availableFuncPoints)
+                        $("#ipPoints" + problem.id).append("<div class='left'>Functional points: " + earnedStylePoints  + "/" + availableStylePoints + "</div><div class='left'>Style points: " + earnedFuncPoints + "/" + availableFuncPoints + "</div>")
                     });
                 });
             });
