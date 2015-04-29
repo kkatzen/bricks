@@ -253,6 +253,8 @@ function addSubmission(submission) {
     var results = { correct: false, style: false };
     results.correct = results.correct || (submission.value.correct == curProblem.value.correct);
     results.style = results.style || (submission.value.style == curProblem.value.style);
+    // this gets you the pnut object that was created from the student's code - submission.style
+    //YO LOOK HERE
     //add checks and x's to the submission
     if (results.correct) {
         $(gradeF).append(correct("8px"));
@@ -275,6 +277,7 @@ function addSubmission(submission) {
     //attach the link to the submission
 	$("#subs").prepend(link);
 }
+
 function resizeWindow(){
 /*	var window_height = $("#consoleHeader").height();
     var window_height2 = $("#codemirror").height();
@@ -346,6 +349,7 @@ window.onload = function () {
 		//$("#errors").removeClass("hidden");
 		$("#console").empty();
 		$("#console").append(msg);
+		console.log(msg);
 	};
 	$("#test").click(function () {
 		var code = editor.getValue();
@@ -375,6 +379,7 @@ window.onload = function () {
 				addSubmission(submission);
 				foldersReload();
 				setErrorMsg(submission.message);
+				console.log(submission);
 			});
 		}
 	});

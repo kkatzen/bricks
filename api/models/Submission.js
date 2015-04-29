@@ -35,7 +35,7 @@ module.exports = {
 			type: 'string'
 		}
 	},
-
+// THIS LOOKS LIKE A THING
 	beforeCreate: function (values, cb) {
 		//values.message = false;
 		Problem.findOne(values.problem).exec(function (err, p) {
