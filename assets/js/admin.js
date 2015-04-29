@@ -776,6 +776,7 @@ window.onload = function () {
             //breaks here with "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
             $.post("/problem/update", opts, function (problem) {
                 console.log("heya");
+                fillProblemDisplay(problem);
                 var updateSuccessMessage = $("<div class='alert alert-success' role='alert'>Problem Updated</div>");
                 $("#editProblemError").append(updateSuccessMessage);
                 curProblem = problem;
