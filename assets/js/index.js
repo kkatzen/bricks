@@ -253,7 +253,6 @@ function addSubmission(submission) {
     var results = { correct: false, style: false };
     results.correct = results.correct || (submission.value.correct == curProblem.value.correct);
     results.style = results.style || (submission.value.style == curProblem.value.style);
-    // this gets you the tests that the professor wrote - curProblem.onSubmit
     // this gets you the pnut object that was created from the student's code - submission.style
     //YO LOOK HERE
     //add checks and x's to the submission
