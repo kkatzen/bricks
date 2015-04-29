@@ -761,7 +761,9 @@ window.onload = function () {
             $("#editProblemError").append(noPointsError);
         } else {
             console.dir(opts);
+            //breaks here with "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
             $.post("/problem/update", opts, function (problem) {
+                console.log("heya");
                 var updateSuccessMessage = $("<div class='alert alert-success' role='alert'>Problem Updated</div>");
                 $("#editProblemError").append(updateSuccessMessage);
                 curProblem = problem;
@@ -828,3 +830,23 @@ window.onload = function () {
     //enable tooltips
     $('[data-toggle="tooltip"]').tooltip()
 };
+
+
+function populateProgress () {
+    $.post("/user/read/", {}, function(users){
+        total = users.length;
+        users.forEach(function (user) {
+            $("#visualization").append('<div class="visualize-row" id="visualize-student-' + user.id + '"></div>')
+        })
+    });
+    $.post("/folder/read", null, function (folders) {
+        folders.forEach(function (folder) {
+            $.post("/problem/read", {folder: folder.id}, function (problems) {
+                problems.forEach( function (problem) {
+
+                })
+            });
+        })
+    });
+
+}
