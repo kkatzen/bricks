@@ -106,13 +106,13 @@ function addProblemToAccordian(problem,folderName){
 
 			var currentEarned = $(earnedPointsDiv).text();
 			var availablePoints = $(availPointsDiv).text();
-			console.log("currentEarnedPre" +currentEarned);
-			console.log("maxScore" +maxScore);
+//			console.log("currentEarnedPre" +currentEarned);
+//			console.log("maxScore" +maxScore);
 			currentEarned = Number(currentEarned);
 			currentEarned = currentEarned + maxScore;
-			console.log("currentEarnedPost" +currentEarned);
+//			console.log("currentEarnedPost" +currentEarned);
 			$(earnedPointsDiv).empty().append(currentEarned);
-			console.log("check a" + availablePoints + " e" + currentEarned);
+//			console.log("check a" + availablePoints + " e" + currentEarned);
 
 			if(availablePoints == currentEarned){
 				console.log("check is yes");
@@ -370,7 +370,7 @@ window.onload = function () {
 			var AST = acorn.parse(code);    // return an abstract syntax tree structure
 			// var types = pnut.listTopLevelTypes(AST);
 			var ssOb = pnut.collectStructureStyleFacts(AST);    // return a analysis of style grading by checking AST
-
+			console.log("ssOb" + ssOb.numDeclVar);
 			$.post("/submission/create", {problem: problem, code: code, style: JSON.stringify(ssOb)}, function (submission) {
 				addSubmission(submission);
 				foldersReload();

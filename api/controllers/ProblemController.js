@@ -143,6 +143,7 @@ module.exports = {
   },
 
   reorder: function (req, res) {
+    console.log("reorder" + req.param("folder"));
     Problem.find({folder: req.param("folder")})
     .sort({"num": 1})
     .exec(function(err, problems) {

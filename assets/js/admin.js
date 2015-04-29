@@ -7,14 +7,13 @@ function wrong(){
    return $("<span class='glyphicon glyphicon-remove'></span>").css("color", "red").css("margin-right", "5px");
 }
 
-
 function fillProblemEdit(problem) {
 	$("#edit").removeClass("hidden");
 	$("#editPlaceholder").addClass("hidden");
 	$("#editType").val(problem.type);
 	$("#editPhase").val(problem.phase);
 	$("#editProblemName").val(problem.name);
-    $("#editfolderDropdown").val(problem.folder);
+    $("#editFolderDropdown").val(problem.folder);
     $("#editLanguageDropdown").val(problem.language);
     $("#editDescription").val(problem.text);
     $("#editStylePoints").val(problem.value.style),
@@ -23,7 +22,9 @@ function fillProblemEdit(problem) {
     $( "#deleteProblem" ).click(function() {   
         if (confirm('Are you sure you wish to delete this problem ?')) {
             $.post("/problem/delete", {id: problem.id}, function () {
-                emptyProblem();
+                $.post("/problem/reorder", {folder: problem.folder}, function () {
+                    emptyProblem();
+                });
             });
         }
     });
@@ -227,16 +228,13 @@ function getSubmission(submission,user,problem) {
     $("#submissionProblem").empty().append(b);
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
-    $("#ISL" + folder.id).append("<li>" + '<div class="problem-name-first left">' + "<a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
-    console.log(submission.code);
-
+    $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
     editor.setValue(submission.code);
     console.log("refresh editor");
 
     $("#submissionMessage").empty().html(submission.message);
     $("#submissionTitle").html(problem.name);
 	$.post("/folder/read/", {id: problem.folder}, function(folder){
-		console.log(folder.name);
 		$("#submissionTitle").html(problem.name + "<i> in " + folder.name + "</i>");
 	});
 
@@ -267,7 +265,6 @@ function getSubmission(submission,user,problem) {
 }
 
 function getIndividual(user, refresh) {
-    console.log("getIndividual called");
     //Generate page for particular individual student    
     if(curStudent == user.id && refresh == false){
         return;
@@ -301,6 +298,7 @@ function getIndividual(user, refresh) {
                 if(!problem){
                     console.log("no problem");
                     $.post("/submission/delete", {id: submission.id}, function (submission) {
+                        ///OLD CODE: IF YOU WANT TO USE THIS, YOU MUST CALL REORDER WITHIN THIS DELETE
                         console.log("deleted submission" + submission.id);
                     });
                 }
@@ -308,6 +306,7 @@ function getIndividual(user, refresh) {
                     if(!folder){
                         console.log("no folder");
                         $.post("/problem/delete", {id: problem.id}, function (problem) {
+                            ///OLD CODE: IF YOU WANT TO USE THIS, YOU MUST CALL REORDER WITHIN THIS DELETE
                             console.log("deleted problem " + problem.id);
                         });
 
@@ -339,7 +338,6 @@ function getIndividual(user, refresh) {
                         $("#ISL" + folder.id).append("<li>" + "<div class='problem-name-first left'><a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
                         submissions.forEach( function (submission) {
                             submissionCount++;
-                            console.log(user.displayName + " " + submissionCount + "/" + totalSubmissionNumber);
                             if(totalSubmissionNumber == submissionCount){
                                 $("#studentRefresh").removeAttr('disabled');
                             }
@@ -420,9 +418,14 @@ function reloadFolders() {
 	$("#folderDropdown").empty();
     $("#editFolderDropdown").empty();
     numpoints = 0;
+    console.log("");
+    console.log("");
+    console.log("");
+    console.log("");
     $.post("/folder/read", null, function (folders) {
         folders.forEach(function (folder) {
-            addFolder(folder);
+            console.log(folder.name + " num:" + folder.num);
+            addFolder(folder)
         });
     });
 }
@@ -431,10 +434,10 @@ function addFolder(folder) {
 
 	$("#folderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
 	$("#problemsfolderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
-	$("#editfolderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
+    $("#editFolderDropdown").append($("<option></option>").attr("value",folder.id).html(folder.name));
 
     if(curProblem) {
-        $("#editfolderDropdown").val(curProblem.folder);
+        $("#editFolderDropdown").val(curProblem.folder);
     }
     if(curFolder) {
         $("#problemsfolderDropdown").val(curFolder);
@@ -448,6 +451,7 @@ function addFolder(folder) {
     $("#" + accordianFolderId).empty();
     $.post("/problem/read", {folder: folder.id}, function (problems) {
         problems.forEach( function (problem) {
+//            console.log(problem.name + " num:" + problem.num);
             numpoints += parseInt(problem.value.style) + parseInt(problem.value.correct);
             var link = addProblemToAccordian(problem, accordianFolderId);
             $("#" + accordianFolderId).append(link);
@@ -505,8 +509,6 @@ function reloadSortableFolders() {
     $("#leftSideFolders").append('<ul id="sortable" class="panel-default"></ul>');
     $.post("/folder/read", null, function (folders) {
         folders.forEach(function (folder) {
-
-
             var expandButton = $("<a href='#accoridanFolder" + folder.id + "'></a>")
             .attr("data-parent","#accordion")
             .attr("data-toggle","collapse")
@@ -558,7 +560,9 @@ function reloadSortableFolders() {
                     .click(function () {
                         if (confirm('Are you sure you wish to delete this problem ?')) {
                             $.post("/problem/delete", {id: problem.id}, function () {
-                                console.log('reloadSortableFolders();')
+                                $.post("/problem/reorder", {folder: problem.folder}, function () {
+                                    console.log('reloadSortableFolders();')
+                                });
                             });
                         }
                         reloadSortableFolders();
@@ -606,6 +610,9 @@ function reloadSortableFolders() {
                 var id = ui.item.attr('id');
                 var difference = oldIndex - newIndex;
                 $.post("/folder/update", {id: id, num: oldIndex, dir: difference}, function (folder) {
+                    $.post("/folder/reorder", {}, function () {
+                        alert("hi");
+                    });
                 });
             }
         });
@@ -731,7 +738,9 @@ window.onload = function () {
         } else {
             console.dir(opts);
             $.post("/problem/create", opts, function (problem) {
-                reloadFolders();
+                $.post("/problem/reorder", {folder: problem.folder}, function () {
+                    reloadFolders();
+                });
             });
         }
 	});
@@ -744,7 +753,7 @@ window.onload = function () {
 			type: $("#editType").val(),
 			phase: $("#editPhase").val(),
 			name: $("#editProblemName").val(),
-			folder: $("#editfolderDropdown").val(),
+			folder: $("#editFolderDropdown").val(),
             language: $("#editLanguageDropdown").val(),
 			text: $("#editDescription").val(),
             correct: $("#editCorrectPoints").val(),
