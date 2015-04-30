@@ -1,4 +1,5 @@
 
+
 //------------------------------------------------------------------------
 //
 //  This JavaScript code implements an API for AST analysis
@@ -17,97 +18,115 @@
 //  Yuxin Mo: myx@cs.unc.edu in 4/1/2015 
 //
 //------------------------------------------------------------------------
+
+
 // global "package" name is pnut
+
 var pnut = (function () {  
+
 //------------------------------------------------------------------------
 //   - traverse the AST and collect all the interesting facts
 //   - store facts in an object and return the object
 //   - data object will be sent to the server for analysis/grading
 //------------------------------------------------------------------------
-function collectStructureStyleFacts(ast) {
-var dObj  = {
-/******************************************************************/
-/* 1. Style Grading for Declaration and Use of Variable           */
-/*    a. numDecVars(ast)               ==> integer >= 0           */
-/*    b. numUndecVars(ast)             ==> integer >= 0           */
-/*    c. numVarsUsed(ast)              ==> integer >= 0           */
-/*    d. numVarsInFuncsUseGloVars(ast) ==> integer >= 0           */
-/*    e. isAnyFuncVar(ast)             ==> boolean ? true:false   */
-/******************************************************************/
-nDV      : numDecVars(ast),
-nUDV     : numUndecVars(ast),
-nVU      : numVarsUsed(ast),
-nVFUGV   : numVarsInFuncsUseGloVars(ast),
-isFV     : isAnyFuncVar(ast),
-/******************************************************************/
-/* 2. Style Grading for Declaration and Use of Array              */
-/*    a. numDecArrs(ast)      ==> integer >= 0                    */
-/*    b. numUndecArrs(ast)    ==> integer >= 0                    */
-/*    c. numArrsUsed(ast)     ==> integer >= 0                    */
-/******************************************************************/
-nDA      : numDecArrs(ast),
-nUDA     : numUndecArrs(ast),
-nAU      : numArrsUsed(ast),
-/******************************************************************/
-/* 3. Style Grading for Declaration and Use of Object             */
-/*    a. numDecObjs(ast)                 ==> integer >= 0         */
-/*    b. numUndecObjs(ast)               ==> integer >= 0         */
-/*    c. numObjsUsed(ast)                ==> integer >= 0         */
-/*    d. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
-/******************************************************************/    
-nDO      : numDecObjs(ast),
-nUDO     : numUndecObjs(ast),
-nOU      : numObjsUsed(ast),
-isFBAFRO : isAnyFuncBoundToAFuncRtnObj(ast),
-/******************************************************************/
-/* 4. Style Grading for Use of While Loop                         */
-/*    a. numWhileLoopsInGloLev(ast)       ==> integer >= 0        */
-/*    b. numNestedWhileLoopsInGloLev(ast) ==> integer >= 0        */
-/*    c. numWhileLoopsInFuncs(ast)        ==> integer >= 0        */
-/*    d. numNestedWhileLoopsInFuncs(ast)  ==> integer >= 0        */
-/*    e. numWhileLoopsInAProgram(ast)     ==> integer >= 0        */
-/******************************************************************/  
-nWLGL    : numWhileLoopsInGloLev(ast),
-nNWLGL   : numNestedWhileLoopsInGloLev(ast),
-nWLF     : numWhileLoopsInFuncs(ast),
-nNWLF    : numNestedWhileLoopsInFuncs(ast),
-nWLAP    : numWhileLoopsInAProgram(ast),
-/******************************************************************/
-/* 5. Style Grading for Use of For Loop                           */
-/*    a. numForLoopsInGloLev(ast)            ==> integer >= 0     */
-/*    b. numNestedForLoopsInGloLev(ast)      ==> integer >= 0     */
-/*    c. numForLoopsInFuncs(ast)             ==> integer >= 0     */
-/*    d. numNestedForLoopsInFuncs(ast)       ==> integer >= 0     */
-/*    e. numForLoopsInAProgram(ast)          ==> integer >= 0     */
-/******************************************************************/   
-nFLGL    : numForLoopsInGloLev(ast),
-nNFLGL   : numNestedForLoopsInGloLev(ast),
-nFLF     : numForLoopsInFuncs(ast),
-nNFLF    : numNestedForLoopsInFuncs(ast),
-nFLAP    : numForLoopsInAProgram(ast),
-/******************************************************************/
-/* 6. Style Grading for Declaration and Use of Function           */
-/*    a. numDecFuncs(ast)               ==> integer >= 0          */
-/*    b. areCallExpsAllValid(ast)       ==> integer >= 0          */
-/*    c. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
-/*    d. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
-/*    e. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
-/*    f. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
-/******************************************************************/
-nDF      : numDecFuncs(ast),
-areCEAV  : areCallExpsAllValid(ast),
-areDFC   : areDecFuncsCalled(ast),
-areDFCO  : areDecFuncsCalledOnce(ast),
-isADFPBR : isAnyDecFuncPassedByRef(ast),
-isAFRO   : isAnyFuncReturnObj(ast),
-/******************************************************************/
-/* 7. Style Grading for Recursive Function                        */
-/*    a. isRecursiveFunction(ast)  ==> boolean ? true:false        */
-/******************************************************************/   
-isRF     : isRecursiveFunction(ast)
+
+  function collectStructureStyleFacts(ast) {
+
+    var dObj  = {
+
+    /******************************************************************/
+    /* 1. Style Grading for Declaration and Use of Variable           */
+    /*    a. numDecVars(ast)               ==> integer >= 0           */
+    /*    b. numUndecVars(ast)             ==> integer >= 0           */
+    /*    c. numVarsUsed(ast)              ==> integer >= 0           */
+    /*    d. numVarsInFuncsUseGloVars(ast) ==> integer >= 0           */
+    /*    e. isAnyFuncVar(ast)             ==> boolean ? true:false   */
+    /******************************************************************/
+      nDV      : numDecVars(ast),
+      nUDV     : numUndecVars(ast),
+      nVU      : numVarsUsed(ast),
+      nVFUGV   : numVarsInFuncsUseGloVars(ast),
+      isFV     : isAnyFuncVar(ast),
+
+
+    /******************************************************************/
+    /* 2. Style Grading for Declaration and Use of Array              */
+    /*    a. numDecArrs(ast)      ==> integer >= 0                    */
+    /*    b. numUndecArrs(ast)    ==> integer >= 0                    */
+    /*    c. numArrsUsed(ast)     ==> integer >= 0                    */
+    /******************************************************************/
+      nDA      : numDecArrs(ast),
+      nUDA     : numUndecArrs(ast),
+      nAU      : numArrsUsed(ast),
+
+    /******************************************************************/
+    /* 3. Style Grading for Declaration and Use of Object             */
+    /*    a. numDecObjs(ast)                 ==> integer >= 0         */
+    /*    b. numUndecObjs(ast)               ==> integer >= 0         */
+    /*    c. numObjsUsed(ast)                ==> integer >= 0         */
+    /*    d. isAnyFuncBoundToAFuncRtnObj(ast)==> boolean ? true:false */
+    /******************************************************************/    
+      nDO      : numDecObjs(ast),
+      nUDO     : numUndecObjs(ast),
+      nOU      : numObjsUsed(ast),
+      isFBAFRO : isAnyFuncBoundToAFuncRtnObj(ast),
+
+    /******************************************************************/
+    /* 4. Style Grading for Use of While Loop                         */
+    /*    a. numWhileLoopsInGloLev(ast)       ==> integer >= 0        */
+    /*    b. numNestedWhileLoopsInGloLev(ast) ==> integer >= 0        */
+    /*    c. numWhileLoopsInFuncs(ast)        ==> integer >= 0        */
+    /*    d. numNestedWhileLoopsInFuncs(ast)  ==> integer >= 0        */
+    /*    e. numWhileLoopsInAProgram(ast)     ==> integer >= 0        */
+    /******************************************************************/  
+      nWLGL    : numWhileLoopsInGloLev(ast),
+      nNWLGL   : numNestedWhileLoopsInGloLev(ast),
+      nWLF     : numWhileLoopsInFuncs(ast),
+      nNWLF    : numNestedWhileLoopsInFuncs(ast),
+      nWLAP    : numWhileLoopsInAProgram(ast),
+
+    /******************************************************************/
+    /* 5. Style Grading for Use of For Loop                           */
+    /*    a. numForLoopsInGloLev(ast)            ==> integer >= 0     */
+    /*    b. numNestedForLoopsInGloLev(ast)      ==> integer >= 0     */
+    /*    c. numForLoopsInFuncs(ast)             ==> integer >= 0     */
+    /*    d. numNestedForLoopsInFuncs(ast)       ==> integer >= 0     */
+    /*    e. numForLoopsInAProgram(ast)          ==> integer >= 0     */
+    /******************************************************************/   
+      nFLGL    : numForLoopsInGloLev(ast),
+      nNFLGL   : numNestedForLoopsInGloLev(ast),
+      nFLF     : numForLoopsInFuncs(ast),
+      nNFLF    : numNestedForLoopsInFuncs(ast),
+      nFLAP    : numForLoopsInAProgram(ast),
+
+    /******************************************************************/
+    /* 6. Style Grading for Declaration and Use of Function           */
+    /*    a. numDecFuncs(ast)               ==> integer >= 0          */
+    /*    b. areCallExpsAllValid(ast)       ==> integer >= 0          */
+    /*    c. areDecFuncsCalled(ast)         ==> boolean ? true:false  */
+    /*    d. areDecFuncsCalledOnce(ast)     ==> boolean ? true:false  */
+    /*    e. isAnyDecFuncPassedByRef(ast)   ==> boolean ? true:false  */
+    /*    f. isAnyFuncReturnObj(ast)        ==> boolean ? true:false  */
+    /******************************************************************/
+      nDF      : numDecFuncs(ast),
+      areCEAV  : areCallExpsAllValid(ast),
+      areDFC   : areDecFuncsCalled(ast),
+      areDFCO  : areDecFuncsCalledOnce(ast),
+      isADFPBR : isAnyDecFuncPassedByRef(ast),
+      isAFRO   : isAnyFuncReturnObj(ast),
+
+    /******************************************************************/
+    /* 7. Style Grading for Recursive Function                        */
+    /*    a. isRecursiveFunction(ast)  ==> boolean ? true:false        */
+    /******************************************************************/   
+      isRF     : isRecursiveFunction(ast)
     };
-return dObj;
+
+    return dObj;
   }
+
+
+
 /******************************************************************/
 /* 1. Style Grading for Declaration and Use of Variable           */
 /*    a. numDecVars(ast)            ==> integer >= 0              */
@@ -115,6 +134,7 @@ return dObj;
 /*    c. isAnyFuncVar(ast)          ==> boolean ? true:false      */
 /*    d. isAnyGloVarUsedInFuns(ast) ==> boolean ? true:false      */
 /******************************************************************/
+
 //------------------------------------------------------------------------
 // 1-a. calculate total number of declared variables in a program
 //      ex: function bar() {
@@ -127,18 +147,20 @@ return dObj;
 //            }
 //          }
 //------------------------------------------------------------------------  
-function numDecVars(ast) {
-console.log("numDecVars: "+listDecVars(ast).list.length);
-return listDecVars(ast).list.length;
+  function numDecVars(ast) {
+    console.log("numDecVars: "+listDecVars(ast).list.length);
+    return listDecVars(ast).list.length;
   }
+
 //------------------------------------------------------------------------
 // 1-b. calculate total number of undeclared variables 
 //      that get used in a program
 //------------------------------------------------------------------------  
-function numUndecVars(ast) {
-console.log("numUndecVars: " + listUndecVars(ast).length);
-return listUndecVars(ast).length;
+  function numUndecVars(ast) {
+    console.log("numUndecVars: " + listUndecVars(ast).length);
+    return listUndecVars(ast).length;
   } 
+
 //------------------------------------------------------------------------
 // 1-c. calculate total number of variables used in a program
 //      ex. (array) arr.push(val)
@@ -146,10 +168,12 @@ return listUndecVars(ast).length;
 //          var num = val + 1 (val gets used)
 //          num = val + 1 (num and val both get used)
 //------------------------------------------------------------------------
-function numVarsUsed(ast) {
-console.log("numVarsUsed: " + listVarsUsed(ast).list.length);
-return listVarsUsed(ast).list.length;
+  function numVarsUsed(ast) {
+    console.log("numVarsUsed: " + listVarsUsed(ast).list.length);
+    return listVarsUsed(ast).list.length;
   }
+
+
 //------------------------------------------------------------------------
 // 1-d. calculate the number of variables in functions that uses 
 //      global declared variables
@@ -160,217 +184,257 @@ return listVarsUsed(ast).list.length;
 //            alert(globj.name);
 //          }
 //------------------------------------------------------------------------
-function numVarsInFuncsUseGloVars(ast) {
-console.log("numVarsInFuncsUseGloVars: " + listVarsInFuncsUseGloVars(ast).length);
-return listVarsInFuncsUseGloVars(ast).length;
+  function numVarsInFuncsUseGloVars(ast) {
+    console.log("numVarsInFuncsUseGloVars: " + listVarsInFuncsUseGloVars(ast).length);
+    return listVarsInFuncsUseGloVars(ast).length;
   }
+
+
 //------------------------------------------------------------------------
 // 1-e. exam if any function gets assigned to a variable in global level
 //      ex: function bar() { }
 //          var f2 = bar;
 //------------------------------------------------------------------------
-function isAnyFuncVar(ast) {
-console.log("isAnyFuncVar: " + (dictFuncVars(ast).useds.keys().length>0));
-return (dictFuncVars(ast).useds.keys().length>0);
+  function isAnyFuncVar(ast) {
+    console.log("isAnyFuncVar: " + (dictFuncVars(ast).useds.keys().length>0));
+    return (dictFuncVars(ast).useds.keys().length>0);
   }
+
+
 //------------------------------------------------------------------------
 // private function:
 // list all declared variables in a program
 //------------------------------------------------------------------------ 
-function listDecVars(ast, decVars) {
-var map, nd, m, n, decs;
-var list    = [];
-var floop    = " <= for { }";
-var wloop    = " <= while { }";
-var ifblock  = " <= if { }";
-var funblock = " <= Function ";
-if(arguments.length==2) { 
+  function listDecVars(ast, decVars) {
+    var map, nd, m, n, decs;
+    var list    = [];
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
+
+    if(arguments.length==2) { 
       map = decVars; 
     } else {
       map = new HashMap(); 
     }
-for(m in ast.body) {
+
+    for(m in ast.body) {
       nd = ast.body[m];
-switch(nd.type) {
-case "VariableDeclaration":  // base case for a variable declaration
+
+      switch(nd.type) {
+        case "VariableDeclaration":  // base case for a variable declaration
           decs = nd.declarations;
-for(n in decs) {
-var add = 0;
-if(decs[n].init!=null) { // make sure a declaration trys to bind a var with a value;
-if(decs[n].init.type=="Identifier") {  // check for variable pointer 
-var pos = map.getItem(decs[n].init.name);
-if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+
+          for(n in decs) {
+            var add = 0;
+            if(decs[n].init!=null) { // make sure a declaration trys to bind a var with a value;
+
+              if(decs[n].init.type=="Identifier") {  // check for variable pointer 
+                var pos = map.getItem(decs[n].init.name);
+
+                if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
                   list.push("var " + decs[n].id.name); 
                   add = 1;
                 }
               } 
-else if(decs[n].init.type=="Literal") {// check for variable initialization    
+              else if(decs[n].init.type=="Literal") {// check for variable initialization    
                 list.push("var " + decs[n].id.name);
                 add = 1;
               }
             }
-else if(decs[n].id.type=="Identifier"){
+            else if(decs[n].id.type=="Identifier"){
               list.push("var " + decs[n].id.name); 
               add = 1;
             }
-if(add==1 && map.getItem(decs[n].id.name)==undefined) {
+
+            if(add==1 && map.getItem(decs[n].id.name)==undefined) {
               map.setItem(decs[n].id.name, [ast.start, ast.end]);
             }
           }
-break;
-case "ForStatement":
-// check vars in loop initilization
-if(nd.init!=null                      && 
+          break;
+        case "ForStatement":
+
+          // check vars in loop initilization
+          if(nd.init!=null                      && 
             nd.init.type=="VariableDeclaration" &&
             nd.init.declarations[0].init!= null) {
-var dec = nd.init.declarations[0];
-var add = 0;
-if(dec.init.type=="Literal") {
+            var dec = nd.init.declarations[0];
+            var add = 0;
+
+            if(dec.init.type=="Literal") {
               list.push(dec.id.name + " <= " + floop);
               add = 1;
             }
-else if(dec.init.type=="Identifier") {
-var pos = map.getItem(dec.init.name);
-// exam if a declared var is in a calling scope or not
-if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
+            else if(dec.init.type=="Identifier") {
+              var pos = map.getItem(dec.init.name);
+
+              // exam if a declared var is in a calling scope or not
+              if(pos!=undefined && pos[0]<nd.start && pos[1]>nd.end) {
                 list.push(dec.id.name + floop);
                 add = 1;
               }
             }
-if(add==1 && map.getItem(dec.id.name)==undefined) { 
-// a var declaration has a wider scoping range than a var usage
+
+            if(add==1 && map.getItem(dec.id.name)==undefined) { 
+              // a var declaration has a wider scoping range than a var usage
               map.setItem(dec.id.name, [ast.start, ast.end]); 
             }
           }
-// check vars in loop body
-if(nd.body.body.length > 0) { 
-var obj    = listDecVars(nd.body, map);
-var lpVars = obj.list;
+
+          // check vars in loop body
+          if(nd.body.body.length > 0) { 
+            var obj    = listDecVars(nd.body, map);
+            var lpVars = obj.list;
             map        = obj.map;
-for(n in lpVars) { list.push(lpVars[n] + floop); }
+
+            for(n in lpVars) { list.push(lpVars[n] + floop); }
           }
-break;
-case "WhileStatement":
-if(nd.body.body.length > 0) { 
-var obj    = listDecVars(nd.body, map);
-var wpVars = obj.list;
+          break;
+        case "WhileStatement":
+          if(nd.body.body.length > 0) { 
+            var obj    = listDecVars(nd.body, map);
+            var wpVars = obj.list;
             map        = obj.map;
-for(n in wpVars) { list.push(wpVars[n] + wloop); }
+
+            for(n in wpVars) { list.push(wpVars[n] + wloop); }
           }
-break;
-case "IfStatement":
-if(nd.consequent.body.length > 0) {
-var obj    = listDecVars(nd.consequent, map);
-var ifVars = obj.list;
+          break;
+        case "IfStatement":
+          if(nd.consequent.body.length > 0) {
+            var obj    = listDecVars(nd.consequent, map);
+            var ifVars = obj.list;
             map        = obj.map;
-for(n in ifVars) { list.push(ifVars[n] + ifblock); }
+
+            for(n in ifVars) { list.push(ifVars[n] + ifblock); }
           }
-break;
-case "FunctionDeclaration":
-if(nd.body.body.length > 0) {
-var ndName = nd.id.name;
-var obj    = listDecVars(nd.body, map);
-var ndVars = obj.list;
+          break;
+        case "FunctionDeclaration":
+          if(nd.body.body.length > 0) {
+            var ndName = nd.id.name;
+            var obj    = listDecVars(nd.body, map);
+            var ndVars = obj.list;
             map        = obj.map;
-for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
+
+            for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
           }
-break;
+          break;
       }
     }
-return {list: list, map: map};
+
+    return {list: list, map: map};
   }
+
+
 //------------------------------------------------------------------------
 // private function:
 // list all operator variables (right-hand side variables)
 //------------------------------------------------------------------------ 
-function listOperatorVars(nd, map) {
-var list = [];
-switch(nd.type) {
-case "Identifier":
+  function listOperatorVars(nd, map) {
+    var list = [];
+
+    switch(nd.type) {
+      case "Identifier":
         list.push(nd.name);
-if(map.getItem(nd.name)==undefined) {
+
+        if(map.getItem(nd.name)==undefined) {
           map.setItem(nd.name, [nd.start, nd.end]);
         }
-break;
-case "BinaryExpression":
-var left      = listOperatorVars(nd.left, map);
-var right     = listOperatorVars(nd.right, map);
-var lMap      = left.map;
-var rMap      = right.map;
-var lMapKeys  = lMap.keys();
-var rMapKeys  = rMap.keys();
+        break;
+      case "BinaryExpression":
+        var left      = listOperatorVars(nd.left, map);
+        var right     = listOperatorVars(nd.right, map);
+        var lMap      = left.map;
+        var rMap      = right.map;
+        var lMapKeys  = lMap.keys();
+        var rMapKeys  = rMap.keys();
+
         list = list.concat(left.list);
         list = list.concat(right.list);
-for(m in lMapKeys) {
-if(map.getItem(lMapKeys[m])==undefined) {
+
+        for(m in lMapKeys) {
+          if(map.getItem(lMapKeys[m])==undefined) {
             map.setItem(lMapKeys[m], lMap.getItem(lMapKeys[m]));
           }
         }
-for(m in rMapKeys) {
-if(map.getItem(rMapKeys[m])==undefined) {
+
+        for(m in rMapKeys) {
+          if(map.getItem(rMapKeys[m])==undefined) {
             map.setItem(rMapKeys[m], rMap.getItem(rMapKeys[m]));
           }
         }
-break;
-case "Literal":
-break;
-case "CallExpression":
-break;
+        break;
+      case "Literal":
+        break;
+      case "CallExpression":
+        break;
     }
-return {list:list, map:map};
+    return {list:list, map:map};
   }
+
+
 //------------------------------------------------------------------------
 // private function:
 // list all undeclacred variables that get used in a program
 //------------------------------------------------------------------------ 
-function listUndecVars(ast) {
-var decVars  = listDecVars(ast).map;
-var usedVars = listVarsUsed(ast).map;
-var keys     = usedVars.keys();
-var list     = [];
-// check for the use of undelcared vars
-for(m in keys) { 
-var scopeDecVar  = decVars.getItem(keys[m]);
-var scopeUsedVar = usedVars.getItem(keys[m]);
-if(scopeDecVar == undefined) {
+  function listUndecVars(ast) {
+    var decVars  = listDecVars(ast).map;
+    var usedVars = listVarsUsed(ast).map;
+    var keys     = usedVars.keys();
+    var list     = [];
+
+    // check for the use of undelcared vars
+    for(m in keys) { 
+      var scopeDecVar  = decVars.getItem(keys[m]);
+      var scopeUsedVar = usedVars.getItem(keys[m]);
+
+      if(scopeDecVar == undefined) {
         list.push(keys[m]);
       } 
-else if(scopeUsedVar[0]<scopeDecVar[0] || scopeUsedVar[0]>scopeDecVar[1] ||
+      else if(scopeUsedVar[0]<scopeDecVar[0] || scopeUsedVar[0]>scopeDecVar[1] ||
         scopeUsedVar[1]<scopeDecVar[0] || scopeUsedVar[1]>scopeDecVar[1]) {
         list.push(keys[m]);
       }
     }
-return list;
+    return list;
   } 
+
+
 //------------------------------------------------------------------------
 // private function:
 // list all variables that are used in a program
 //------------------------------------------------------------------------ 
-function listVarsUsed(ast, varUsed) {
-var list    = [];
-var nd, args, cal, add, left, right, lList, rList, map;
-var floop    = " <= for { }";
-var wloop    = " <= while { }";
-var ifblock  = " <= if { }";
-var funblock = " <= Function ";
-if(arguments.length==2) { 
+  function listVarsUsed(ast, varUsed) {
+    var list    = [];
+    var nd, args, cal, add, left, right, lList, rList, map;
+    var floop    = " <= for { }";
+    var wloop    = " <= while { }";
+    var ifblock  = " <= if { }";
+    var funblock = " <= Function ";
+
+    if(arguments.length==2) { 
       map = varUsed; 
     } else {
       map = new HashMap(); 
     }
-for(m in ast.body) {
+
+    for(m in ast.body) {
       nd = ast.body[m];
-switch(nd.type) { // base case
-case "VariableDeclaration":
+
+      switch(nd.type) { // base case
+        case "VariableDeclaration":
           decs = nd.declarations;
-for(d in decs) {
-if(decs[d].init!=null && decs[d].init.type=="Identifier") {
+
+          for(d in decs) {
+
+            if(decs[d].init!=null && decs[d].init.type=="Identifier") {
               list.push(decs[d].init.name);
-if(map.getItem(decs[d].id.name)==undefined) {
+
+              if(map.getItem(decs[d].id.name)==undefined) {
                 map.setItem(decs[d].id.name, [nd.start, nd.end]);
               }
             }
-else if(decs[d].init!=null && decs[d].init.type=="BinaryExpression") {
+            else if(decs[d].init!=null && decs[d].init.type=="BinaryExpression") {
               left   = listOperatorVars(decs[d].init.left, map);
               map    = left.map;
               right  = listOperatorVars(decs[d].init.right, map);
@@ -379,199 +443,232 @@ else if(decs[d].init!=null && decs[d].init.type=="BinaryExpression") {
               list   = list.concat(right.list);
             }
           }
-break;
-case "ExpressionStatement":
+          break;
+        case "ExpressionStatement":
           exp = nd.expression;
-switch(exp.type) {
-case "UpdateExpression":
+
+          switch(exp.type) {
+            case "UpdateExpression":
               list.push(exp.argument.name);
-if(map.getItem(exp.argument.name)==undefined) {
+
+              if(map.getItem(exp.argument.name)==undefined) {
                 map.setItem(exp.argument.name, [nd.start, nd.end]);
               }
-break;
-case "AssignmentExpression":
+              break;
+            case "AssignmentExpression":
               left   = listOperatorVars(exp.left, map);
               map    = left.map;
               right  = listOperatorVars(exp.right, map);
               map    = right.map;
               list   = list.concat(left.list);
               list   = list.concat(right.list);
-break;
-case "CallExpression":
+              break;
+            case "CallExpression":
               cal = exp.callee;
-// check for passing arguments in call functions
-if(cal.type=="Identifier") {
+
+              // check for passing arguments in call functions
+              if(cal.type=="Identifier") {
                 args = exp.arguments;
-if(args.length>0) {
-for(n in args) {
-if(args[n].type=="Identifier") {
+
+                if(args.length>0) {
+                  for(n in args) {
+                    if(args[n].type=="Identifier") {
                       list.push(args[n].name);
-if(map.getItem(args[n].name)==undefined) {
+
+                      if(map.getItem(args[n].name)==undefined) {
                         map.setItem(args[n].name, [nd.start, nd.end]);
                       }
                     }
                   }
                 }
               }
-else if(cal.type=="MemberExpression") {
+              else if(cal.type=="MemberExpression") {
                 args = exp.arguments;
-// check for objects that calls their property functions
-if(cal.object=="Identifier") {
+
+                // check for objects that calls their property functions
+                if(cal.object=="Identifier") {
                   list.push(cal.object.name);
-if(map.getItem(cal.object.name)==undefined) {
+
+                  if(map.getItem(cal.object.name)==undefined) {
                     map.setItem(cal.object.name, [nd.start, nd.end]);
                   }
                 }
-// check for passing arguments in call functions
-if(args.length>0) {
-for(n in args) {
-if(args[n].type=="Identifier") {
+
+                // check for passing arguments in call functions
+                if(args.length>0) {
+                  for(n in args) {
+                    if(args[n].type=="Identifier") {
                       list.push(args[n].name);
-if(map.getItem(args[n].name)==undefined) {
+
+                      if(map.getItem(args[n].name)==undefined) {
                         map.setItem(args[n].name, [nd.start, nd.end]);
                       }
                     }
                   }
                 }
               }
-break;
+              break;
           }
-break;
-case "ForStatement":
-/* check vars in loop initilization */
-if(nd.init != null && nd.init.type=="AssignmentExpression") { 
+          break;
+        case "ForStatement":
+
+          /* check vars in loop initilization */
+
+          if(nd.init != null && nd.init.type=="AssignmentExpression") { 
             left   = listOperatorVars(nd.init.left, map);
             map    = left.map;
             right  = listOperatorVars(nd.init.right, map);
             map    = right.map;
             lList  = left.list;
             rList  = rMap.list;
-for(n in lList) { list.push(lList[n] + floop); }
-for(n in rList) { list.push(rList[n] + floop); }
+
+            for(n in lList) { list.push(lList[n] + floop); }
+            for(n in rList) { list.push(rList[n] + floop); }
           }
-else if(nd.init != null && nd.init.type=="VariableDeclaration") { 
-// left-hand side var declaration
-var varName  = nd.init.declarations[0].id.name;
+          else if(nd.init != null && nd.init.type=="VariableDeclaration") { 
+
+            // left-hand side var declaration
+            var varName  = nd.init.declarations[0].id.name;
             list.push(varName + floop);
-if(map.getItem(varName)==undefined) { map.setItem(varName, [nd.start, nd.end]); }
-// right-hand side possilble var assignment
-if(nd.init.declarations[0].init.type=="BinaryExpression") {
+            if(map.getItem(varName)==undefined) { map.setItem(varName, [nd.start, nd.end]); }
+
+            // right-hand side possilble var assignment
+            if(nd.init.declarations[0].init.type=="BinaryExpression") {
               left   = listOperatorVars(nd.init.declarations[0].init.left, map);
               map    = left.map;
               right  = listOperatorVars(nd.init.declarations[0].init.right, map);
               map    = right.map;
               lList  = left.list;
               rList  = rMap.list;
-for(n in lList) { list.push(lList[n] + floop); }
-for(n in rList) { list.push(rList[n] + floop); }
+
+              for(n in lList) { list.push(lList[n] + floop); }
+              for(n in rList) { list.push(rList[n] + floop); }
             }
           } 
-// check vars in loop body
-if(nd.body.body.length > 0) { 
-var obj     = listVarsUsed(nd.body, map);
-var lpVars  = obj.list;
+
+          // check vars in loop body
+          if(nd.body.body.length > 0) { 
+            var obj     = listVarsUsed(nd.body, map);
+            var lpVars  = obj.list;
             map         = obj.map;
-for(n in lpVars) { list.push(lpVars[n] + floop); }
+
+            for(n in lpVars) { list.push(lpVars[n] + floop); }
           }
-break;
-case "WhileStatement":
-/* skip conditional vars in while test bracket */
-// check vars in loop body
-if(nd.body.body.length > 0) { 
-var obj    = listVarsUsed(nd.body, map);
-var wpVars = obj.list;
+          break;
+        case "WhileStatement":
+          /* skip conditional vars in while test bracket */
+
+          // check vars in loop body
+          if(nd.body.body.length > 0) { 
+            var obj    = listVarsUsed(nd.body, map);
+            var wpVars = obj.list;
             map        = obj.map;
-for(n in wpVars) { list.push(wpVars[n] + wloop); }
+
+            for(n in wpVars) { list.push(wpVars[n] + wloop); }
           }
-break;
-case "IfStatement":
-if(nd.consequent.body.length > 0) {
-var obj    = listVarsUsed(nd.consequent, map);
-var ifVars = obj.list;
+
+          break;
+        case "IfStatement":
+          if(nd.consequent.body.length > 0) {
+            var obj    = listVarsUsed(nd.consequent, map);
+            var ifVars = obj.list;
             map        = obj.map;
-for(n in ifVars) { list.push(ifVars[n] + ifblock); }
+
+            for(n in ifVars) { list.push(ifVars[n] + ifblock); }
           }
-break;
-case "FunctionDeclaration":
-if(nd.body.body.length > 0) {
-var ndName  = nd.id.name;
-var obj     = listVarsUsed(nd.body, map);
-var ndVars  = obj.list;
+          break;
+        case "FunctionDeclaration":
+          if(nd.body.body.length > 0) {
+            var ndName  = nd.id.name;
+            var obj     = listVarsUsed(nd.body, map);
+            var ndVars  = obj.list;
             map         = obj.map;
-for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
+
+            for(n in ndVars) { list.push(ndVars[n] + funblock + ndName + "()"); }
           }
-break;
+          break;
       }
     }
-return {list:list, map:map};
+
+    return {list:list, map:map};
   } 
+
+
 //------------------------------------------------------------------------
 // private function:
 // list global variables in which directly points to a function
 //      ex: function bar() { }
 //          var f2 = bar;
 //------------------------------------------------------------------------ 
-function dictFuncVars(ast, funcNames, funcVars) {
-var nd, temp, obj, funcs, useds;
-var list = [];
-if(arguments.length==3) { 
+  function dictFuncVars(ast, funcNames, funcVars) {
+    var nd, temp, obj, funcs, useds;
+    var list = [];
+
+    if(arguments.length==3) { 
       funcs = funcNames; 
       useds = funcVars;
     } else {
       funcs = new HashMap(); 
       useds = new HashMap();
     }
-for(m in ast.body) {
+
+    for(m in ast.body) {
       nd = ast.body[m];
-switch(nd.type) {
-case "FunctionDeclaration":
+
+      switch(nd.type) {
+        case "FunctionDeclaration":
           funcs.setItem(nd.id.name, [nd.start, nd.end]); // collect declared functions into funcs
-case "VariableDeclaration":
-/* loop through the program to validate each var-to-func pair */
-var sbnd = nd.declarations;
-for(n in sbnd) {    
-if(sbnd[n].init!=null && sbnd[n].init.type=="Identifier") {
-if(funcs.hasItem(sbnd[n].init.name) && !useds.hasItem(sbnd[n].id.name)){
+        case "VariableDeclaration":
+
+          /* loop through the program to validate each var-to-func pair */
+          
+          var sbnd = nd.declarations;
+          for(n in sbnd) {    
+            if(sbnd[n].init!=null && sbnd[n].init.type=="Identifier") {
+              if(funcs.hasItem(sbnd[n].init.name) && !useds.hasItem(sbnd[n].id.name)){
                 useds.setItem(sbnd[n].id.name, [nd.start, nd.end]);
               }
             } 
           }
-break;
-case "ExpressionStatement":
-/* loop through the program to validate each var-to-func pair */
-var exp = nd.expression;
-if(exp.type=="AssignmentExpression" && 
+          break;
+        case "ExpressionStatement":
+
+          /* loop through the program to validate each var-to-func pair */
+
+          var exp = nd.expression;
+          if(exp.type=="AssignmentExpression" && 
             exp.left.type=="Identifier" && exp.right.type=="Identifier") {
-if(funcs.hasItem(exp.right.name) && !useds.hasItem(exp.left.name)) { 
+            if(funcs.hasItem(exp.right.name) && !useds.hasItem(exp.left.name)) { 
               useds.setItem(exp.left.name, [nd.start, nd.end]);
             }                    
           }
-break;
-case "WhileStatement":
-if(nd.body.body.length>0) {
+          break;
+        case "WhileStatement":
+          if(nd.body.body.length>0) {
             obj = dictFuncVars(nd.body, funcs, useds);
             useds = obj.useds;
             funcs = obj.funcs;
           }
-break;
-case "IfStatement":
-if(nd.consequent.body.length>0) {
+          break;
+        case "IfStatement":
+          if(nd.consequent.body.length>0) {
             obj = dictFuncVars(nd.consequent, funcs, useds);
             useds = obj.useds;
             funcs = obj.funcs;
           }
-break;
-case "ForStatement":
-if(nd.body.body.length>0) {
+          break;
+        case "ForStatement":
+          if(nd.body.body.length>0) {
             obj = dictFuncVars(nd.body, funcs, useds);
             useds = obj.useds;
             funcs = obj.funcs;
           }
-break;
+          break;
       }
     }
-// console.log("ListFuncVars: " +arr);
-return {useds: useds, funcs: funcs};
+
+    // console.log("ListFuncVars: " +arr);
+    return {useds: useds, funcs: funcs};
   }
 
 //------------------------------------------------------------------------
@@ -1832,22 +1929,7 @@ return {useds: useds, funcs: funcs};
           }
           break;
         case "IfStatement":
-          var csqt = nd.consequent;
-          dict = dictDecFuncs(csqt, dict);
-
-          if(csqt.type=="FunctionDeclaration") {
-            name = csqt.id.name + "("+ csqt.params.length+" params)";
-            
-            if(dict.getItem(name)==undefined) {
-              dict.setItem(name, [nd.start, nd.end]);
-            }          
-          }
-          break;
-        case "WhileStatement":
-          dict = dictDecFuncs(nd.body, dict);
-          break;
-        case "ForStatement":
-          dict = dictDecFuncs(nd.body, dict);
+          dict = dictDecFuncs(nd.consequent, dict);
           break;
       }
     }
@@ -1860,7 +1942,8 @@ return {useds: useds, funcs: funcs};
 // create a dictionary to map function calls with their occurrence order.
 //------------------------------------------------------------------------
   function dictFuncCalls(ast, fCalls) {
-    var calls, nd, dec, name, exp;
+    var calls = new HashMap();
+    var nd, dec, name, exp;
 
     if(arguments.length==2) { 
       calls = fCalls; 
