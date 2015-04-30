@@ -608,10 +608,8 @@ function reloadSortableFolders() {
                 var newIndex = ui.item.index();
                 var oldIndex = $(this).attr('data-previndex');
                 var id = ui.item.attr('id');
-                var difference = oldIndex - newIndex;
-                $.post("/folder/update", {id: id, num: oldIndex, dir: difference}, function (folder) {
+                $.post("/folder/update", {id: id, oldIndex: oldIndex, newIndex: newIndex}, function (folder) {
                     $.post("/folder/reorder", {}, function () {
-                        alert("hi");
                     });
                 });
             }
