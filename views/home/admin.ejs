@@ -125,6 +125,10 @@ ul {
 	height:10px;
 	float:left;
 }
+#refreshData {
+	float: right;
+	margin-top: -6px;
+}
 
 </style>
 <script src="lib/codemirror.js"></script>
@@ -301,8 +305,12 @@ ul {
 			<!-- STUDENT PROGRESS SECTION -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					Student Attempts  <!-- <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span> -->
-					<button class="btn btn-primary btn-sm pull-right" id="refreshData" data-toggle="tooltip" data-placement="top" title="Progress Bar updates in realtime. Use refresh to update table below.">Refresh</button>
+					<h4 class="panel-title">
+						Student Attempts
+						<span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span>
+						<button class="btn btn-primary btn-sm" id="refreshData" data-toggle="tooltip" data-placement="top" title="Progress Bar updates in realtime. Use refresh to update table below.">Refresh</button>
+
+					</h4>
 				</div>
 				<div id="allStudents1ProblemTable">
 					<div class="panel-body">

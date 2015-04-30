@@ -385,11 +385,11 @@ window.onload = function () {
 	});
 
 	$('#accShow').on('click', function() {
-	    if($(this).text() == 'Hide All') {
-	        $(this).text('Expand Sections');
+	    if($(this).text() == 'Close Folders') {
+	        $(this).text('Expand Folders');
 	        $('.folderCollapse').collapse('hide');
 	    } else {
-	        $(this).text('Hide All');
+	        $(this).text('Close Folders');
 	        $('.folderCollapse').collapse('show');
 	    }
 	    return false;
