@@ -42,6 +42,9 @@ function emptyProblem(){
 function fillProblemDisplay(problem) {
     $("#pointbreakdown").removeClass("hidden");
     $("#problemDisplayName").empty().append(problem.name);
+    $.post("/folder/read/", {id: problem.folder}, function(folder){
+        $("#problemDisplayName").html(problem.name + "<i> in " + folder.name + "</i>");
+    });
     $("#problemDisplayBody").empty().append(problem.text);
     $("#availablePtStyle").empty().append(problem.value.style);
     $("#availablePtCorrect").empty().append(problem.value.correct);
@@ -589,8 +592,9 @@ function reloadSortableFolders() {
                     var newIndex = ui.item.index();
                     var oldIndex = $(this).attr('data-previndex');
                     var id = ui.item.attr('id');
-                    var difference = oldIndex - newIndex;
-                    $.post("/problem/update", {id: id, folder: folder, num: oldIndex, dir: difference}, function (problem) {
+                    $.post("/problem/update", {id: id, oldIndex: oldIndex, newIndex: newIndex}, function (problem) {
+                        $.post("/problem/reorder", {folder: folder.id}, function () {
+                        });
                     });
                 }
             });
