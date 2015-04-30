@@ -231,30 +231,33 @@ function getSubmission(submission,user,problem) {
     $("#submissionProblem").empty().append(b);
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
-    $("#submissionPoints").html("Style pts:" + submission.value.style +  "/" + problem.value.style + "<br/>Func Points: " + submission.value.correct + "/" + problem.value.correct);
+    $("#submissionPoints").html("Style Points: " + submission.value.style +  "/" + problem.value.style + "<br/>Functionality Points: " + submission.value.correct + "/" + problem.value.correct);
+    console.log(submission.code);
+
     editor.setValue(submission.code);
     console.log("refresh editor");
 
     $("#submissionMessage").empty().html(submission.message);
     $("#submissionTitle").html(problem.name);
-	$.post("/folder/read/", {id: problem.folder}, function(folder){
-		$("#submissionTitle").html(problem.name + "<i> in " + folder.name + "</i>");
-	});
+    $.post("/folder/read/", {id: problem.folder}, function(folder){
+        console.log(folder.name);
+        $("#submissionTitle").html(problem.name + "<i> in " + folder.name + "</i>");
+    });
 
     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
         submissions.forEach( function (submission) {
-        	var d = new Date(submission.createdAt);
+            var d = new Date(submission.createdAt);
 
             if(currentId == submission.id){
                 var a = $("<li></li>")
-                .html(d.toLocaleString() + "<br /> -c" + submission.value.correct + " -s " + submission.value.style)
+                .html('<div class="submission-timestamp">' + d.toLocaleString() + "</div><div class='submission-points'>Functionality: " + submission.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + '</div>')
                 .click(function (event) {
                     event.preventDefault();
                     getSubmission(submission,user,problem);
                 });
             }else {
                 var a = $("<li></li>")
-                .html("<a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a><br /> -c" + submission.value.correct + " -s " + submission.value.style)
+                .html("<a href='#submission' data-toggle='pill'><div class='submission-timestamp'>" + d.toLocaleString() + '</div></a><div class="submission-points">Functionality: ' + submission.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + '</div>')
                 .click(function (event) {
                     event.preventDefault();
                     getSubmission(submission,user,problem);
@@ -377,7 +380,7 @@ function getIndividual(user, refresh) {
                         var percent = parseInt(totalAttempted) / parseInt(numpoints) * parseInt(100);
                         percent = percent + "%";
                         $("#pbyellow").css("width",percent);
-                        $("#ipPoints" + problem.id).append("<div class='left'>Functional points: " + earnedStylePoints  + "/" + availableStylePoints + "</div><div class='left'>Style points: " + earnedFuncPoints + "/" + availableFuncPoints + "</div>")
+                        $("#ipPoints" + problem.id).append("<div class='left'>Functionality: " + earnedStylePoints  + "/" + availableStylePoints + "</div><div class='left'>Style: " + earnedFuncPoints + "/" + availableFuncPoints + "</div>")
                     });
                 });
             });
