@@ -43,24 +43,19 @@ module.exports = {
 				console.log("There was an error loading the associated problem");
 				return cb();
 			}
-			var onSubmit = new Function("batch", "code", "style", "solution", "fail", "pass", "status", p.onSubmit);
+			var onSubmit = new Function("batch", "code", "style", "solution", "fail", p.onSubmit);
 			try {
 				var updatePoints = function () {
 					values.value = {
-						correct: score.f ? p.value.correct : 0,
-						style:   score.s ? p.value.style : 0
+						correct: score.f,  
+						style:   score.s
 					};
 					cb(null, values);
-					done.updated = true;
-				};
-				var done = {
-					f: false,
-					s: false,
-					updated: false
+				//	done.updated = true;
 				};
 				var score = {
-					f: false,
-					s: false
+					f: p.value.correct,  //begin with full points which users can lose
+					s: p.value.style
 				};
 				onSubmit(
 					require("../../batch/batch"),	// "batch" - the batch module
@@ -68,60 +63,43 @@ module.exports = {
 					values.style,					// "style" - the style analysis of the student's code
 					p.solution,						// "solution" - the values stored in the solution in the problem
 					{ 								// "fail" - the code behind fail.f() and fail.s()
-						f: function (msg) {
-							if (!done.f) {
-								score.f = false;
+						f: function (msg,pts) {
+							//subtract function points
+							score.f = score.f - pts;
+							if(score.f < 0){
+								score.f = 0;
 							}
-							values.message = values.message || msg;
-							if (done.s && !done.updated) {
-								updatePoints();
-							}
-							done.f = true;
-						},
-						s: function (msg) {
-							if (!done.s) {
-								score.s = false;
-							}
-							values.message = values.message || msg;
-							if (done.f && !done.updated) {
-								updatePoints();
-							}
-							done.s = true;
-						}
-					},
-					{ 								// "pass" - the code behind pass.f() and pass.s()
-						f: function () {
-							if (!done.f) {
-								score.f = true;
-							}
-							if (done.s && !done.updated) {
-								updatePoints();
-							}
-							done.f = true;
-						},
-						s: function () {
-							if (!done.s) {
-								score.s = true;
-							}
-							if (done.f && !done.updated) {
-								updatePoints();
-							}
-							done.s = true;
-						}
-					},
-					{ 								// "status" - useful methods for knowing the status of grading
-						f: function() {
-							return {
-								called: done.f,
-								result: score.f
+							//append function message if given 
+							if(msg != ""){
+								if(!values.message){
+									values.message = "Functional Error: " + msg;
+								}else {
+									values.message = values.message + "\n" + "Functional Error: " + msg;
+								}
 							}
 						},
-						s: function() {
-							return {
-								called: done.s,
-								result: score.s
+						s: function (msg,pts) {
+							//subtract style points
+							score.s = score.s - pts;
+							if(score.s < 0){
+								score.s = 0;
 							}
-						}
+							//append style message if given
+							if(msg != ""){
+								if(!values.message){
+									values.message = "Style Error: " + msg;
+								}else {
+									values.message = values.message + "\n" + "Style Error: " + msg;
+								}
+							}
+						},
+						done: function (msg,pts) {
+							if(!values.message){
+								values.message = msg;
+								console.log(values.message);
+							}
+							updatePoints();
+						},
 					}
 				);
 			} catch (e) {

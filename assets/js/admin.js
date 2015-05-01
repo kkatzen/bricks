@@ -779,7 +779,10 @@ window.onload = function () {
             $.post("/problem/update", opts, function (problem) {
                 console.log("heya");
                 fillProblemDisplay(problem);
-                var updateSuccessMessage = $("<div class='alert alert-success' role='alert'>Problem Updated</div>");
+                var updateSuccessMessage = $("<div class='alert alert-success' role='alert' id='problemUpdatedMessage'>Problem Updated</div>");
+                setTimeout(function() {
+                    $("#problemUpdatedMessage").remove();
+                }, 2000);
                 $("#editProblemError").append(updateSuccessMessage);
                 curProblem = problem;
                 reloadFolders();
@@ -789,7 +792,10 @@ window.onload = function () {
     $("#newAdminBtn").click(function() {
         $.post("/user/setAdmin", {user: $("#newAdmin").val()}, function(admin) {
             if(admin) {
-                var updateSuccessMessage = $("<div class='alert alert-success' role='alert'>Update Succeeded</div>");
+                var updateSuccessMessage = $("<div class='alert alert-success' role='alert' id='adminUpdateMessage'>Update Succeeded</div>");
+                setTimeout(function() {
+                    $("#adminUpdateMessage").remove();
+                }, 2000);
                 $("#newAdmin").val("");
                 $("#newAdminError").empty().append(updateSuccessMessage);
                 loadUsers();

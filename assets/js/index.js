@@ -198,6 +198,10 @@ function addProbInfo (problem) {
 	$("#submissions").removeClass("hidden");
 	$("#pointbreakdown").removeClass("hidden");
 	$("#desc-title").empty().append(problem.name);
+	$.post("/folder/read/", {id: problem.folder}, function(folder){
+        $("#desc-title").html(problem.name + "<i> in " + folder.name + "</i>");
+    });
+
 	$("#desc-body").empty().append(problem.text);
 	curProblem = problem;
 	$("#availablePtStyle").empty().append(problem.value.style);
