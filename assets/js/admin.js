@@ -80,9 +80,54 @@ function getStudentResults(problem) {
     });
 }
 
-function updateProblemProgressBar(problem){
-    $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
-    $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+function updateProblemProgressBar(){
+    problem = curProblem;
+    numfunct = 0;
+    numstyle = 0;
+    numattempted = 0;
+    numearned = 0;
+
+    $.post("/user/read/", {}, function(users){
+        users.forEach(function (user) {
+            console.log(user.displayName);
+            var results = {tried: false, correct: false, style: false};
+            $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
+                console.log(submission.code);
+                if(submissions.length == 0){
+                } else {
+                    results.tried = true;
+                    submissions.forEach(function(submission) {
+                        if(submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
+                            results.correct = true;
+                            results.style = true;
+                            return true;
+                        }
+                        else if(submission.value.correct == problem.value.correct && submission.value.style != problem.value.style) {
+                            results.correct = true;
+                        }
+                    });
+                }
+
+                if(results.tried) {
+                    numattempted++;
+                    if(results.correct) {
+                        numfunct++;
+                    }
+                    if(results.style) {
+                        numstyle++;
+                    }
+                    if(results.correct && results.style){
+                        numearned++;
+                    }
+                }
+                //update progress labels
+                $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
+                $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
+                $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
+                $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+            });
+        });
+    });
 }
 
 function problemCorrect(user, problem, student, totalStudents){
@@ -155,8 +200,8 @@ function problemCorrect(user, problem, student, totalStudents){
         //update progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
         $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
-        updateProblemProgressBar(problem);
-
+        $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
+        $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
     });
 }
 
@@ -681,9 +726,12 @@ window.onload = function () {
     
     setInterval(
         function() {
-            updateProblemProgressBar(curProblem);
+            if($("#questions").hasClass("active")){
+                updateProblemProgressBar();
+                console.log('update progress bar');
+            }
         },
-        500 /* 30000 ms = 30 sec */
+        2000 /* 30000 ms = 30 sec */
     );
 
     editor = CodeMirror.fromTextArea(codemirror, {
