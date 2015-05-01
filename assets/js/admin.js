@@ -56,7 +56,7 @@ function getStudentResults(problem) {
     numstyle = 0;
     numattempted = 0;
     numearned = 0;
-    var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Functionality / Style Points</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
+    var tbl = $("<table class='table'><thead><tr><th>Name</th><th class='probStudentSubmissionTableTD'># Tries</th><th class='probStudentSubmissionTableTD'>Functionality</th><th class='probStudentSubmissionTableTD'>Style Points</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
     $("#allStudents1ProblemTable").empty().append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
@@ -81,6 +81,9 @@ function getStudentResults(problem) {
 }
 
 function updateProblemProgressBar(){
+    if(curProblem == null){
+        return;
+    }
     problem = curProblem;
     numfunct = 0;
     numstyle = 0;
@@ -132,13 +135,29 @@ function updateProblemProgressBar(){
 
 function problemCorrect(user, problem, student, totalStudents){
     //check score of a student for a problem
-    var rsection = $("<td>");
+    var rsectionF = $("<td>").attr("class","probStudentSubmissionTableTD");
+    var rsectionS = $("<td>").attr("class","probStudentSubmissionTableTD");
+
     var results = {tried: false, correct: false, style: false};
-    $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
+    $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username, reverse: true}, function(submissions){
         if(submissions.length == 0){
-            student.append("<td>" + submissions.length + "</td>");
+            student.append("<td class='probStudentSubmissionTableTD'>" + submissions.length + "</td>");
         } else {
-        	student.append("<td><a data-toggle='collapse' data-parent='#accordion' href='#submissionUser" + user.id + "' >" + submissions.length + "</a></td>");
+            var myVariable = $("<td>").attr("class","probStudentSubmissionTableTD");
+            var a = $("<a></a>")
+                .html(submissions.length)
+                .click(function (event) {
+                    console.log("angst");
+                    if($(".submissionUser"+user.id).hasClass("hidden")) {
+                        $(".submissionUser"+user.id).removeClass('hidden');
+                    } else {
+                        $(".submissionUser"+user.id).addClass('hidden');
+                    }
+            });
+
+            myVariable.append(a);
+        	student.append(myVariable);
+
             results.tried = true;
             submissions.forEach(function(submission) {
                 if(submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
@@ -155,26 +174,26 @@ function problemCorrect(user, problem, student, totalStudents){
             numattempted++;
             if(results.correct) {
                 numfunct++;
-                rsection.append(problem.value.correct + "f</td><td>");
-            } else {
-                rsection.append(problem.value.correct + "f</td><td>");
-            } if(results.style) {
+                rsectionF.append(correct("8px"));
+            }else {
+                rsectionF.append(wrong("8px"));
+            }
+            if(results.style) {
                 numstyle++;
-                rsection.append(problem.value.style + "s</td>");
-            } else {
-                rsection.append(problem.value.style + "s</td>");
+                rsectionS.append(correct("8px"));
+            }else {
+                rsectionS.append(wrong("8px"));
             }
             if(results.correct && results.style){
                 numearned++;
             }
         }
-        student.append(rsection);
-        $("#allStudents1ProblemResults").append(student);
 
-        var collapseBody = $("<tr class='collapse out' id='submissionUser" + user.id + "'></tr>");
-       	$("#allStudents1ProblemResults").append(collapseBody);
 
+        var myRows = [];
 		submissions.forEach( function (submission) {
+            var width = $( "#allStudents1ProblemTable" ).width();
+            var submissionRow = $("<tr class='hidden submissionUser" + user.id + "'>");
             var d = new Date(submission.createdAt);
 			var a = $("<a></a>")
 				.attr("href","#submission")
@@ -183,19 +202,24 @@ function problemCorrect(user, problem, student, totalStudents){
                 .click(function (event) {
                     event.preventDefault();
                         getSubmission(submission,user,problem);
-                });
-        	$("#submissionUser" + user.id)
-                .append($("<tr class='attemptProblem'></tr>")
-                    .append($("<td></td>")
-                        .append(a))
-                    .append($("<td></td>")
-                        .append(submission.value.correct + " /"))
-                    .append($("<td></td>")
-                        .append(" " + submission.value.style))
-
-                );
+            });
+        	submissionRow.append("<td>");
+            submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append(a));
+            var iconF = submission.value.correct ==  problem.value.correct ? correct("8px") : wrong("8px");
+            var iconS = submission.value.style ==  problem.value.style ? correct("8px") : wrong("8px");
+            submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append("<span class='badge'>" + submission.value.correct + "/" + problem.value.correct+ "</span>").append(iconF));
+            submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append("<span class='badge'>" + submission.value.style + "/" + problem.value.style+ "</span>").append(iconS));
+            myRows.push(submissionRow);
         });
+
 		console.log("collpasemf");
+
+        student.append(rsectionF);
+        student.append(rsectionS);
+        $("#allStudents1ProblemResults").append(student);
+        for (var index = 0; index < myRows.length; index++) {
+            $("#allStudents1ProblemResults").append(myRows[index]);
+        }
 
         //update progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
