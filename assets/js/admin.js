@@ -295,18 +295,28 @@ function getSubmission(submission,user,problem) {
 
             if(currentId == submission.id){
                 var a = $("<li></li>")
-                .html('<div class="submission-timestamp">' + d.toLocaleString() + "</div><div class='submission-points'>Functionality: " + submission.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + '</div>')
+                .html('<div class="submission-timestamp">' + d.toLocaleString() + "</div><div class='submission-points'>Functionality: " + submission.value.correct + "/" + problem.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + "/" + problem.value.style + '</div>')
                 .click(function (event) {
                     event.preventDefault();
                     getSubmission(submission,user,problem);
                 });
+                if ((submission.value.correct == problem.value.correct) && (submission.value.style == problem.value.style)) {
+                    a.append(correct("8px"));
+                } else {
+                    a.append(wrong("8px")); 
+                }
             }else {
                 var a = $("<li></li>")
-                .html("<a href='#submission' data-toggle='pill'><div class='submission-timestamp'>" + d.toLocaleString() + '</div></a><div class="submission-points">Functionality: ' + submission.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + '</div>')
+                .html("<a href='#submission' data-toggle='pill'><div class='submission-timestamp'>" + d.toLocaleString() + '</div></a><div class="submission-points">Functionality: ' + submission.value.correct + "/" + problem.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + "/" + problem.value.style + '</div>')
                 .click(function (event) {
                     event.preventDefault();
                     getSubmission(submission,user,problem);
                 });
+                if (submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
+                    a.append(correct("8px"));
+                } else {
+                    a.append(wrong("8px")); 
+                }
             }
             $("#relatedSubmissions").append(a);
         });
