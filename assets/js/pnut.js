@@ -1929,7 +1929,22 @@ var pnut = (function () {
           }
           break;
         case "IfStatement":
-          dict = dictDecFuncs(nd.consequent, dict);
+          var csqt = nd.consequent;
+          dict = dictDecFuncs(csqt, dict);
+
+          if(csqt.type=="FunctionDeclaration") {
+            name = csqt.id.name + "("+ csqt.params.length+" params)";
+            
+            if(dict.getItem(name)==undefined) {
+              dict.setItem(name, [nd.start, nd.end]);
+            }          
+          }
+          break;
+        case "WhileStatement":
+          dict = dictDecFuncs(nd.body, dict);
+          break;
+        case "ForStatement":
+          dict = dictDecFuncs(nd.body, dict);
           break;
       }
     }
@@ -1942,8 +1957,7 @@ var pnut = (function () {
 // create a dictionary to map function calls with their occurrence order.
 //------------------------------------------------------------------------
   function dictFuncCalls(ast, fCalls) {
-    var calls = new HashMap();
-    var nd, dec, name, exp;
+    var calls, nd, dec, name, exp;
 
     if(arguments.length==2) { 
       calls = fCalls; 
