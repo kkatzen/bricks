@@ -87,7 +87,7 @@ function updateProblemProgressBar(problem){
 
 function problemCorrect(user, problem, student, totalStudents){
     //check score of a student for a problem
-    var rsection = $("<td></td>");
+    var rsection = $("<td>");
     var results = {tried: false, correct: false, style: false};
     $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
         if(submissions.length == 0){
@@ -110,14 +110,14 @@ function problemCorrect(user, problem, student, totalStudents){
             numattempted++;
             if(results.correct) {
                 numfunct++;
-                rsection.append(problem.value.correct + " / ");
+                rsection.append(problem.value.correct + "f</td><td>");
             } else {
-                rsection.append(problem.value.correct + " / ");
+                rsection.append(problem.value.correct + "f</td><td>");
             } if(results.style) {
                 numstyle++;
-                rsection.append(problem.value.style);
+                rsection.append(problem.value.style + "s</td>");
             } else {
-                rsection.append(problem.value.style);
+                rsection.append(problem.value.style + "s</td>");
             }
             if(results.correct && results.style){
                 numearned++;
@@ -350,13 +350,13 @@ function getIndividual(user, refresh) {
 							var d = new Date(submission.createdAt);
 
                             var a = $("<li></li>")
-                            .html("<a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a>")
+                            .html("<div class='submission-name-first left'><a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a></div>")
                             .click(function (event) {
                                 event.preventDefault();
                                     getSubmission(submission,user,problem);
                             });
                             $("#ISL" + problem.id).append(a);
-                            $("#ISL" + problem.id).append("style: " + submission.value.style  + "correct: " + submission.value.correct + "</li>");
+                            $("#ISL" + problem.id).append("<div class='left-submission'>Functionality: " + submission.value.correct + "/" + problem.value.correct + "</div><div class='style-submission left-submission'>Style: " + submission.value.style + "/" + problem.value.style + "</div></li>");
                             if (parseInt(submission.value.style) > parseInt(earnedStylePoints)){
                                 earnedStylePoints = parseInt(submission.value.style);
                                 totalEarned += parseInt(earnedStylePoints);
