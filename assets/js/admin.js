@@ -517,7 +517,7 @@ function addProblemToAccordian(problem,folderName){
             .append(problem.name)
     );
     if(problem.phase == 0) {
-        link.css("background-color","lightgray");
+        link.css("text-decoration", "line-through");
     }
     link.click(function () { 
         curProblem = problem;
