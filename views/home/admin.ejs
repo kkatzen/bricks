@@ -105,11 +105,38 @@ form > button {
 	width: 21.5%;
 }
 .problem-name-first {
-	width:35%
+	width:35%;
 }
 
 ul {
 	list-style-type: none;
+}
+
+#visualization {
+	width:100%;
+}
+.visualize-row {
+	width:100%;
+	height:10px;
+	margin:2px 0;
+}
+.visualize-square {
+	width:10px;
+	height:10px;
+	float:left;
+}
+#refreshData {
+	float: right;
+	margin-top: -6px;
+}
+
+.submission-points {
+	float:left;
+	width:20%;
+}
+.submission-timestamp {
+	float:left;
+	width:60%
 }
 
 </style>
@@ -130,8 +157,7 @@ ul {
 			</button>
 			<a class="navbar-brand" href="../">Bricks</a>
 			<a class="navbar-brand" href="#students" data-toggle="pill">Students</a>
-			<a class="navbar-brand" href="#admin" data-toggle="pill">Manage</a>
-			<a class="navbar-brand" href="#progress" data-toggle="pill">Progress</a>
+			<a class="navbar-brand" href="#admin" data-toggle="pill">Admins</a>
 			<a class="navbar-brand" href="#help" data-toggle="pill">Help</a>
 		</div>
 		<div class="navbar-right">
@@ -150,7 +176,7 @@ ul {
 	<!-- SIDE BAR -->
 	<div id="navigationPanel" class="panel panel-default col-md-3  ">
 		<button id="sortFolders" type="button" class="btn btn-default">Edit Folders</button>
-		<button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add</button>
+		<button id="sortFolders" type="button" class="btn btn-default" href="#addquestion" data-toggle="pill">Add Problem</button>
 		<p>
 		<div class="panel-group" id="leftSideFolders"></div>
 	</div>
@@ -251,7 +277,7 @@ ul {
 									<div class="col-md-6">
 										<label name="editFolder" class="control-label" for="folder">Folder</label>
 										<select id="editFolderDropdown" class="form-control">  </select>
-									</div>
+									</div> 
 								</div>
 							</div>
 							<label class="control-label" for="editDescription">Description</label>
@@ -260,10 +286,11 @@ ul {
 							<textarea name="editOnSubmit" id="editOnSubmit" class="form-control" 
 									 style="font-family:Consolas, monospace">
 							</textarea>
+							<div id="editProblemError"></div>
+
 							<button class="btn btn-success form-control" id="editProblem">Update Problem</button>
 							<button class="btn btn-danger form-control" id="deleteProblem">Delete Problem</button>
 
-							<div id="editProblemError"></div>
 						</form>
 					</div>
 				</div>
@@ -287,8 +314,12 @@ ul {
 			<!-- STUDENT PROGRESS SECTION -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					Student Attempts  <!-- <span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span> -->
-					<button class="btn btn-primary btn-sm pull-right" id="refreshData" data-toggle="tooltip" data-placement="top" title="Progress Bar updates in realtime. Use refresh to update table below.">Refresh</button>
+					<h4 class="panel-title">
+						Student Attempts
+						<span id="function" class="label label-info" data-toggle="tooltip" data-placement="top" title="Students with full correct points">0%</span><span id="style" class="label label-success" data-toggle="tooltip" data-placement="top" title="Students with full style points">0%</span>
+						<button class="btn btn-primary btn-sm" id="refreshData" data-toggle="tooltip" data-placement="top" title="Progress Bar updates in realtime. Use refresh to update table below.">Refresh</button>
+
+					</h4>
 				</div>
 				<div id="allStudents1ProblemTable">
 					<div class="panel-body">
@@ -439,11 +470,12 @@ ul {
 		</div>
 		<!-- SUBMISSION SECTION ENDS -->
 
-		<!-- PROGRESS SECTION -->
+		<!-- PROGRESS SECTION 
 		<div class="tab-pane" id="progress">
 			<h1>Progress</h1>
+			<div id="visualization"></div>
 		</div>
-		<!-- PROGRESS SECTION ENDS -->
+		 PROGRESS SECTION ENDS -->
 
 		<!-- ADMIN SECTION -->
 		<div class="tab-pane" id="admin">

@@ -58,26 +58,28 @@ module.exports = {
    *    `/folder/update`
    */
    update: function (req, res) {
+        //need to call reorder after this function so it behaves well.
+
         var id = req.param("id");
         var name = req.param("name");
-        var num = req.param("num");
-        var dir = req.param("dir");
-        var clicked = Number(num)-Number(dir);
-        var other = clicked+Number(dir);
+        var newIndex = req.param("newIndex");
+        var oldIndex = req.param("oldIndex");
+
+        //necessary because of reordering afterwards
+        if(parseInt(newIndex) > parseInt(oldIndex)){
+          newIndex = parseInt(newIndex) +1; 
+        }
+
+        console.log("hi newIndex" + newIndex + "oldIndex" + oldIndex);
         //update num
-        if(dir){
-            Folder.update({num: parseInt(clicked)}, {num: other}).exec(function(err1, folder1) {
-                if(err1) {
-                    console.log(err1);
+        if(newIndex){
+          console.log("updating Num: new index..." + newIndex)
+            Folder.update({id:id}, {num: newIndex}).exec(function(err2, folder2) {
+                if(err2) {
+                    console.log(err2);
                 } else {
+                    res.send(folder2[0]);
                 }
-                Folder.update({id:id}, {num: clicked}).exec(function(err2, folder2) {
-                    if(err2) {
-                        console.log(err2);
-                    } else {
-                        res.send(folder2[0]);
-                    }
-                });
             });
         //update name
         } else {
@@ -132,11 +134,16 @@ module.exports = {
 
    reorder: function (req, res) {
       Folder.find()
-      .sort({"num": 1})
+      .sort({"num": 1, "updatedAt":-1})
       .exec(function(err, folders) {
         var num = 0;
         folders.forEach(function(folder) {
+            console.log("folder: " + folder.name);
+
+            console.log("old: " + folder.num);
             folder.num = Number(num);
+            console.log("new: " + folder.num);
+
             folder.save( function(err) {
                 if(err) {
                     console.log(err);

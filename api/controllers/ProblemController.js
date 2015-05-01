@@ -74,26 +74,27 @@ module.exports = {
    *    `/assignment/update`
    */
    update: function (req, res) {
-   var id = req.param("id");
-   if(req.param("dir")) {
-       var num = req.param("num");
-        var folder = req.param("folder"); 
-        var dir = req.param("dir");
-        var clicked = Number(num)-Number(dir);
-        var other = clicked + Number(dir);
-        Problem.update({num: clicked, folder: folder}, {num: other}).exec(function(err1, problem1) {
-            if(err1) {
-                console.log(err1);
-            } else {
-            }
-            Problem.update({id:id}, {num: clicked}).exec(function(err2, problem2) {
-                if(err2) {
-                    console.log(err2);
-                } else {
-                    res.send(problem2[0]);
-                }
-            });
-       });
+
+    var id = req.param("id");
+    var name = req.param("name");
+    var newIndex = req.param("newIndex");
+    var oldIndex = req.param("oldIndex");
+
+    //necessary because of reordering afterwards
+    if(parseInt(newIndex) > parseInt(oldIndex)){
+      newIndex = parseInt(newIndex) + 1; 
+    }
+
+   if(newIndex) {
+    console.log("updating Num: new index..." + newIndex +" from "+oldIndex);
+    Problem.update({id:id}, {num: newIndex}).exec(function(err2, problem2) {
+        if(err2) {
+            console.log(err2);
+        } else {
+            res.send(problem2[0]);
+        }
+    });
+
    } else {
        var opts = {
             type: req.param("type"),
@@ -143,8 +144,9 @@ module.exports = {
   },
 
   reorder: function (req, res) {
+    console.log("reorder" + req.param("folder"));
     Problem.find({folder: req.param("folder")})
-    .sort({"num": 1})
+    .sort({"num": 1, "updatedAt":-1})
     .exec(function(err, problems) {
         var num = 0;
         problems.forEach(function(problem) {
