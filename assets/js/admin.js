@@ -237,7 +237,7 @@ function getSubmission(submission,user,problem) {
     editor.setValue(submission.code);
     console.log("refresh editor");
 
-    $("#submissionMessage").empty().html(submission.message);
+    $("#submissionMessage").empty().html(submission.message.replace(/\n/g,"<br />"));
     $("#submissionTitle").html(problem.name);
     $.post("/folder/read/", {id: problem.folder}, function(folder){
         console.log(folder.name);

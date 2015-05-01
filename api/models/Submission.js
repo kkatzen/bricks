@@ -74,7 +74,7 @@ module.exports = {
 								if(!values.message){
 									values.message = "Functional Error: " + msg;
 								}else {
-									values.message = values.message + "\n" + "Functional Error: " + msg;
+									values.message = values.message + "\n " + "Functional Error: " + msg;
 								}
 							}
 						},
@@ -89,7 +89,7 @@ module.exports = {
 								if(!values.message){
 									values.message = "Style Error: " + msg;
 								}else {
-									values.message = values.message + "\n" + "Style Error: " + msg;
+									values.message = values.message + "\n " + "Style Error: " + msg;
 								}
 							}
 						},
