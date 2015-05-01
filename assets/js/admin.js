@@ -267,7 +267,6 @@ function getSubmission(submission,user,problem) {
         });
     });
     setTimeout( editor.refresh(), 0 );
-
 }
 
 function getIndividual(user, refresh) {
@@ -745,6 +744,12 @@ window.onload = function () {
             $.post("/problem/create", opts, function (problem) {
                 $.post("/problem/reorder", {folder: problem.folder}, function () {
                     reloadFolders();
+                    var problemCreated = $("<div class='alert alert-success' id='problemCreatedSuccess' role='alert'>Problem created!</div>");
+                    $("#newProblemError").append(problemCreated);
+                    setTimeout(function() {
+                        $("#problemCreatedSuccess").remove();
+                    }, 2000);
+
                 });
             });
         }
@@ -780,7 +785,6 @@ window.onload = function () {
             console.dir(opts);
             //breaks here with "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
             $.post("/problem/update", opts, function (problem) {
-                console.log("heya");
                 fillProblemDisplay(problem);
                 var updateSuccessMessage = $("<div class='alert alert-success' role='alert' id='problemUpdatedMessage'>Problem Updated</div>");
                 setTimeout(function() {
@@ -804,7 +808,6 @@ window.onload = function () {
                 loadUsers();
             } else {
                 var updateErrorMessage = $("<div class='alert alert-danger' role='alert'>That username is not in our database</div>");
-
                 $("#newAdminError").empty().append(updateErrorMessage);
             }
         });
