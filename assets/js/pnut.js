@@ -15,6 +15,7 @@
 //   -- rewrite the code bodies
 //   -- or write adapter functions
 //
+//  David Stotts, 5/16/2014
 //  Yuxin Mo: myx@cs.unc.edu in 4/1/2015 
 //
 //------------------------------------------------------------------------
@@ -119,7 +120,21 @@ var pnut = (function () {
     /* 7. Style Grading for Recursive Function                        */
     /*    a. isRecursiveFunction(ast)  ==> boolean ? true:false        */
     /******************************************************************/   
-      isRF     : isRecursiveFunction(ast)
+      isRF     : isRecursiveFunction(ast),
+
+    /******************************************************************/
+    /* Stotts' old pnut API                                           */
+    /******************************************************************/
+      nTFD     : numTopFuncDecls(ast),
+      nTFC     : numTopFuncCalls(ast),
+      nBGD     : numBadGlobalDecls(ast),
+      nBGU     : numBadGlobalUses(ast),
+      nTFL     : numForLoops(ast),
+      nTWL     : numWhileLoops(ast),
+      uBGV     : usesBadGlobalVars(ast),
+      nAFL     : numForLoopsInAllFuncDecls(ast),
+      nAWL     : numWhileLoopsInAllFuncDecls(ast),
+      isAFD1C  : isAllFuncDeclsPlusOneCall(ast),
     };
 
     return dObj;
@@ -1475,8 +1490,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numWhileLoopsInGloLev(ast) {
-    console.log("numWhileLoopsInGloLev: " +numWhileLoops(ast).wltl);
-    return numWhileLoops(ast).wltl;
+    console.log("numWhileLoopsInGloLev: " +countWhileLoops(ast).wltl);
+    return countWhileLoops(ast).wltl;
   }
 
 
@@ -1498,8 +1513,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedWhileLoopsInGloLev(ast) {
-    console.log("numNestedWhileLoopsInGloLev: " +numWhileLoops(ast).nwltl);
-    return numWhileLoops(ast).nwltl;
+    console.log("numNestedWhileLoopsInGloLev: " +countWhileLoops(ast).nwltl);
+    return countWhileLoops(ast).nwltl;
   }
 
 
@@ -1522,8 +1537,8 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numWhileLoopsInFuncs(ast) {
-    console.log("numWhileLoopsInFuncs: " +numWhileLoops(ast).wlf);
-    return numWhileLoops(ast).wlf;
+    console.log("numWhileLoopsInFuncs: " +countWhileLoops(ast).wlf);
+    return countWhileLoops(ast).wlf;
   }
 
 
@@ -1531,8 +1546,8 @@ var pnut = (function () {
 // 4-d. calculate total number of nested while loops in functions (local)
 //------------------------------------------------------------------------  
   function numNestedWhileLoopsInFuncs(ast) {
-    console.log("numNestedWhileLoopsInFuncs: " +numWhileLoops(ast).nwlf);
-    return numWhileLoops(ast).nwlf;
+    console.log("numNestedWhileLoopsInFuncs: " +countWhileLoops(ast).nwlf);
+    return countWhileLoops(ast).nwlf;
   }
 
 
@@ -1540,8 +1555,8 @@ var pnut = (function () {
 // 4-e. calculate total number of while loops in a program
 //------------------------------------------------------------------------  
   function numWhileLoopsInAProgram(ast) {
-    console.log("numWhileLoopsInAProgram: " +(numWhileLoops(ast).wltl+numWhileLoops(ast).wlf));
-    return (numWhileLoops(ast).wltl+numWhileLoops(ast).wlf);
+    console.log("numWhileLoopsInAProgram: " +(countWhileLoops(ast).wltl+countWhileLoops(ast).wlf));
+    return (countWhileLoops(ast).wltl+countWhileLoops(ast).wlf);
   }
 
 
@@ -1549,7 +1564,7 @@ var pnut = (function () {
 // private function:
 // calculate total number of while loops in a calling scope
 //------------------------------------------------------------------------  
-  function numWhileLoops(ast) {
+  function countWhileLoops(ast) {
     var counts = {wltl:0, nwltl:0, wlf:0, nwlf:0};
     var nd, snd, lowLevLoops;
 
@@ -1558,7 +1573,7 @@ var pnut = (function () {
 
       switch(nd.type) {
         case "WhileStatement":
-          lowLevLoops = numWhileLoops(nd.body);
+          lowLevLoops = countWhileLoops(nd.body);
 
           // number of while loop in top level of a calling scope
           counts.wltl = counts.wltl + lowLevLoops.wltl + 1;
@@ -1570,14 +1585,14 @@ var pnut = (function () {
           counts.nwltl = (lowLevLoops.nwltl>0) ? counts.nwltl+lowLevLoops.nwltl:counts.nwltl;
           break;
         case "ForStatement":
-            counts = (nd.body.body.length>0) ? numWhileLoops(nd.body):counts;
+            counts = (nd.body.body.length>0) ? countWhileLoops(nd.body):counts;
           break;
         case "IfStatement":
-          counts = (nd.consequent.body.length>0) ? numWhileLoops(nd.consequent):counts;
+          counts = (nd.consequent.body.length>0) ? countWhileLoops(nd.consequent):counts;
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length>0) {
-            lowLevLoops = numWhileLoops(nd.body);
+            lowLevLoops = countWhileLoops(nd.body);
 
             // numWhileLoopsInFuncs
             counts.wlf = counts.wlf + lowLevLoops.wltl;
@@ -1617,8 +1632,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numForLoopsInGloLev(ast) {
-    console.log("numForLoopsInGloLev: " +numForLoops(ast).fltl);
-    return numForLoops(ast).fltl;
+    console.log("numForLoopsInGloLev: " +countForLoops(ast).fltl);
+    return countForLoops(ast).fltl;
   }
 
 
@@ -1638,8 +1653,8 @@ var pnut = (function () {
 //        }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInGloLev(ast) {
-    console.log("numNestedForLoopsInGloLev: " +numForLoops(ast).nfltl);
-    return numForLoops(ast).nfltl;
+    console.log("numNestedForLoopsInGloLev: " +countForLoops(ast).nfltl);
+    return countForLoops(ast).nfltl;
   }
 
 
@@ -1660,8 +1675,8 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numForLoopsInFuncs(ast) {
-    console.log("numForLoopsInFuncs: " +numForLoops(ast).flf);
-    return numForLoops(ast).flf;
+    console.log("numForLoopsInFuncs: " +countForLoops(ast).flf);
+    return countForLoops(ast).flf;
   }
 
 //------------------------------------------------------------------------
@@ -1681,23 +1696,23 @@ var pnut = (function () {
 //          }
 //------------------------------------------------------------------------  
   function numNestedForLoopsInFuncs(ast) {
-    console.log("numNestedForLoopsInFuncs: " +numForLoops(ast).nflf);
-    return numForLoops(ast).nflf;
+    console.log("numNestedForLoopsInFuncs: " +countForLoops(ast).nflf);
+    return countForLoops(ast).nflf;
   }
 
 //------------------------------------------------------------------------
 // 5-e. calculate total number of for loops in a program
 //------------------------------------------------------------------------  
   function numForLoopsInAProgram(ast) {
-    console.log("numForLoopsInAProgram: " +(numForLoops(ast).fltl+numForLoops(ast).flf));
-    return (numForLoops(ast).fltl+numForLoops(ast).flf);
+    console.log("numForLoopsInAProgram: " +(countForLoops(ast).fltl+countForLoops(ast).flf));
+    return (countForLoops(ast).fltl+countForLoops(ast).flf);
   }
 
 //------------------------------------------------------------------------
 // private function:
 // calculate total number of for loops in a calling scope
 //------------------------------------------------------------------------  
-  function numForLoops(ast) {
+  function countForLoops(ast) {
     var counts = {fltl:0, nfltl:0, flf:0, nflf:0};
     var nd, snd;
 
@@ -1706,7 +1721,7 @@ var pnut = (function () {
 
       switch(nd.type) {
         case "ForStatement":
-          lowLevLoops = numForLoops(nd.body);
+          lowLevLoops = countForLoops(nd.body);
 
           // number of for loop in top level of a calling scope
           counts.fltl = counts.fltl + lowLevLoops.fltl + 1;
@@ -1718,14 +1733,14 @@ var pnut = (function () {
           counts.nfltl = (lowLevLoops.nfltl>0) ? counts.nfltl+lowLevLoops.nfltl:counts.nfltl;
           break;
         case "WhileStatement":
-            counts = (nd.body.body.length>0) ? numForLoops(nd.body):counts;
+            counts = (nd.body.body.length>0) ? countForLoops(nd.body):counts;
           break;
         case "IfStatement":
-          counts = (nd.consequent.body.length>0) ? numForLoops(nd.consequent):counts;
+          counts = (nd.consequent.body.length>0) ? countForLoops(nd.consequent):counts;
           break;
         case "FunctionDeclaration":
           if(nd.body.body.length>0) {
-            lowLevLoops = numForLoops(nd.body);
+            lowLevLoops = countForLoops(nd.body);
 
             // numForLoopsInFuncs
             counts.flf  = counts.flf + lowLevLoops.fltl;
@@ -2331,6 +2346,263 @@ var pnut = (function () {
   }
 
 
+/******************************************************************/ 
+/*
+/* Stotts' old API functions
+/*
+/*   numBadGlobalDecls (ast)          ==>  integer >= 0
+/*   numBadGlobalUses (ast)           ==>  integer >= 0
+/*   usesBadGlobalVars (ast)          ==>  boolean
+/*   numForLoops (ast)                ==>  integer >= 0
+/*   numWhileLoops (ast)              ==>  integer >= 0
+/*   numForLoopsInAllFuncDecls(ast)   ==>  integer >= 0
+/*   numWhileLoopsInAllFuncDecls(ast) ==>  integer >= 0
+/*   numForNestLevels (ast)           ==>  integer >= 0
+/*   numWhileNestLevels (ast)         ==>  integer >= 0
+/*   numTopFuncDecls (ast)            ==>  integer >= 0
+/*   numTopFuncCalls (ast)            ==>  integer >= 0
+/*   isFuncCall (obj)                 ==>  boolean
+/*   listTopLevelTypes (ast)          ==>  [ string ]
+/*   isAllFuncDeclsPlusOneCall (ast)  ==>  boolean
+/*
+/******************************************************************/ 
+
+
+//------------------------------------------------------------------------
+//   global variables, declaration and use
+//-----------------------------------------------------------------------
+
+  function numBadGlobalDecls (ast) {
+    // global var decl
+    // but we exclude function value assignments to global
+    var count = 0;
+    var nst = ast.body.length;
+    var st;
+    for (var i=0; i<nst; i++) {
+      st = ast.body[i]; 
+      if (st.type == "VariableDeclaration") {
+        var decs = st.declarations; // an array of obj
+        for (var d=0; d<decs.length; d++) {
+          if (decs[d].init.type != "FunctionExpression") { count++; }
+        }
+      }
+    }
+    return count;
+  }
+
+
+  function numBadGlobalUses(ast) {
+    // global var on left of assignment
+    // but we exclude function value assignments to global
+    var count = 0;
+    var nst = ast.body.length;
+    var st;
+    for (var i=0; i<nst; i++) {
+      st = ast.body[i]; 
+      if (st.type == "ExpressionStatement") {
+        if (st.expression.type != "CallExpression") { count++; }
+      }
+    }
+    return count;
+  }
+
+
+  function usesBadGlobalVars(ast) { 
+    return (numBadGlobalDecls(ast) > 0 || numBadGlobalUses(ast) > 0); 
+  }
+
+
+
+//------------------------------------------------------------------------
+//   loops (top level)
+//------------------------------------------------------------------------
+
+  function numForLoops (ast) {
+    // only counts for loops at the global level for now
+    var count = 0;
+    var nst = ast.body.length;
+    for (var i=0; i<nst; i++) {
+      if (ast.body[i].type == "ForStatement") { count++; }
+    }
+    return count;
+  }
+
+
+  function numWhileLoops (ast) {
+    // only counts while loops at the global level for now
+    var count = 0;
+    var nst = ast.body.length;
+    for (var i=0; i<nst; i++) {
+      if (ast.body[i].type == "WhileStatement") { count++; }
+    }
+    return count;
+  }
+
+
+  function numForNestLevels (ast) { 
+    // yet to be implemented
+    return 0; 
+  }
+
+
+  function numWhileNestLevels (ast) { 
+    // yet to be implemented
+    return 0; 
+  }
+
+
+//------------------------------------------------------------------------
+//   loops in functions
+//------------------------------------------------------------------------
+
+  function numForLoopsInAllFuncDecls(ast) {
+    // search tree and when find a func decl we do the loop count 
+    // skips global level
+    var count = 0;
+    var nst = ast.body.length;
+    for (var i=0; i<nst; i++) {
+      if (ast.body[i].type == "FunctionDeclaration") { 
+         count += numForLoops( ast.body[i].body);
+         //alert("in func for count: " +count);
+      }
+    }
+    return count;
+  }
+
+
+  function numWhileLoopsInAllFuncDecls(ast) {
+    // search tree and when find a func decl we do the loop count 
+    // skips global level
+    var count = 0;
+    var nst = ast.body.length;
+    for (var i=0; i<nst; i++) {
+      if (ast.body[i].type == "FunctionDeclaration") { 
+         count += numWhileLoops( ast.body[i].body);
+         //alert("in func for count: " +count);
+      }
+    }
+    return count;
+  }
+
+
+
+//------------------------------------------------------------------------
+//   function declarations (top level)
+//   function calls (top level)
+//------------------------------------------------------------------------
+
+  function numTopFuncDecls (ast) {
+    // counts top level function foo () { ... } syntax
+    // also counts top level var foo = function () { ... }
+    var count = 0;
+    var nst = ast.body.length;
+    var st;
+    for (var i=0; i<nst; i++) {
+      st = ast.body[i];
+      if (st.type == "FunctionDeclaration") {
+        // syntax: function foo(n) { ... }
+        count++; 
+      } 
+      else if (st.type == "VariableDeclaration") {
+        // syntax: var foo = function (n) { ... } 
+        var decs = st.declarations; // an array of obj
+        for (var d=0; d<decs.length; d++) {
+          if (decs[d].init.type == "FunctionExpression") { count++; }
+        }
+      } 
+      else { // move along to next statement, nothing to do for now
+      }
+    } // end for loop
+    return count;
+  }
+
+
+  function isFuncCall (ob) { 
+    switch (ob.type) {
+      case "ExpressionStatement":
+        if (ob.expression.type === "CallExpression") return true;
+        if (ob.expression.type === "AssignmentExpression") {
+    if (ob.expression.right.type === "CallExpression") return true;
+        }
+        break;
+      case "VariableDeclaration":
+        if (ob.declarations[0].init.type === "CallExpression") return true;
+        break;
+      default: return false;
+    }
+    return false; 
+  }
+
+
+  function numTopFuncCalls (ast) {
+    var count = 0;
+    var nst = ast.body.length;
+    var st;
+    for (var i=0; i<nst; i++) {
+      st = ast.body[i];
+      if (isFuncCall(st)) count += 1;
+    }
+    /*
+    for (var i=0; i<nst; i++) {
+      st = ast.body[i];
+      if (st.type == "ExpressionStatement") {
+        // syntax: myMain();
+        if (st.expression.type == "CallExpression") { count += 1; }
+        // syntax: z = myMain(); 
+        if (st.expression.type == "AssignmentStatement") { 
+    if (st.expression.right == "CallExpression") { count += 1; }
+        }
+      } 
+    } // end for loop
+    */
+    return count;
+  }
+
+
+//------------------------------------------------------------------------
+//   top level structure check
+//   is it nothing but func decls and one func call?
+//------------------------------------------------------------------------
+
+
+  function listTopLevelTypes (ast) {
+    // what are the main top level statements in the program
+    var nst = ast.body.length;
+    var list = [];
+    for (var i=0; i<nst; i++) { list[i] = ast.body[i].type ; }
+    return list; // array of strings
+  }
+
+
+  function isAllFuncDeclsPlusOneCall (ast) {
+    if (numTopFuncCalls(ast) != 1) return false;
+    
+    var numFuncDecls = 0;
+    var stList = listTopLevelTypes(ast); // array of strings
+
+    for (var s=0; s<stList.length; s++) {
+       switch (stList[s]) {
+          case "FunctionDeclaration":
+             // cool this is ok, so count and just keep going
+             numFuncDecls += 1;
+             break;
+          case "VariableDeclaration":
+             // is this var decl really a func decl?
+             if (ast.body[s].declarations[0].init.type == "FunctionExpression") { 
+               numFuncDecls += 1; 
+             } else { 
+               return false; 
+             }
+             break;
+          case "ExpressionStatement":
+             // is this expression a single func call?
+       if (!isFuncCall(ast.body[s])) return false;
+             break;
+          default: return false;
+       } // end switch
+    } // end for loop
+    return ( numFuncDecls > 0 ) ;
+  }
 
 
 // all functions have been declared local to this anonymous function
@@ -2380,8 +2652,22 @@ var pnut = (function () {
     isAnyFuncReturnObj         : isAnyFuncReturnObj,
 
     /* 7. Style Grading for Recursive Function                */
-    isRecursiveFunction         : isRecursiveFunction,
+    isRecursiveFunction        : isRecursiveFunction,
 
+    /* 8. Stotts' Old API Functions                           */
+    numBadGlobalDecls          : numBadGlobalDecls ,
+    numBadGlobalUses           : numBadGlobalUses,
+    usesBadGlobalVars          : usesBadGlobalVars,
+    numForLoops                : numForLoops, 
+    numWhileLoops              : numWhileLoops, 
+    numForNestLevels           : numForNestLevels, 
+    numWhileNestLevels         : numWhileNestLevels, 
+    numForLoopsInAllFuncDecls  : numForLoopsInAllFuncDecls,
+    numWhileLoopsInAllFuncDecls: numWhileLoopsInAllFuncDecls,
+    numTopFuncDecls            : numTopFuncDecls, 
+    numTopFuncCalls            : numTopFuncCalls, 
+    listTopLevelTypes          : listTopLevelTypes, 
+    isAllFuncDeclsPlusOneCall  : isAllFuncDeclsPlusOneCall, 
 
   }
 
