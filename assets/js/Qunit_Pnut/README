@@ -1,0 +1,30 @@
+Files:
+enviornment.html: This is what you open to see the tests that pass and fail in your browser.
+qunit-1.17.1.css:   Used by environment.html for display
+qunit-1.17.1.js:      Used to run Qunit tests.
+tests.js:                 Contains tests for the new pnut.js functions.
+
+Where this stuff comes from: environment, and the qunit files come from: https://qunitjs.com.  
+I specified the qunit-1.17.1.js, qunit-1.17.1.css, acorn and pnut as src in environment.html, 
+if you want to change the directory structure, you will need to update the relative paths to 
+these files to ensure the tests continue to work.
+
+
+tests.js: This is where you’ll add more test cases.
+Organization:
+	Each function is in its own QUnit.test function.
+	Each group of tests is specified by QUnit.module( "group number” );  (This is less import-
+	ant for making new tests).
+
+This is the format of the tests placed inside QUnit.test statement: 
+  	code  = “code to be tested”
+	  AST  = acorn.parse(code);
+  	assert.deepEqual( pnut.testFunction(AST), expectedVal,  “Function number case test number”);
+Or if you want something truthy:
+  	assert.ok( pnut.testFunction(AST),    “Function number case test number”);
+
+Running the tests: To run the unit tests, simply open environment.html in your browser.  The 
+tests should execute, and feedback should be provided on tests that passed and failed.
+
+If you’re getting started with qunit, this is a fantastic page to get you up to speed, and 
+deals with some interesting problems: http://qunitjs.com/cookbook/
