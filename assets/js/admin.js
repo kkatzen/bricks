@@ -56,7 +56,7 @@ function getStudentResults(problem) {
     numstyle = 0;
     numattempted = 0;
     numearned = 0;
-    var tbl = $("<table class='table'><thead><tr><th>Name</th><th># Tries</th><th>Functionality / Style Points</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
+    var tbl = $("<table class='table'><thead><tr><th>Name</th><th class='probStudentSubmissionTableTD'># Tries</th><th class='probStudentSubmissionTableTD'>Functionality</th><th class='probStudentSubmissionTableTD'>Style Points</th></tr></thead><tbody id='allStudents1ProblemResults'></tbody></table>");
     $("#allStudents1ProblemTable").empty().append(tbl);
     $.post("/user/read/", {}, function(users){
         total = users.length;
@@ -80,20 +80,84 @@ function getStudentResults(problem) {
     });
 }
 
-function updateProblemProgressBar(problem){
-    $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
-    $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+function updateProblemProgressBar(){
+    if(curProblem == null){
+        return;
+    }
+    problem = curProblem;
+    numfunct = 0;
+    numstyle = 0;
+    numattempted = 0;
+    numearned = 0;
+
+    $.post("/user/read/", {}, function(users){
+        users.forEach(function (user) {
+            console.log(user.displayName);
+            var results = {tried: false, correct: false, style: false};
+            $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
+                console.log(submission.code);
+                if(submissions.length == 0){
+                } else {
+                    results.tried = true;
+                    submissions.forEach(function(submission) {
+                        if(submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
+                            results.correct = true;
+                            results.style = true;
+                            return true;
+                        }
+                        else if(submission.value.correct == problem.value.correct && submission.value.style != problem.value.style) {
+                            results.correct = true;
+                        }
+                    });
+                }
+
+                if(results.tried) {
+                    numattempted++;
+                    if(results.correct) {
+                        numfunct++;
+                    }
+                    if(results.style) {
+                        numstyle++;
+                    }
+                    if(results.correct && results.style){
+                        numearned++;
+                    }
+                }
+                //update progress labels
+                $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
+                $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
+                $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
+                $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
+            });
+        });
+    });
 }
 
 function problemCorrect(user, problem, student, totalStudents){
     //check score of a student for a problem
-    var rsection = $("<td></td>");
+    var rsectionF = $("<td>").attr("class","probStudentSubmissionTableTD");
+    var rsectionS = $("<td>").attr("class","probStudentSubmissionTableTD");
+
     var results = {tried: false, correct: false, style: false};
-    $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
+    $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username, reverse: true}, function(submissions){
         if(submissions.length == 0){
-            student.append("<td>" + submissions.length + "</td>");
+            student.append("<td class='probStudentSubmissionTableTD'>" + submissions.length + "</td>");
         } else {
-        	student.append("<td><a data-toggle='collapse' data-parent='#accordion' href='#submissionUser" + user.id + "' >" + submissions.length + "</a></td>");
+            var myVariable = $("<td>").attr("class","probStudentSubmissionTableTD");
+            var a = $("<a></a>")
+                .html(submissions.length)
+                .click(function (event) {
+                    console.log("angst");
+                    if($(".submissionUser"+user.id).hasClass("hidden")) {
+                        $(".submissionUser"+user.id).removeClass('hidden');
+                    } else {
+                        $(".submissionUser"+user.id).addClass('hidden');
+                    }
+            });
+
+            myVariable.append(a);
+        	student.append(myVariable);
+
             results.tried = true;
             submissions.forEach(function(submission) {
                 if(submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
@@ -110,26 +174,26 @@ function problemCorrect(user, problem, student, totalStudents){
             numattempted++;
             if(results.correct) {
                 numfunct++;
-                rsection.append(problem.value.correct + " / ");
-            } else {
-                rsection.append(problem.value.correct + " / ");
-            } if(results.style) {
+                rsectionF.append(correct("8px"));
+            }else {
+                rsectionF.append(wrong("8px"));
+            }
+            if(results.style) {
                 numstyle++;
-                rsection.append(problem.value.style);
-            } else {
-                rsection.append(problem.value.style);
+                rsectionS.append(correct("8px"));
+            }else {
+                rsectionS.append(wrong("8px"));
             }
             if(results.correct && results.style){
                 numearned++;
             }
         }
-        student.append(rsection);
-        $("#allStudents1ProblemResults").append(student);
 
-        var collapseBody = $("<tr class='collapse out' id='submissionUser" + user.id + "'></tr>");
-       	$("#allStudents1ProblemResults").append(collapseBody);
 
+        var myRows = [];
 		submissions.forEach( function (submission) {
+            var width = $( "#allStudents1ProblemTable" ).width();
+            var submissionRow = $("<tr class='hidden submissionUser" + user.id + "'>");
             var d = new Date(submission.createdAt);
 			var a = $("<a></a>")
 				.attr("href","#submission")
@@ -138,25 +202,30 @@ function problemCorrect(user, problem, student, totalStudents){
                 .click(function (event) {
                     event.preventDefault();
                         getSubmission(submission,user,problem);
-                });
-        	$("#submissionUser" + user.id)
-                .append($("<tr class='attemptProblem'></tr>")
-                    .append($("<td></td>")
-                        .append(a))
-                    .append($("<td></td>")
-                        .append(submission.value.correct + " /"))
-                    .append($("<td></td>")
-                        .append(" " + submission.value.style))
-
-                );
+            });
+        	submissionRow.append("<td>");
+            submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append(a));
+            var iconF = submission.value.correct ==  problem.value.correct ? correct("8px") : wrong("8px");
+            var iconS = submission.value.style ==  problem.value.style ? correct("8px") : wrong("8px");
+            submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append("<span class='badge'>" + submission.value.correct + "/" + problem.value.correct+ "</span>").append(iconF));
+            submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append("<span class='badge'>" + submission.value.style + "/" + problem.value.style+ "</span>").append(iconS));
+            myRows.push(submissionRow);
         });
+
 		console.log("collpasemf");
+
+        student.append(rsectionF);
+        student.append(rsectionS);
+        $("#allStudents1ProblemResults").append(student);
+        for (var index = 0; index < myRows.length; index++) {
+            $("#allStudents1ProblemResults").append(myRows[index]);
+        }
 
         //update progress labels
         $("#function").empty().append(Math.floor((numfunct/total)*100)+"%");
         $("#style").empty().append(Math.floor((numstyle/total)*100)+"%");
-        updateProblemProgressBar(problem);
-
+        $("#pbp-yellow").css("width",Math.floor(((numattempted-numearned)/total)*100)+"%");
+        $("#pbp-green").css("width",Math.floor((numearned/total)*100)+"%");
     });
 }
 
@@ -237,7 +306,7 @@ function getSubmission(submission,user,problem) {
     editor.setValue(submission.code);
     console.log("refresh editor");
 
-    $("#submissionMessage").empty().html(submission.message);
+    $("#submissionMessage").empty().html(submission.message.replace(/\n/g,"<br />"));
     $("#submissionTitle").html(problem.name);
     $.post("/folder/read/", {id: problem.folder}, function(folder){
         console.log(folder.name);
@@ -250,24 +319,33 @@ function getSubmission(submission,user,problem) {
 
             if(currentId == submission.id){
                 var a = $("<li></li>")
-                .html('<div class="submission-timestamp">' + d.toLocaleString() + "</div><div class='submission-points'>Functionality: " + submission.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + '</div>')
+                .html('<div class="submission-timestamp">' + d.toLocaleString() + "</div><div class='submission-points'>Functionality: " + submission.value.correct + "/" + problem.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + "/" + problem.value.style + '</div>')
                 .click(function (event) {
                     event.preventDefault();
                     getSubmission(submission,user,problem);
                 });
+                if ((submission.value.correct == problem.value.correct) && (submission.value.style == problem.value.style)) {
+                    a.append(correct("8px"));
+                } else {
+                    a.append(wrong("8px")); 
+                }
             }else {
                 var a = $("<li></li>")
-                .html("<a href='#submission' data-toggle='pill'><div class='submission-timestamp'>" + d.toLocaleString() + '</div></a><div class="submission-points">Functionality: ' + submission.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + '</div>')
+                .html("<a href='#submission' data-toggle='pill'><div class='submission-timestamp'>" + d.toLocaleString() + '</div></a><div class="submission-points">Functionality: ' + submission.value.correct + "/" + problem.value.correct + "</div><div class='submission-points'>Style: " + submission.value.style + "/" + problem.value.style + '</div>')
                 .click(function (event) {
                     event.preventDefault();
                     getSubmission(submission,user,problem);
                 });
+                if (submission.value.correct == problem.value.correct && submission.value.style == problem.value.style) {
+                    a.append(correct("8px"));
+                } else {
+                    a.append(wrong("8px")); 
+                }
             }
             $("#relatedSubmissions").append(a);
         });
     });
     setTimeout( editor.refresh(), 0 );
-
 }
 
 function getIndividual(user, refresh) {
@@ -341,7 +419,11 @@ function getIndividual(user, refresh) {
                     var attemptedStylePoints = parseInt(0);
                     var attemptedFuncPoints = parseInt(0);
                     $.post("/submission/read/", {id: problem.id, student: user.username}, function(submissions){
-                        $("#ISL" + folder.id).append("<li>" + "<div class='problem-name-first left'><a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
+                        if(submissions.length > 0){
+                            $("#ISL" + folder.id).append("<li>" + "<div class='problem-name-first left'><a data-toggle='collapse' data-parent='#accordian' href='#ISL" + problem.id + "' >" + problem.name + "</a></div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='collapse'></ul></li>");
+                        }else{
+                            $("#ISL" + folder.id).append("<li>" + "<div class='problem-name-first left'>" + problem.name + "</div><span id='ipPoints" + problem.id + "'></span><span id='ipCount" + problem.id + "'></span><ul id='ISL" + problem.id + "' class='panel-collapse collapse'></ul></li>");
+                        }
                         submissions.forEach( function (submission) {
                             submissionCount++;
                             if(totalSubmissionNumber == submissionCount){
@@ -351,13 +433,13 @@ function getIndividual(user, refresh) {
 							var d = new Date(submission.createdAt);
 
                             var a = $("<li></li>")
-                            .html("<a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a>")
+                            .html("<div class='submission-name-first left'><a href='#submission' data-toggle='pill'>" + d.toLocaleString() + "</a></div>")
                             .click(function (event) {
                                 event.preventDefault();
                                     getSubmission(submission,user,problem);
                             });
                             $("#ISL" + problem.id).append(a);
-                            $("#ISL" + problem.id).append("style: " + submission.value.style  + "correct: " + submission.value.correct + "</li>");
+                            $("#ISL" + problem.id).append("<div class='left-submission'>Functionality: " + submission.value.correct + "/" + problem.value.correct + "</div><div class='style-submission left-submission'>Style: " + submission.value.style + "/" + problem.value.style + "</div></li>");
                             if (parseInt(submission.value.style) > parseInt(earnedStylePoints)){
                                 earnedStylePoints = parseInt(submission.value.style);
                                 totalEarned += parseInt(earnedStylePoints);
@@ -473,7 +555,7 @@ function addProblemToAccordian(problem,folderName){
             .append(problem.name)
     );
     if(problem.phase == 0) {
-        link.css("background-color","lightgray");
+        link.css("text-decoration", "line-through");
     }
     link.click(function () { 
         curProblem = problem;
@@ -682,9 +764,12 @@ window.onload = function () {
     
     setInterval(
         function() {
-            updateProblemProgressBar(curProblem);
+            if($("#questions").hasClass("active")){
+                updateProblemProgressBar();
+                console.log('update progress bar');
+            }
         },
-        500 /* 30000 ms = 30 sec */
+        2000 /* 30000 ms = 30 sec */
     );
 
     editor = CodeMirror.fromTextArea(codemirror, {
@@ -745,6 +830,12 @@ window.onload = function () {
             $.post("/problem/create", opts, function (problem) {
                 $.post("/problem/reorder", {folder: problem.folder}, function () {
                     reloadFolders();
+                    var problemCreated = $("<div class='alert alert-success' id='problemCreatedSuccess' role='alert'>Problem created!</div>");
+                    $("#newProblemError").append(problemCreated);
+                    setTimeout(function() {
+                        $("#problemCreatedSuccess").remove();
+                    }, 2000);
+
                 });
             });
         }
@@ -780,7 +871,6 @@ window.onload = function () {
             console.dir(opts);
             //breaks here with "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
             $.post("/problem/update", opts, function (problem) {
-                console.log("heya");
                 fillProblemDisplay(problem);
                 var updateSuccessMessage = $("<div class='alert alert-success' role='alert' id='problemUpdatedMessage'>Problem Updated</div>");
                 setTimeout(function() {
@@ -804,7 +894,6 @@ window.onload = function () {
                 loadUsers();
             } else {
                 var updateErrorMessage = $("<div class='alert alert-danger' role='alert'>That username is not in our database</div>");
-
                 $("#newAdminError").empty().append(updateErrorMessage);
             }
         });

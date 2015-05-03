@@ -31,8 +31,14 @@ module.exports = {
         var problem = req.param("id");
         var highest = req.param("highest");
         var student = req.param("student");
+        var reverse = req.param("reverse");
+        var direction = 1;
+        if(reverse){
+          direction = -1;
+        }
+
         if (problem && !student) {
-            Submission.find({problem: problem, user: req.user.username}).sort({createdAt: 1}).exec(function(err, submissions) {
+            Submission.find({problem: problem, user: req.user.username}).sort({createdAt: direction}).exec(function(err, submissions) {
                 if (err) {
                     console.log("error getting submissions from database");
                 } else {
@@ -40,7 +46,7 @@ module.exports = {
                 }
             });
         } else if (problem && student) {
-            Submission.find({problem: problem, user: student}).sort({createdAt: 1}).exec(function(err, submissions) {
+            Submission.find({problem: problem, user: student}).sort({createdAt: direction}).exec(function(err, submissions) {
                 if (err) {
                     console.log("error getting submissions from database");
                 } else {
@@ -48,7 +54,7 @@ module.exports = {
                 }
             });
         } else if (!problem && student) {
-            Submission.find({user: student}).sort({createdAt: 1}).exec(function(err, submissions) {
+            Submission.find({user: student}).sort({createdAt: direction}).exec(function(err, submissions) {
                 if (err) {
                     console.log("error getting submissions from database");
                 } else {
@@ -56,7 +62,7 @@ module.exports = {
                 }
             });
         } else {
-            Submission.find().sort({createdAt: 1}).exec(function(err, submissions) {
+            Submission.find().sort({createdAt: direction}).exec(function(err, submissions) {
                 if (err) {
                     console.log("error getting submissions from database");
                 } else {

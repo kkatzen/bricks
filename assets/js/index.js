@@ -69,7 +69,7 @@ function addProblemToAccordian(problem,folderName){
 			.append(problem.name)
 	);
 	if(problem.phase == 0) {
-	    link.css("background-color","lightgray");
+	    link.css("text-decoration", "line-through");
 	}
 	link.click(function () { addProbInfo(problem); });
 
@@ -257,18 +257,18 @@ function addSubmission(submission) {
     var results = { correct: false, style: false };
     results.correct = results.correct || (submission.value.correct == curProblem.value.correct);
     results.style = results.style || (submission.value.style == curProblem.value.style);
-    // this gets you the pnut object that was created from the student's code - submission.style
-    //YO LOOK HERE
-    //add checks and x's to the submission
+
+    $(gradeF).append("<span class='badge'>" + submission.value.correct + "/" +curProblem.value.correct + "</span>");
     if (results.correct) {
         $(gradeF).append(correct("8px"));
     } else {
         $(gradeF).append(wrong("8px"));
     }
+    $(gradeS).append("<span class='badge'>" + submission.value.style + "/" +curProblem.value.style + "</span>");
     if (results.style) {
-        $(gradeS).append(correct("18px"));
+        $(gradeS).append(correct("8px"));
     } else {
-        $(gradeS).append(wrong("18px"));
+        $(gradeS).append(wrong("8px"));
     }
     link.append(gradeF);
     link.append(gradeS);
@@ -375,16 +375,23 @@ window.onload = function () {
 			$("#console").empty();
 			var problem = curProblem.id;
 			var code = editor.getValue();
-			var AST = acorn.parse(code);    // return an abstract syntax tree structure
-			// var types = pnut.listTopLevelTypes(AST);
-			var ssOb = pnut.collectStructureStyleFacts(AST);    // return a analysis of style grading by checking AST
-			console.log("ssOb" + ssOb.numDeclVar);
-			$.post("/submission/create", {problem: problem, code: code, style: JSON.stringify(ssOb)}, function (submission) {
-				addSubmission(submission);
-				foldersReload();
-				setErrorMsg(submission.message);
-				console.log(submission);
-			});
+			try {
+				var AST = acorn.parse(code);    // return an abstract syntax tree structure
+				// var types = pnut.listTopLevelTypes(AST);
+				var ssOb = pnut.collectStructureStyleFacts(AST);    // return a analysis of style grading by checking AST
+				console.log("ssOb" + ssOb.numDeclVar);
+				$.post("/submission/create", {problem: problem, code: code, style: JSON.stringify(ssOb)}, function (submission) {
+					addSubmission(submission);
+					foldersReload();
+					setErrorMsg(submission.message);
+					console.log(submission);
+				});
+			} catch (e) {
+				$("#console").append("Error! Be sure to test your code locally before submitting.");
+			}
+
+			
+
 		}
 	});
 
