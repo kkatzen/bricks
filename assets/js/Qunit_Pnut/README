@@ -23,8 +23,9 @@ tests.js: This is where you’ll add more test cases.
   	Or if you want something truthy:
   		assert.ok( pnut.testFunction(AST),    “Function number case test number”);
 
-Running the tests: To run the unit tests, simply open environment.html in your browser.  The 
-tests should execute, and feedback should be provided on tests that passed and failed.
+Running the tests: To run the unit tests, simply open environment.html in your browser.  I recommend using chrome,
+as that was what I used, and I know Safari does not work on a couple of the cases.
+The tests should execute, and feedback should be provided on tests that passed and failed.
 
 If you’re getting started with qunit, this is a fantastic page to get you up to speed, and 
 deals with some interesting problems: http://qunitjs.com/cookbook/
