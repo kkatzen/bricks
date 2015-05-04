@@ -112,11 +112,12 @@ function addProblemToAccordian(problem,folderName){
 			currentEarned = currentEarned + maxScore;
 //			console.log("currentEarnedPost" +currentEarned);
 			$(earnedPointsDiv).empty().append(currentEarned);
-//			console.log("check a" + availablePoints + " e" + currentEarned);
+			console.log("check a" + availablePoints + " e" + currentEarned);
 
 			if(availablePoints == currentEarned){
 				console.log("check is yes");
-				$(checkDiv).append(correct("8px"));
+				$(checkDiv).append(correct("8px").css("float","right"));
+				$("#panel-" + folderName).removeClass("panel-danger");
 				$("#panel-" + folderName).removeClass("panel-warning");
 				$("#panel-" + folderName).addClass("panel-success");
 			}

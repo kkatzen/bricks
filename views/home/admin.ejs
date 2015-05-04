@@ -567,6 +567,39 @@ ul {
 			<h3>Exploring Specific Submissions</h3>
 			Once you are on the page showing the code that a student submitted for a problem, you can show/hide personal information about the student in case you want to display their code for the class to look at. You can also find a list of all of that student's other submissions for that problem at the bottom of the page.
 
+			<h3>Grading Student Submissions</h3>
+			Below is a template for generating scores for students.  The functions fail.f() and fail.s() deduct functionality and style points (respectively).  They take 2 parameters: the message to append to the console and the number of points to deduct.  Leaving the message blank ("") will deduct points without appending a message.  When done checking for errors, fail.done() declares what message the user will see in the console if there were no errors.
+
+			<pre>
+var soln_inputs = [ [ ] ];
+var soln_outputs = [ ["Hello World"] ];
+
+function totalChecker (err, user_outputs, truVec ) {
+
+  //Functional Tests
+  if (err) { 
+      fail.f("There was an error in your code: " + err.msg,5);  //subtract 5 functional points
+      fail.s("",5); //substract 5 style points
+  }
+  else {
+      for(var i=0; i&lt;truVec.length; i++) { 
+      	truVec[i] || fail.f("failed functional correctness",5); //subtract 5 functional points for each
+      }
+  }
+
+  //Style Tests
+  if (style.nDV != 1) { fail.s("Declare exactly 1 variable",3); } 
+  if (style.nDF != 1) { fail.s("One function to run is required",2); }
+
+  //Success Message
+  fail.done("Good job!"); //Message seen if no points deducted.
+}
+
+// make it so
+batch.exec ( code, soln_inputs, soln_outputs, totalChecker);      
+			</pre>
+
+
 		</div>
 		<!-- HELP SECTION ENDS -->
 
