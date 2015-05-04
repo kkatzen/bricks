@@ -92,10 +92,8 @@ function updateProblemProgressBar(){
 
     $.post("/user/read/", {}, function(users){
         users.forEach(function (user) {
-            console.log(user.displayName);
             var results = {tried: false, correct: false, style: false};
             $.post("/submission/read/" + problem.id, {id: problem.id, student: user.username}, function(submissions){
-                console.log(submission.code);
                 if(submissions.length == 0){
                 } else {
                     results.tried = true;
@@ -147,7 +145,6 @@ function problemCorrect(user, problem, student, totalStudents){
             var a = $("<a></a>")
                 .html(submissions.length)
                 .click(function (event) {
-                    console.log("angst");
                     if($(".submissionUser"+user.id).hasClass("hidden")) {
                         $(".submissionUser"+user.id).removeClass('hidden');
                     } else {
@@ -211,8 +208,6 @@ function problemCorrect(user, problem, student, totalStudents){
             submissionRow.append($("<td class='probStudentSubmissionTableTD'></td>").append("<span class='badge'>" + submission.value.style + "/" + problem.value.style+ "</span>").append(iconS));
             myRows.push(submissionRow);
         });
-
-		console.log("collpasemf");
 
         student.append(rsectionF);
         student.append(rsectionS);
@@ -301,15 +296,12 @@ function getSubmission(submission,user,problem) {
     $("#submissionCreatedBy").empty().append(a);
     $("#relatedSubmissions").empty();
     $("#submissionPoints").html("Style Points: " + submission.value.style +  "/" + problem.value.style + "<br/>Functionality Points: " + submission.value.correct + "/" + problem.value.correct);
-    console.log(submission.code);
 
     editor.setValue(submission.code);
-    console.log("refresh editor");
 
     $("#submissionMessage").empty().html(submission.message.replace(/\n/g,"<br />"));
     $("#submissionTitle").html(problem.name);
     $.post("/folder/read/", {id: problem.folder}, function(folder){
-        console.log(folder.name);
         $("#submissionTitle").html(problem.name + "<i> in " + folder.name + "</i>");
     });
 
@@ -506,13 +498,8 @@ function reloadFolders() {
 	$("#folderDropdown").empty();
     $("#editFolderDropdown").empty();
     numpoints = 0;
-    console.log("");
-    console.log("");
-    console.log("");
-    console.log("");
     $.post("/folder/read", null, function (folders) {
         folders.forEach(function (folder) {
-            console.log(folder.name + " num:" + folder.num);
             addFolder(folder)
         });
     });
@@ -539,7 +526,6 @@ function addFolder(folder) {
     $("#" + accordianFolderId).empty();
     $.post("/problem/read", {folder: folder.id}, function (problems) {
         problems.forEach( function (problem) {
-//            console.log(problem.name + " num:" + problem.num);
             numpoints += parseInt(problem.value.style) + parseInt(problem.value.correct);
             var link = addProblemToAccordian(problem, accordianFolderId);
             $("#" + accordianFolderId).append(link);
@@ -649,7 +635,7 @@ function reloadSortableFolders() {
                         if (confirm('Are you sure you wish to delete this problem ?')) {
                             $.post("/problem/delete", {id: problem.id}, function () {
                                 $.post("/problem/reorder", {folder: problem.folder}, function () {
-                                    console.log('reloadSortableFolders();')
+
                                 });
                             });
                         }
@@ -766,7 +752,6 @@ window.onload = function () {
         function() {
             if($("#questions").hasClass("active")){
                 updateProblemProgressBar();
-                console.log('update progress bar');
             }
         },
         2000 /* 30000 ms = 30 sec */
@@ -913,7 +898,6 @@ window.onload = function () {
 
     $('#onyenSearchButton').on('click', function( event ) {
         var onyenValue = $("#onyen").val();
-        console.log("onyen " + onyenValue);
         if(onyenValue == ""){
             getIndividualNone("null");
             return;
@@ -944,22 +928,3 @@ window.onload = function () {
     $('[data-toggle="tooltip"]').tooltip()
 };
 
-
-function populateProgress () {
-    $.post("/user/read/", {}, function(users){
-        total = users.length;
-        users.forEach(function (user) {
-            $("#visualization").append('<div class="visualize-row" id="visualize-student-' + user.id + '"></div>')
-        })
-    });
-    $.post("/folder/read", null, function (folders) {
-        folders.forEach(function (folder) {
-            $.post("/problem/read", {folder: folder.id}, function (problems) {
-                problems.forEach( function (problem) {
-
-                })
-            });
-        })
-    });
-
-}

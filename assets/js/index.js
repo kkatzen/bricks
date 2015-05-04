@@ -6,60 +6,10 @@ var folderStudScore = 0;
 var totScore = 0;
 var studScore = 0;
 
-
-/*
-fProto = {
-   addProblem : function (problem) {
-      var maxScore = 0;
-      var probMax = Number(problem.value.correct) + Number(problem.value.style);
-      totScore += probMax;
-      var link = $("<li></li>").append(
-			$("<a></a>")
-				.attr("href","#")
-				.append(problem.name)
-		);
-        if(problem.phase == 0) {
-            link.css("background-color","lightgray");
-        }
-      link.click(function () { addProbInfo(problem); });
-      if (loggedIn) {
-         var results = { correct: false, style: false };
-	 $.post("/submission/read/" + problem.id, {}, function (submissions) {
-	    if (submissions.length == 0) {
-            //do nothing
-	    } else {
-		submissions.forEach( function (submission) {
-           var curSubScore = Number(submission.value.correct)+Number(submission.value.style);
-           if(curSubScore > maxScore) {
-                maxScore = curSubScore;
-           }
-		   results.correct = 
-                      results.correct || (submission.value.correct == problem.value.correct);
-		   results.style = results.style || (submission.value.style == problem.value.style);
-		   if (results.correct && results.style) { return true; } 
-         });
-           studScore += maxScore;
-           if (maxScore < probMax) {
-                $("a", link).append(inProgress("8px"));
-            } else {
-                $("a", link).append(correct("8px"));
-            }
-            var probGrade = $("<span class='badge'>" + maxScore + "/" + (Number(problem.value.correct) + Number(problem.value.style))+"</span>");
-            $("a", link).append(probGrade);
-		}
-        $("#grade").empty().append(studScore + "/" + totScore);
-		});
-		}
-		$("ul",this.domNode).append(link);
-	}
-}
-*/
-
 function addProblemToAccordian(problem,folderName){
 	var earnedPointsDiv = "#earned-" +folderName;
 	var availPointsDiv = "#avail-" +folderName;
 	var checkDiv = "#check-" +folderName;
-	console.log("addProblemToAccordian()");
 	var maxScore = 0;
 	var probMax = Number(problem.value.correct) + Number(problem.value.style);
 	totScore += probMax;
@@ -106,16 +56,11 @@ function addProblemToAccordian(problem,folderName){
 
 			var currentEarned = $(earnedPointsDiv).text();
 			var availablePoints = $(availPointsDiv).text();
-//			console.log("currentEarnedPre" +currentEarned);
-//			console.log("maxScore" +maxScore);
 			currentEarned = Number(currentEarned);
 			currentEarned = currentEarned + maxScore;
-//			console.log("currentEarnedPost" +currentEarned);
 			$(earnedPointsDiv).empty().append(currentEarned);
-			console.log("check a" + availablePoints + " e" + currentEarned);
 
 			if(availablePoints == currentEarned){
-				console.log("check is yes");
 				$(checkDiv).append(correct("8px").css("float","right"));
 				$("#panel-" + folderName).removeClass("panel-danger");
 				$("#panel-" + folderName).removeClass("panel-warning");
@@ -154,20 +99,6 @@ function inProgress (pad) {
 }
 
 function addFolder (folder) {
-	/*
-	var dropdown = $("<li></li>").addClass("dropdown");
-	var toggle = $("<a></a>")
-		.attr("href","#")
-		.attr("data-toggle","dropdown")
-		.addClass("dropdown-toggle")
-		.append(folder.name)
-		.append( $("<b></b>").addClass("caret") );
-	var menu = $("<ul></ul>")
-		.addClass("dropdown-menu")
-		.attr("id","f-" + folder.id);
-	dropdown.append(toggle).append(menu);
-	$("#folders").append(dropdown);
-	*/
 	var accordianFolderName = "accoridanFolder" + folder.id;
 	var toggleLabel = '<a data-toggle="collapse" data-parent="#accordion" href="#'+ accordianFolderName + '">' + folder.name + '</a>';
 	var accordian = "<div id='panel-" + accordianFolderName  + "' class='panel panel-danger'><div class='panel-heading'><h4 class='panel-title'>" + toggleLabel + " <span id='earned-"+ accordianFolderName + "'>0</span>/<span id='avail-"+ accordianFolderName + "'></span><span id='check-"+ accordianFolderName + "'></span></h4></div><ul id = '" + accordianFolderName + "' class='panel-collapse collapse folderCollapse'></ul></div></div>";
@@ -177,13 +108,9 @@ function addFolder (folder) {
 	$("#" + accordianFolderName).append(accordianFolderBody);
 	var folderScore = 0;
 	$("#avail-" + accordianFolderName).empty().append(folderScore);
-	//var fObj = { domNode : dropdown, data : folder };
-	//fObj.__proto__ = fProto;
-	//allFolders[folder.id] = fObj;
 	$("#" + accordianFolderName).empty();
 	$.post("/problem/read", {folder: folder.id, phase: 2}, function (problems) {
 		problems.forEach( function (problem) {
-			//fObj.addProblem(problem);
 			var link = addProblemToAccordian(problem, accordianFolderName);
 			folderScore += parseInt(problem.value.style) + parseInt(problem.value.correct);
 			$("#" + accordianFolderName).append(link);
@@ -214,17 +141,12 @@ function addProbInfo (problem) {
 
 		submissions.forEach( function (submission) {
 			addSubmission(submission);
-			console.log(submission.value.style);
-			console.log(submission.value.correct);			
 			if(submission.value.style > highestStyle){
 				highestStyle = submission.value.style;
 			}
 			if(submission.value.correct > highestCorrect){
 				highestCorrect = submission.value.correct;
 			}
-			console.log("highestCorrect" + highestCorrect);
-			console.log("highestStyle" + highestStyle);			
-
 		});
 		$("#highestPtCorrect").empty().append(highestCorrect);
 		$("#highestPtStyle").empty().append(highestStyle);
@@ -248,7 +170,6 @@ function addProbInfo (problem) {
 }
 
 function addSubmission(submission) {
-    console.log("adding submission");
 	var time = new Date(submission.updatedAt);
 	var timeString = time.toLocaleDateString() + " " + time.toLocaleTimeString();
     var link = $("<tr></tr>");
@@ -351,14 +272,11 @@ window.onload = function () {
 		}
 	});
 	var setErrorMsg = function (msg) {
-		//$("#errors").removeClass("hidden");
 		$("#console").empty();
 		$("#console").append(msg);
-		console.log(msg);
 	};
 	$("#test").click(function () {
 		var code = editor.getValue();
-		//$("#errors").removeClass("hidden");
 		$("#console").empty();
 		try {
 			eval(code);
@@ -380,18 +298,14 @@ window.onload = function () {
 				var AST = acorn.parse(code);    // return an abstract syntax tree structure
 				// var types = pnut.listTopLevelTypes(AST);
 				var ssOb = pnut.collectStructureStyleFacts(AST);    // return a analysis of style grading by checking AST
-				console.log("ssOb" + ssOb.numDeclVar);
 				$.post("/submission/create", {problem: problem, code: code, style: JSON.stringify(ssOb)}, function (submission) {
 					addSubmission(submission);
 					foldersReload();
 					setErrorMsg(submission.message);
-					console.log(submission);
 				});
 			} catch (e) {
 				$("#console").append("Error! Be sure to test your code locally before submitting.");
 			}
-
-			
 
 		}
 	});
