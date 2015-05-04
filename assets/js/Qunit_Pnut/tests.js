@@ -22,14 +22,14 @@ QUnit.test( "Test 1.a numDecVars", function( assert ) {
           "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 4, pnut.numDecVars(AST), "1.a case 1");
+  assert.deepEqual( pnut.numDecVars(AST), 4, "1.a case 1");
 
-  // Case 1:
+  // Case 2:
   var code = "var v;"+
               "var p=\"me\";";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numDecVars(AST), "1.a case 2");
+  assert.deepEqual(  pnut.numDecVars(AST), 2, "1.a case 2");
 
   // Case 1:
   var code = 
@@ -38,7 +38,7 @@ QUnit.test( "Test 1.a numDecVars", function( assert ) {
           "function foo() { var d = 0; } ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numDecVars(AST), "1.a case 3");
+  assert.deepEqual(  pnut.numDecVars(AST), 3, "1.a case 3");
 
     // Case 1:
   var code = 
@@ -47,7 +47,7 @@ QUnit.test( "Test 1.a numDecVars", function( assert ) {
           "function foo() {  d = 0; } ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numDecVars(AST), "1.a case 4");
+  assert.deepEqual(  pnut.numDecVars(AST), 1, "1.a case 4");
 
 
     // Case 1:
@@ -57,7 +57,7 @@ QUnit.test( "Test 1.a numDecVars", function( assert ) {
               "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numDecVars(AST), "1.a case 5");
+  assert.deepEqual(  pnut.numDecVars(AST), 2, "1.a case 5");
 });
 
 //------------------------------------------------------------------------
@@ -73,7 +73,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
   var code =  "d = 0; ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numUndecVars(AST), "1.c Case 1");
+  assert.deepEqual( pnut.numUndecVars(AST), 1, "1.c Case 1");
 
 // Case 2:
   var code = 
@@ -82,7 +82,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
           "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numUndecVars(AST), "1.c Case 2");
+  assert.deepEqual( pnut.numUndecVars(AST), 1, "1.c Case 2");
 
 // Case 3:
   var code = "function bar() { "+
@@ -93,7 +93,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
           "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numUndecVars(AST), "1.c Case 3");
+  assert.deepEqual( pnut.numUndecVars(AST), 2, "1.c Case 3");
 
 
 // Case 4:
@@ -106,7 +106,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
             "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numUndecVars(AST), "1.c Case 4");
+  assert.deepEqual( pnut.numUndecVars(AST), 2, "1.c Case 4");
 
 // Case 5:
   var code = 
@@ -116,7 +116,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
             "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numUndecVars(AST), "1.c Case 5");
+  assert.deepEqual( pnut.numUndecVars(AST), 2, "1.c Case 5");
 
 
 // Case 6:
@@ -129,7 +129,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
             "} ";
 
   AST  = acorn.parse(code); 
-  assert.deepEqual(2, pnut.numUndecVars(AST), "1.c Case 6");
+  assert.deepEqual( pnut.numUndecVars(AST), 2, "1.c Case 6");
 
 // Case 2:
   var code = 
@@ -138,7 +138,7 @@ QUnit.test( "Test 1.c numUndecVars", function( assert ) {
           "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numUndecVars(AST), "1.c Case 7");
+  assert.deepEqual( pnut.numUndecVars(AST), 1, "1.c Case 7");
 });
 //------------------------------------------------------------------------
 // 1-d. list all undeclacred variables that get used in a program
@@ -202,7 +202,7 @@ QUnit.test( "Test 2.a numDecArrs", function( assert ) {
          "var c = new Array(); ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numDecArrs(AST), "2.a case 1");
+  assert.deepEqual(  pnut.numDecArrs(AST), 3, "2.a case 1");
 
   // Case 2
   var code = 
@@ -213,7 +213,7 @@ QUnit.test( "Test 2.a numDecArrs", function( assert ) {
          "var c = new Array(); ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numDecArrs(AST), "2.a case 2");
+  assert.deepEqual(  pnut.numDecArrs(AST), 2, "2.a case 2");
 
   // Case 3
   var code = 
@@ -226,7 +226,7 @@ QUnit.test( "Test 2.a numDecArrs", function( assert ) {
          "var c = new Array(); "; 
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numDecArrs(AST), "2.a case 3");
+  assert.deepEqual( pnut.numDecArrs(AST), 2, "2.a case 3");
 
     // Case 4
   var code = 
@@ -237,7 +237,7 @@ QUnit.test( "Test 2.a numDecArrs", function( assert ) {
          "var c = new Array(); ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numDecArrs(AST), "2.a case 4");
+  assert.deepEqual(  pnut.numDecArrs(AST), 2, "2.a case 4");
 
 });
 //------------------------------------------------------------------------
@@ -260,7 +260,7 @@ QUnit.test( "Test 2.c numUndecArrs", function( assert ) {
          "var c = new Array(); ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numUndecArrs(AST), "2.c case 1");
+  assert.deepEqual( pnut.numUndecArrs(AST), 2, "2.c case 1");
 
   // Case 2
   var code = 
@@ -271,7 +271,7 @@ QUnit.test( "Test 2.c numUndecArrs", function( assert ) {
          "var c = new Array(); ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numUndecArrs(AST), "2.c case 2");
+  assert.deepEqual(  pnut.numUndecArrs(AST), 2, "2.c case 2");
 
   // Case 3
   var code = 
@@ -285,7 +285,7 @@ QUnit.test( "Test 2.c numUndecArrs", function( assert ) {
          "var c = new Array(); ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numUndecArrs(AST), "2.c case 3");
+  assert.deepEqual(  pnut.numUndecArrs(AST), 2, "2.c case 3");
 
 //------------------------------------------------------------------------
 // 2-d. list all undeclared arrays that get used in a program
@@ -303,7 +303,7 @@ QUnit.test( "Test 2.e numArrsUsed", function( assert ) {
        "c = [];";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 4, pnut.numArrsUsed(AST), "2.e case 1");
+  assert.deepEqual(  pnut.numArrsUsed(AST), 4, "2.e case 1");
 
 
   // Case 2
@@ -316,7 +316,7 @@ QUnit.test( "Test 2.e numArrsUsed", function( assert ) {
           "c.push(3);";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numArrsUsed(AST), "2.e case 2");
+  assert.deepEqual(  pnut.numArrsUsed(AST), 3, "2.e case 2");
 
     // Case 3
   var code =
@@ -326,7 +326,7 @@ QUnit.test( "Test 2.e numArrsUsed", function( assert ) {
           "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numArrsUsed(AST), "2.e case 3");
+  assert.deepEqual(  pnut.numArrsUsed(AST), 1, "2.e case 3");
 });
 //------------------------------------------------------------------------
 // 2-f. list all arrays that are used in a program 
@@ -359,7 +359,7 @@ var code = "var car = {name:\"Tom\", age:20};"+
        
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numDecObjs(AST), "3.a Case 1");
+  assert.deepEqual(  pnut.numDecObjs(AST), 2, "3.a Case 1");
 
 // Case 2
 var code = 
@@ -381,7 +381,7 @@ var code =
        
 
   AST  = acorn.parse(code);
-  assert.deepEqual(3, pnut.numDecObjs(AST), "3.a Case 2");
+  assert.deepEqual( pnut.numDecObjs(AST), 3, "3.a Case 2");
 
 });
 //------------------------------------------------------------------------
@@ -414,7 +414,7 @@ var code =
        
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numUndecObjs(AST), "3.c Case 1");
+  assert.deepEqual( pnut.numUndecObjs(AST), 1, "3.c Case 1");
 
 
 var code = 
@@ -433,7 +433,7 @@ var code =
         "} ";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 4, pnut.numUndecObjs(AST), "3.c Case 2");
+  assert.deepEqual(  pnut.numUndecObjs(AST), 4, "3.c Case 2");
 });
 //------------------------------------------------------------------------
 // 3-d. list all undeclared objects that get used in a program
@@ -458,15 +458,13 @@ var code =
        "var steal = obj2;"; //not sure if this last one should count or not...
       
   AST  = acorn.parse(code);
-  assert.ok( ( 1 == pnut.numObjsUsed(AST)), "3.e Case 1");
-  assert.ok( true, " 3.e Case 1 expecting 1 got: "+pnut.numObjsUsed(AST));
-
+  assert.deepEqual(  pnut.numObjsUsed(AST), 1, "3.e Case 1");
   // Case 2
 var code = 
        "var car   = {name:\"Tom\", age:20};"+ //we need to dec as var for counted as obj
        "car.name  = \"me!\";";
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numObjsUsed(AST), "3.e Case 2");
+  assert.deepEqual(  pnut.numObjsUsed(AST), 1, "3.e Case 2");
 
 });
 
@@ -523,7 +521,7 @@ QUnit.test( "Test 4.a numWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numWhileLoopsInGloLev(AST), "4.a Case 1");
+  assert.deepEqual(  pnut.numWhileLoopsInGloLev(AST), 1, "4.a Case 1");
 
     // Case 2
   var code = 
@@ -537,7 +535,7 @@ QUnit.test( "Test 4.a numWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numWhileLoopsInGloLev(AST), "4.a Case 2");
+  assert.deepEqual(  pnut.numWhileLoopsInGloLev(AST), 2, "4.a Case 2");
 
     // Case 3
   var code = 
@@ -553,7 +551,7 @@ QUnit.test( "Test 4.a numWhileLoopsInGloLev", function( assert ) {
        "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numWhileLoopsInGloLev(AST), "4.a Case 3");
+  assert.deepEqual( pnut.numWhileLoopsInGloLev(AST), 2, "4.a Case 3");
 
   // Case 4
   var code = 
@@ -566,7 +564,7 @@ QUnit.test( "Test 4.a numWhileLoopsInGloLev", function( assert ) {
 
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numWhileLoopsInGloLev(AST), "4.a Case 4");
+  assert.deepEqual( pnut.numWhileLoopsInGloLev(AST), 1, "4.a Case 4");
 
 
   // Case 5
@@ -584,7 +582,7 @@ QUnit.test( "Test 4.a numWhileLoopsInGloLev", function( assert ) {
 
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numWhileLoopsInGloLev(AST), "4.a Case 5");
+  assert.deepEqual(  pnut.numWhileLoopsInGloLev(AST), 2, "4.a Case 5");
 
   // Case 6
   var code = 
@@ -598,7 +596,7 @@ QUnit.test( "Test 4.a numWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numForLoopsInGloLev(AST), "5.a Case 6");
+  assert.deepEqual(  pnut.numForLoopsInGloLev(AST), 1, "5.a Case 6");
 
 });
 
@@ -625,7 +623,7 @@ QUnit.test( "Test 4.b numNestedWhileLoopsInGloLev", function( assert ) {
        "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numNestedWhileLoopsInGloLev(AST), "4.b Case 1");
+  assert.deepEqual(  pnut.numNestedWhileLoopsInGloLev(AST), 1, "4.b Case 1");
 
    // Case 2  Ask prof if want it fixed???  While loop inside for loop
   var code = 
@@ -641,7 +639,7 @@ QUnit.test( "Test 4.b numNestedWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numNestedWhileLoopsInGloLev(AST), "4.b Case 2");
+  assert.deepEqual(  pnut.numNestedWhileLoopsInGloLev(AST), 1, "4.b Case 2");
 
     // Case 3 ask prof about this too
   var code = 
@@ -657,7 +655,7 @@ QUnit.test( "Test 4.b numNestedWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numNestedWhileLoopsInGloLev(AST), "4.b Case 3");
+  assert.deepEqual( pnut.numNestedWhileLoopsInGloLev(AST),  2, "4.b Case 3");
 
     // Case 5
   var code = 
@@ -678,7 +676,7 @@ QUnit.test( "Test 4.b numNestedWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numNestedWhileLoopsInGloLev(AST), "4.b Case 4");
+  assert.deepEqual( pnut.numNestedWhileLoopsInGloLev(AST), 2, "4.b Case 4");
 
 });
 
@@ -705,7 +703,7 @@ QUnit.test( "Test 4.c numWhileLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numWhileLoopsInFuncs(AST), "4.c Case 1");
+  assert.deepEqual(pnut.numWhileLoopsInFuncs(AST), 3,  "4.c Case 1");
 
   // Case 2
   var code = 
@@ -723,7 +721,7 @@ QUnit.test( "Test 4.c numWhileLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numWhileLoopsInFuncs(AST), "4.c Case 2");
+  assert.deepEqual( pnut.numWhileLoopsInFuncs(AST), 2, "4.c Case 2");
 
   // Case 3
   var code = 
@@ -741,7 +739,7 @@ QUnit.test( "Test 4.c numWhileLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numWhileLoopsInFuncs(AST), "4.c Case 3");
+  assert.deepEqual( pnut.numWhileLoopsInFuncs(AST), 3, "4.c Case 3");
 
     // Case 4
   var code = 
@@ -764,7 +762,7 @@ QUnit.test( "Test 4.c numWhileLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 4, pnut.numWhileLoopsInFuncs(AST), "4.c Case 4");
+  assert.deepEqual( pnut.numWhileLoopsInFuncs(AST), 4, "4.c Case 4");
 
 });
 
@@ -781,13 +779,13 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
       "foo(); "+
       "function foo() { return 5; }";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 1");
+  assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST),  0, "4.d case 1");
 
 //Case 2
   code = 
       "while(true);";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 2");
+  assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST),  0, "4.d case 2");
 
 //Case 3
   code = 
@@ -797,7 +795,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
           "    while(b<2){}"+
           "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 3");
+  assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST),  0, "4.d case 3");
 
 
 //Case 4  Breaking on this one
@@ -810,7 +808,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
           "}"+
       "}";
   AST  = acorn.parse(code);
-   assert.deepEqual(1, pnut.numNestedWhileLoopsInFuncs(AST), "4.d case 4");
+   assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST), 1, "4.d case 4");
 
   // Case 5
   var code = 
@@ -831,7 +829,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numNestedWhileLoopsInFuncs(AST), "4.d Case 5");
+  assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST), 1, "4.d Case 5");
 
    // Case 6  Debate
   var code = 
@@ -849,7 +847,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numNestedWhileLoopsInFuncs(AST), "4.d Case 6");
+  assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST), 1, "4.d Case 6");
 
 
     // Case 7 Debate
@@ -868,7 +866,7 @@ QUnit.test( "Test 4.d numNestedWhileLoopsInFuncs", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numNestedWhileLoopsInFuncs(AST), "4.d Case 7");
+  assert.deepEqual( pnut.numNestedWhileLoopsInFuncs(AST), 2, "4.d Case 7");
 });
 
 
@@ -890,8 +888,7 @@ QUnit.test( "Test 4.e numNestedWhileLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numNestedWhileLoopsInGloLev(AST), "4.e Case 1");
-  assert.ok( true, " 4.e Case 1 expecting 2 got: "+pnut.numNestedWhileLoopsInGloLev(AST));
+  assert.deepEqual( pnut.numNestedWhileLoopsInGloLev(AST), 2, "4.e Case 1");
 
   // Case 2 ask prof
   var code = 
@@ -909,7 +906,7 @@ QUnit.test( "Test 4.e numNestedWhileLoopsInGloLev", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numWhileLoopsInAProgram(AST), "4.e Case 2");
+  assert.deepEqual( pnut.numWhileLoopsInAProgram(AST),  2, "4.e Case 2");
 
   // Case 3
   var code = 
@@ -927,7 +924,7 @@ QUnit.test( "Test 4.e numNestedWhileLoopsInGloLev", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(3, pnut.numWhileLoopsInAProgram(AST), "4.e Case 3");
+  assert.deepEqual( pnut.numWhileLoopsInAProgram(AST), 3, "4.e Case 3");
 
 });
 /******************************************************************/
@@ -952,7 +949,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numForLoopsInGloLev(AST), "5.a Case 1");
+  assert.deepEqual( pnut.numForLoopsInGloLev(AST), 1, "5.a Case 1");
 
     // Case 2
   var code = 
@@ -966,7 +963,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInGloLev(AST), "5.a Case 2");
+  assert.deepEqual( pnut.numForLoopsInGloLev(AST), 2, "5.a Case 2");
 
     // Case 3
   var code = 
@@ -980,7 +977,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInGloLev(AST), "5.a Case 3");
+  assert.deepEqual( pnut.numForLoopsInGloLev(AST), 2, "5.a Case 3");
 
 
   // Case 4
@@ -993,7 +990,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numForLoopsInGloLev(AST), "5.a Case 4");
+  assert.deepEqual( pnut.numForLoopsInGloLev(AST), 1, "5.a Case 4");
 
 
   // Case 5
@@ -1011,7 +1008,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
 
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInGloLev(AST), "4.a Case 5");
+  assert.deepEqual( pnut.numForLoopsInGloLev(AST), 2, "4.a Case 5");
 
   // Case 6
   var code = 
@@ -1025,7 +1022,7 @@ QUnit.test( "Test 5.a numForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numForLoopsInGloLev(AST), "5.a Case 6");
+  assert.deepEqual( pnut.numForLoopsInGloLev(AST), 1, "5.a Case 6");
 
 
 });
@@ -1051,7 +1048,7 @@ QUnit.test( "Test 5.b numNestedForLoopsInGloLev", function( assert ) {
        "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numNestedForLoopsInGloLev(AST), "5.b Case 1");
+  assert.deepEqual( pnut.numNestedForLoopsInGloLev(AST), 1, "5.b Case 1");
 
   // Case 2 Debate
   var code = 
@@ -1067,7 +1064,7 @@ QUnit.test( "Test 5.b numNestedForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numNestedForLoopsInGloLev(AST), "5.b Case 2");
+  assert.deepEqual( pnut.numNestedForLoopsInGloLev(AST), 1, "5.b Case 2");
 
   // Case 3 Debate
   var code = 
@@ -1083,7 +1080,7 @@ QUnit.test( "Test 5.b numNestedForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numNestedForLoopsInGloLev(AST), "5.b Case 3");
+  assert.deepEqual( pnut.numNestedForLoopsInGloLev(AST), 2, "5.b Case 3");
  
 
     // Case 4
@@ -1105,7 +1102,7 @@ QUnit.test( "Test 5.b numNestedForLoopsInGloLev", function( assert ) {
         "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(2, pnut.numNestedForLoopsInGloLev(AST), "5.b Case 4");
+  assert.deepEqual( pnut.numNestedForLoopsInGloLev(AST), 2, "5.b Case 4");
 
 });
 
@@ -1134,7 +1131,7 @@ QUnit.test( "Test 5.c numForLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numForLoopsInFuncs(AST), "5.c Case 1");
+  assert.deepEqual( pnut.numForLoopsInFuncs(AST), 3, "5.c Case 1");
 
   // Case 2
   var code = 
@@ -1152,7 +1149,7 @@ QUnit.test( "Test 5.c numForLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInFuncs(AST), "5.c Case 2");
+  assert.deepEqual( pnut.numForLoopsInFuncs(AST), 2, "5.c Case 2");
 
   // Case 3
   var code = 
@@ -1170,7 +1167,7 @@ QUnit.test( "Test 5.c numForLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 3, pnut.numForLoopsInFuncs(AST), "5.c Case 3");
+  assert.deepEqual( pnut.numForLoopsInFuncs(AST), 3, "5.c Case 3");
 
     // Case 4
   var code = 
@@ -1193,7 +1190,7 @@ QUnit.test( "Test 5.c numForLoopsInFuncs", function( assert ) {
     "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 4, pnut.numForLoopsInFuncs(AST), "5.c Case 4");
+  assert.deepEqual( pnut.numForLoopsInFuncs(AST), 4, "5.c Case 4");
 
 });
 
@@ -1208,13 +1205,13 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
       "foo(); "+
       "function foo() { return 5; }";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numNestedForLoopsInFuncs(AST), "5.d case 1");
+  assert.deepEqual( pnut.numNestedForLoopsInFuncs(AST), 0, "5.d case 1");
 
 //Case 2
   code = 
       "for(i = 0; i < 2; i++);";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numNestedForLoopsInFuncs(AST), "5.d case 2");
+  assert.deepEqual( pnut.numNestedForLoopsInFuncs(AST), 0, "5.d case 2");
 
 //Case 3
   code = 
@@ -1222,7 +1219,7 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
           "for(j = 0; j < 2; j++);"+
       "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numNestedForLoopsInFuncs(AST), "5.d case 3");
+  assert.deepEqual( pnut.numNestedForLoopsInFuncs(AST), 0, "5.d case 3");
 
 
 //Case 4
@@ -1254,7 +1251,7 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numNestedForLoopsInFuncs(AST), "5.d Case 5");
+  assert.deepEqual( pnut.numNestedForLoopsInFuncs(AST), 1, "5.d Case 5");
 
    // Case 6  Debate
   var code = 
@@ -1272,7 +1269,7 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual(1, pnut.numNestedForLoopsInFuncs(AST), "5.d Case 6");
+  assert.deepEqual( pnut.numNestedForLoopsInFuncs(AST), 1, "5.d Case 6");
 
 
     // Case 7 Debate
@@ -1291,7 +1288,7 @@ QUnit.test( "Test 5.d numNestedForLoopsInFuncs", function( assert ) {
       "}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numNestedForLoopsInFuncs(AST), "5.d Case 7");
+  assert.deepEqual( pnut.numNestedForLoopsInFuncs(AST), 2, "5.d Case 7");
 
 });
 
@@ -1305,13 +1302,13 @@ QUnit.test( "Test 5.e numForLoopsInAProgram", function( assert ) {
       "foo(); "+
       "function foo() { return 5; }";
   AST  = acorn.parse(code);
-  assert.deepEqual( 0, pnut.numForLoopsInAProgram(AST), "5.e case 1");
+  assert.deepEqual( pnut.numForLoopsInAProgram(AST), 0, "5.e case 1");
 
 //Case 2
   code = 
       "for(i = 0; i < 2; i++);";
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numForLoopsInAProgram(AST), "5.e case 2");
+  assert.deepEqual( pnut.numForLoopsInAProgram(AST), 1, "5.e case 2");
 
 //Case 3
   code = 
@@ -1319,7 +1316,7 @@ QUnit.test( "Test 5.e numForLoopsInAProgram", function( assert ) {
           "for(j = 0; j < 2; j++);"+
         "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInAProgram(AST), "5.e case 3");
+  assert.deepEqual( pnut.numForLoopsInAProgram(AST), 2, "5.e case 3");
 
 //Case 4
   code = 
@@ -1329,7 +1326,7 @@ QUnit.test( "Test 5.e numForLoopsInAProgram", function( assert ) {
           "}"+
       "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInAProgram(AST), "5.e case 4");
+  assert.deepEqual( pnut.numForLoopsInAProgram(AST), 2, "5.e case 4");
 
 //Case 5
   code = 
@@ -1338,7 +1335,7 @@ QUnit.test( "Test 5.e numForLoopsInAProgram", function( assert ) {
           "for(j = 0; j < 2; j++){}"+
       "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 2, pnut.numForLoopsInAProgram(AST), "5.e case 5");
+  assert.deepEqual( pnut.numForLoopsInAProgram(AST), 2, "5.e case 5");
 });
 
 QUnit.module( "group 6" );
@@ -1352,7 +1349,7 @@ QUnit.test( "Test 6.a numDecFuncs", function( assert ) {
           "var a = function() {}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numDecFuncs(AST), "6.a case 1");
+  assert.deepEqual( pnut.numDecFuncs(AST), 1, "6.a case 1");
 
 
   //Case 2
@@ -1361,7 +1358,7 @@ QUnit.test( "Test 6.a numDecFuncs", function( assert ) {
             "function bar() {}"+
       "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numDecFuncs(AST), "6.a case 2");
+  assert.deepEqual( pnut.numDecFuncs(AST), 1, "6.a case 2");
 
 
   //Case 3
@@ -1369,7 +1366,7 @@ QUnit.test( "Test 6.a numDecFuncs", function( assert ) {
           "if(true) function a() {}";
 
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numDecFuncs(AST), "6.a case 3");
+  assert.deepEqual( pnut.numDecFuncs(AST), 1, "6.a case 3");
 
 
   //Case 4
@@ -1378,7 +1375,7 @@ QUnit.test( "Test 6.a numDecFuncs", function( assert ) {
           "function foo() {};"+
       "}";
   AST  = acorn.parse(code);
-  assert.deepEqual( 1, pnut.numDecFuncs(AST), "6.a case 4");
+  assert.deepEqual( pnut.numDecFuncs(AST), 1, "6.a case 4");
 
 });
 
